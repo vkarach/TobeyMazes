@@ -42,10 +42,10 @@ public class MapParser {
             }
         }
 
-        return new Field(tiles, colCount, rowCount);
+        return new Field(tiles);
     }
     private static Tile parseCharacter(char c) {
-        TileType state = switch (c) {
+        TileType type = switch (c) {
             case '.' -> TileType.CLEAR;
             case '-' -> TileType.HORIZONTAL_WALL;
             case '|' -> TileType.VERTICAL_WALL;
@@ -53,6 +53,6 @@ public class MapParser {
             case '!' -> TileType.DESTINATION;
             default -> throw new RuntimeException("Invalid character in mapFile" + c);
         };
-        return new Tile(state);
+        return new Tile(type);
     }
 }

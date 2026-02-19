@@ -1,22 +1,22 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
 public class Tile {
-    private TileType state;
+    private TileType type;
 
-    public Tile(TileType state) {
-        this.state = state;
+    public Tile(TileType type) {
+        this.type = type;
     }
 
-    public TileType getState() {
-        return state;
+    public TileType getType() {
+        return type;
     }
 
-    public void setState(TileType state) {
-        this.state = state;
+    public void setType(TileType type) {
+        this.type = type;
     }
 
     @Override
     public String toString() {
-        return String.valueOf(state);
+        return String.valueOf(type);
     }
 }
