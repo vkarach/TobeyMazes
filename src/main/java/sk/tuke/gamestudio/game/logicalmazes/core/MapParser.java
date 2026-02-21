@@ -1,95 +1,115 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
-import java.io.InputStream;
-import java.util.ArrayList;
+import static sk.tuke.gamestudio.game.logicalmazes.core.FileReader.readFileLines;
 import java.util.List;
-import java.util.Scanner;
+
 
 public class MapParser {
-    private Field mapField;
-    private Player player;
+
+
 
     public MapParser(String filename) {
-        List<String> lines = readFileLines(filename);
-        parseMap(lines);
-//        this.player = findPlayer(mapField);
+        List<String> mapLines = readFileLines(filename);
+        Field mapField = parseMap(mapLines);
     }
 
-    private InputStream getInputStream(String filename) {
-        InputStream stream = MapParser.class
-                .getClassLoader()
-                .getResourceAsStream(filename);
+    private Field parseMap(List<String> mapLines) {
+        int[] WH = parseMapSize(mapLines);
+        int width = WH[0];
+        int height = WH[1];
 
-        if (stream == null) {
-            throw new RuntimeException("Resource not found: " + filename);
-        }
-        return stream;
+        Tile[][] tiles = parseMapTiles(mapLines, width, height);
+        boolean[][] vWalls = parseVertWalls(mapLines, width, height);
+        boolean[][] hWalls = parseHorzWalls(mapLines, width, height);
+
+        return new Field(tiles, vWalls, hWalls);
     }
 
-    private List<String> readFileLines(String filename) {
-        InputStream stream = getInputStream(filename);
+    private int[] parseMapSize(List<String> lines) {
+        int i = indexOfLineContains(lines, "W=");
+        String line = lines.get(i);
+        String[] parts = line.split(" ");
+        int width = Integer.parseInt(parts[0].substring(2));
+        int height = Integer.parseInt(parts[1].substring(2));
 
-        List<String> lines = new ArrayList<>();
-        try (Scanner scanner = new Scanner(stream)) {
-            while (scanner.hasNextLine()) {
-                lines.add(scanner.nextLine());
+        return new int[]{width, height};
+    }
+
+    private Tile[][] parseMapTiles(List<String> lines, int width, int height) {
+        int i = indexOfLineContains(lines, "TILES");
+        int start = i + 1;
+//        int end = start + height; // <-- todo: legal format check
+        Tile[][] tiles = new Tile[height][width];
+        for (int row = 0; row < height; row++) {
+            String line = lines.get(start + row);
+
+            if (line.length() != width) {
+                throw new IllegalArgumentException(); // todo: msg
             }
-        }
-        return lines;
-    }
 
-    private Player parsePlayerLine(String line) {
-        Player player;
-        try {
-            String playerXY = line.split("Player:")[1].strip();
-            String[] parts = playerXY.split(" ");
-            int player_x = Integer.parseInt(parts[0]);
-            int player_y = Integer.parseInt(parts[1]);
-            player = new Player(player_x, player_y);
-        }
-        catch (Exception e) {
-            player = new Player(1,1); // player not found, setting default coordinates
-        }
-
-        return player;
-    }
-
-    private void parseMap(List<String> lines) {
-        this.player = parsePlayerLine(lines.removeFirst());
-
-        int rowCount = lines.size(); // ????
-        int colCount = lines.getFirst().length(); // ???
-
-        Tile[][] tiles = new Tile[rowCount][colCount];
-        for (int row = 0; row < rowCount; row++) {
-            String line = lines.get(row);
-
-            for (int col = 0; col < colCount; col++) {
-                char c = line.charAt(col);
-                Tile tile = parseCharacter(c);
+            for (int col = 0; col < width; col++) {
+                char ch = line.charAt(col);
+                Tile tile = charToTile(ch);
                 tiles[row][col] = tile;
             }
         }
-        this.mapField = new Field(tiles);
+        return tiles;
     }
 
-    private Tile parseCharacter(char c) {
-        TileType type = switch (c) {
-            case '.' -> TileType.CLEAR;
-            case '-' -> TileType.HORIZONTAL_WALL;
-            case '|' -> TileType.VERTICAL_WALL;
-            case 'A' -> TileType.PLAYER_SPAWN;
-            case '!' -> TileType.DESTINATION;
-            default -> throw new RuntimeException("Invalid character in mapFile" + c);
+    private boolean[][] parseVertWalls(List<String> lines, int width, int height) {
+        int i = indexOfLineContains(lines, "VERT");
+        int start = i + 1;
+//        int end = start + height; // <-- todo: legal format check
+        boolean[][] vWalls = new boolean[height][width + 1];
+        for (int row = 0; row < height; row++) {
+            String line = lines.get(start + row);
+
+            if (line.length() != width + 1) {
+                throw new IllegalArgumentException(); // todo: msg
+            }
+
+            for (int col = 0; col < width + 1; col++) {
+                boolean isWall = line.charAt(col) == '1';
+                vWalls[row][col] = isWall;
+            }
+        }
+        return vWalls;
+    }
+
+    private boolean[][] parseHorzWalls(List<String> lines, int width, int height) {
+        int i = indexOfLineContains(lines, "HORZ");
+        int start = i + 1;
+//        int end = start + height; // <-- todo: legal format check
+        boolean[][] hWalls = new boolean[height + 1][width];
+        for (int row = 0; row < height + 1; row++) {
+            String line = lines.get(start + row);
+
+            if (line.length() != width) {
+                throw new IllegalArgumentException(); // todo: msg
+            }
+
+            for (int col = 0; col < width; col++) {
+                boolean isWall = line.charAt(col) == '1';
+                hWalls[row][col] = isWall;
+            }
+        }
+        return hWalls;
+    }
+
+    private Tile charToTile(char ch) {
+        return switch(ch) {
+            case 'S' -> new Tile(TileType.PLAYER_SPAWN);
+            case '!' -> new Tile(TileType.DESTINATION);
+            case '.' -> new Tile(TileType.CLEAR);
+            default  -> throw new IllegalArgumentException(); // todo: msg
         };
-        return new Tile(type);
     }
-
-    public Field getMapField() {
-        return mapField;
-    }
-
-    public Player getPlayer() {
-        return player;
+    private int indexOfLineContains(List<String> lines, String part) {
+        for (int i = 0; i < lines.size(); i++) {
+            if (lines.get(i).contains(part)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
