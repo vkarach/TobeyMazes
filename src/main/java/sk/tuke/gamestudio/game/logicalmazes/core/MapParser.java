@@ -5,12 +5,11 @@ import java.util.List;
 
 
 public class MapParser {
-
-
+    private final Field mapField;
 
     public MapParser(String filename) {
         List<String> mapLines = readFileLines(filename);
-        Field mapField = parseMap(mapLines);
+        this.mapField = parseMap(mapLines);
     }
 
     private Field parseMap(List<String> mapLines) {
@@ -111,5 +110,9 @@ public class MapParser {
             }
         }
         return -1;
+    }
+
+    public Field getMapField() {
+        return mapField;
     }
 }

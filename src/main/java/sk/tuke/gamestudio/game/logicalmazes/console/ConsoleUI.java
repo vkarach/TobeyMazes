@@ -1,7 +1,6 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import sk.tuke.gamestudio.game.logicalmazes.core.Field;
-import sk.tuke.gamestudio.game.logicalmazes.core.Player;
 import sk.tuke.gamestudio.game.logicalmazes.core.Tile;
 import sk.tuke.gamestudio.game.logicalmazes.core.TileType;
 
@@ -11,64 +10,65 @@ public class ConsoleUI {
     public ConsoleUI(Console console) {
         this.console = console;
     }
-    public void drawGame(Field mapField, Player player) {
-        drawGame(mapField, player, false);
-    }
-    public void drawGame(Field mapField, Player player, boolean clear) {
-        if (clear) {
-            console.clear();
+
+    private void renderHorizontalWallLine(boolean[][] hWalls, int rowIndex, int colCount) {
+        for (int col = 0; col < colCount; col++) {
+            console.print('+');
+            if (hWalls[rowIndex][col]) {
+                console.print("--");
+            } else {
+                console.print("  ");
+            }
         }
+        console.print('+');
+        console.print('\n');
+    }
+
+    public void drawGame(Field mapField) {
+//        char playerCh = '♞';
+
         int rowCount = mapField.getRowCount();
         int colCount = mapField.getColCount();
 
-        char vBoundChr = '│';
-        char hBoundChr = '─';
-        char playerCh = '♞';
-
-        String horizontalBound = String.valueOf(hBoundChr).repeat(colCount * 2);
-
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(vBoundChr);
-        sb.append(horizontalBound);
-        sb.append(vBoundChr);
-
-        sb.append('\n');
-
         Tile[][] tiles = mapField.getTiles();
-        for (int row = 0; row < rowCount; row++ ) {
-            sb.append(vBoundChr);
-            for (int col = 0; col < colCount; col++ ) {
+        boolean[][] hWalls = mapField.getHWalls();
+        boolean[][] vWalls = mapField.getVWalls();
+
+        for (int row = 0; row < rowCount; row++) {
+            // render horizontal walls
+            renderHorizontalWallLine(hWalls, row, colCount);
+
+            // render vertical walls and tiles
+            for (int col = 0; col < colCount; col++) {
+
+                // left vertical wall
+                if (vWalls[row][col]) {
+                    console.print('|');
+                } else {
+                    console.print(' ');
+                }
+
                 Tile tile = tiles[row][col];
                 char c = getCharByTileType(tile.getType());
-
-                if (row == player.getX() && col == player.getY()) {
-                    sb.append(playerCh);
-                }
-                else {
-                    sb.append(c);
-                }
-                sb.append(' ');
+                console.print(c + " ");
             }
-            sb.append(vBoundChr);
-            sb.append('\n');
+
+            // right outer wall
+            if (vWalls[row][colCount]) {
+                console.print('|');
+            }
+
+            console.print('\n');
         }
 
-        sb.append(vBoundChr);
-        sb.append(horizontalBound);
-        sb.append(vBoundChr); // lower bound
-
-        sb.append("\n\n");
-
-        System.out.print(sb); // drop built string
+        // bottom horizontal line
+        renderHorizontalWallLine(hWalls, rowCount, colCount);
     }
     private char getCharByTileType(TileType tileType) {
         return switch (tileType) {
-            case CLEAR             -> ' ';
-            case HORIZONTAL_WALL   -> '_';
-            case VERTICAL_WALL     -> '|';
             case PLAYER_SPAWN      -> 'A';
             case DESTINATION       -> '!';
+            case CLEAR             -> ' ';
         };
     }
 }
