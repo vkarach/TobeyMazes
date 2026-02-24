@@ -2,15 +2,12 @@ package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-import org.jline.utils.AttributedString;
-import org.jline.utils.AttributedStyle;
 import org.jline.utils.InfoCmp;
 import org.jline.utils.NonBlockingReader;
 
 import java.io.PrintWriter;
 
 public class Console {
-
     public enum InputAction { UP, DOWN, LEFT, RIGHT, QUIT, NONE }
 
     private final Terminal terminal;
@@ -25,10 +22,12 @@ public class Console {
         terminal.enterRawMode();
         reader = terminal.reader();
         this.out = terminal.writer();
+        terminal.puts(InfoCmp.Capability.cursor_invisible);
+        terminal.flush();
     }
 
     public InputAction readAction() throws Exception {
-        int ch = reader.read();
+        int ch = reader.read(10);
 
         if (ch == 'q') return InputAction.QUIT;
         if (ch != 27) return InputAction.NONE; // not ESC
@@ -51,11 +50,13 @@ public class Console {
 
         return InputAction.NONE;
     }
-
     public void clear() {
         terminal.puts(InfoCmp.Capability.clear_screen);
-//        terminal.puts(InfoCmp.Capability.cursor_home);
-//        terminal.flush();
+    }
+
+    public void moveCursorToStart() {
+        terminal.puts(InfoCmp.Capability.cursor_home);
+        terminal.flush();
     }
 
     public void print(String text) {
@@ -67,24 +68,24 @@ public class Console {
     }
 
     private void setCursorPosition(int x, int y) {
-        int row = y + 1;
-        int col = x + 1;
-        out.print("\033[" + row + ";" + col + "H");
+        terminal.puts(InfoCmp.Capability.cursor_address, y, x);
     }
 
     public void print(String text, int x, int y) {
         setCursorPosition(x, y);
-        print(text);
+        out.print(text);
     }
 
-    public void print(String text, int x, int y, int fgColor) {
-        setCursorPosition(x, y);
-
-        AttributedStyle style = AttributedStyle.DEFAULT.foreground(fgColor);
-        new AttributedString(text, style).print(terminal);
-    }
+//    public void print(String text, int x, int y, int fgColor) {
+//        setCursorPosition(x, y);
+//
+//        AttributedStyle style = AttributedStyle.DEFAULT.foreground(fgColor);
+//        new AttributedString(text, style).print(terminal);
+//    }
 
     public void close() throws Exception {
+        terminal.puts(InfoCmp.Capability.cursor_normal);
+        terminal.flush();
         terminal.close();
     }
 }

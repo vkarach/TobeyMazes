@@ -6,20 +6,33 @@ import java.util.List;
 
 public class MapParser {
     private final Field mapField;
+    private Player player;
+    private int targetCount;
 
     public MapParser(String filename) {
         List<String> mapLines = readFileLines(filename);
+        System.out.println("started parsing...");
         this.mapField = parseMap(mapLines);
     }
 
     private Field parseMap(List<String> mapLines) {
-        int[] WH = parseMapSize(mapLines);
-        int width = WH[0];
-        int height = WH[1];
+        int[] wh = parseMapSize(mapLines);
+        int width = wh[0];
+        int height = wh[1];
+
+        System.out.println("width: " + width + ", height: " + height);
 
         Tile[][] tiles = parseMapTiles(mapLines, width, height);
+
+        System.out.println("Parsed tiles");
+
         boolean[][] vWalls = parseVertWalls(mapLines, width, height);
+
+        System.out.println("Parsed vWalls");
+
         boolean[][] hWalls = parseHorzWalls(mapLines, width, height);
+
+        System.out.println("Parsed hWalls");
 
         return new Field(tiles, vWalls, hWalls);
     }
@@ -43,14 +56,36 @@ public class MapParser {
             String line = lines.get(start + row);
 
             if (line.length() != width) {
-                throw new IllegalArgumentException(); // todo: msg
+                throw new IllegalArgumentException(
+                        "TILES section: invalid row length at row=" + row +
+                        ", expected=" + width +
+                        ", got=" + line.length() +
+                        ", line=\"" + line + "\""
+                );
             }
 
             for (int col = 0; col < width; col++) {
                 char ch = line.charAt(col);
                 Tile tile = charToTile(ch);
+
+                if (tile.getType() == TileType.PLAYER_SPAWN) {
+                    if (this.player != null) {
+                        throw new IllegalArgumentException(); // "multiple player spawns"
+                    }
+                    this.player = new Player(row, col);
+                }
+                else if (tile.getType() == TileType.TARGET) {
+                    this.targetCount++;
+                }
+
                 tiles[row][col] = tile;
             }
+        }
+        if (this.player == null) {
+            throw new IllegalArgumentException(); // "no player spawn"
+        }
+        if (this.targetCount == 0) {
+            throw new IllegalArgumentException(); // "no target found"
         }
         return tiles;
     }
@@ -64,7 +99,10 @@ public class MapParser {
             String line = lines.get(start + row);
 
             if (line.length() != width + 1) {
-                throw new IllegalArgumentException(); // todo: msg
+                throw new IllegalArgumentException(
+                    "VERT section: invalid row length at row=" + row +
+                    " (expected=" + width + ", got=" + line.length() + ")"
+                );
             }
 
             for (int col = 0; col < width + 1; col++) {
@@ -84,7 +122,10 @@ public class MapParser {
             String line = lines.get(start + row);
 
             if (line.length() != width) {
-                throw new IllegalArgumentException(); // todo: msg
+                throw new IllegalArgumentException(
+                    "HORZ section: invalid row length at row=" + row +
+                    " (expected=" + width + ", got=" + line.length() + ")"
+                );
             }
 
             for (int col = 0; col < width; col++) {
@@ -98,7 +139,7 @@ public class MapParser {
     private Tile charToTile(char ch) {
         return switch(ch) {
             case 'S' -> new Tile(TileType.PLAYER_SPAWN);
-            case '!' -> new Tile(TileType.DESTINATION);
+            case '!' -> new Tile(TileType.TARGET);
             case '.' -> new Tile(TileType.CLEAR);
             default  -> throw new IllegalArgumentException(); // todo: msg
         };
@@ -114,5 +155,13 @@ public class MapParser {
 
     public Field getMapField() {
         return mapField;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public int getTargetCount() {
+        return this.targetCount;
     }
 }

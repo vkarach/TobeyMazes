@@ -1,11 +1,8 @@
 package sk.tuke.gamestudio.game.logicalmazes;
 
-import com.googlecode.lanterna.input.KeyStroke;
-import org.jline.utils.AttributedStyle;
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.ConsoleUI;
-import sk.tuke.gamestudio.game.logicalmazes.core.Field;
-import sk.tuke.gamestudio.game.logicalmazes.core.MapParser;
+import sk.tuke.gamestudio.game.logicalmazes.core.*;
 
 public class LogicalMaze {
     public static void main(String[] args) throws Exception {
@@ -13,26 +10,37 @@ public class LogicalMaze {
         ConsoleUI consoleUI = new ConsoleUI(console);
 
         MapParser mapParser = new MapParser("map_1.txt");
-        Field mapField = mapParser.getMapField();
+        Field gameField = mapParser.getMapField();
+        Player player = mapParser.getPlayer();
+        int targetCount = mapParser.getTargetCount();
 
-        consoleUI.drawGame(mapField);
         console.clear();
+        consoleUI.renderGameField(gameField, player);
 
-        console.print("Test");
-        console.print("Boo", 10, 10);
-        console.print("Boo", 9, 9, AttributedStyle.RED);
+        GameController controller = new GameController(gameField, player);
+
+        long startTime = System.nanoTime();
 
         while (true) {
-            Console.InputAction a = console.readAction();
-            if (a != Console.InputAction.NONE) {
-                console.clear();
-                consoleUI.drawGame(mapField);
-                System.out.println("command:" + a); // debug
-            }
-            if (a == Console.InputAction.QUIT) {
+            Console.InputAction inputAction = console.readAction();
+            if (inputAction == Console.InputAction.QUIT) {
                 break;
             }
+            else if (inputAction != Console.InputAction.NONE) {
+                controller.onInput(Direction.InputToDirection(inputAction));
+            }
+            if (gameField.takeTarget(player)) {
+                if (--targetCount == 0) {
+                    break;
+                }
+            }
+            consoleUI.renderHud(startTime, targetCount, 25, 0);
+
+            consoleUI.renderGameField(gameField, player, true);
+
         }
+        System.out.println("exiting...");
         console.close();
+        controller.shutdown();
     }
 }

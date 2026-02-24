@@ -1,6 +1,7 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import sk.tuke.gamestudio.game.logicalmazes.core.Field;
+import sk.tuke.gamestudio.game.logicalmazes.core.Player;
 import sk.tuke.gamestudio.game.logicalmazes.core.Tile;
 import sk.tuke.gamestudio.game.logicalmazes.core.TileType;
 
@@ -24,8 +25,42 @@ public class ConsoleUI {
         console.print('\n');
     }
 
-    public void drawGame(Field mapField) {
-//        char playerCh = '♞';
+    private String getTimerString(long startTime) {
+        long now = System.nanoTime();
+        long durationMs = (now - startTime) / 1_000_000;
+
+        long seconds = durationMs / 1000;
+        long twoDigits = (durationMs % 1000) / 10; // .67
+
+        String clock = "\uD83D\uDD50";
+
+        return String.format("%s %d:%02d", clock, seconds, twoDigits);
+    }
+
+    public void renderHud(long startTime, int targetCount, int x, int y) {
+        String timeString     = String.format("| %-10s|", getTimerString(startTime));
+        String targetCountStr = String.format("| %-10s|", "target: " + String.valueOf(targetCount));
+
+        String vBound = "+" + "-".repeat(11) + "+";
+
+        console.print(vBound, x, y); y++;
+        console.print(timeString, x, y); y++;
+        console.print(targetCountStr, x, y); y++;
+        console.print(vBound, x, y); y++;
+    }
+
+    public void renderGameField(Field mapField, Player player, boolean clear) {
+        if (clear) {
+            console.moveCursorToStart();
+        }
+        renderGameField(mapField, player);
+    }
+
+    public void renderGameField(Field mapField, Player player) {
+        char playerCh = '♞';
+
+        int px = player.getX();
+        int py = player.getY();
 
         int rowCount = mapField.getRowCount();
         int colCount = mapField.getColCount();
@@ -50,6 +85,9 @@ public class ConsoleUI {
 
                 Tile tile = tiles[row][col];
                 char c = getCharByTileType(tile.getType());
+                if (col == px && row == py) {
+                    c = playerCh;
+                }
                 console.print(c + " ");
             }
 
@@ -64,11 +102,11 @@ public class ConsoleUI {
         // bottom horizontal line
         renderHorizontalWallLine(hWalls, rowCount, colCount);
     }
+
     private char getCharByTileType(TileType tileType) {
         return switch (tileType) {
-            case PLAYER_SPAWN      -> 'A';
-            case DESTINATION       -> '!';
-            case CLEAR             -> ' ';
+            case PLAYER_SPAWN, CLEAR -> ' ';
+            case TARGET -> '✿';
         };
     }
 }
