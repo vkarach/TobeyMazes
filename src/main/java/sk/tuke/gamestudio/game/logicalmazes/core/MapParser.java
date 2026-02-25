@@ -50,7 +50,7 @@ public class MapParser {
     private Tile[][] parseMapTiles(List<String> lines, int width, int height) {
         int i = indexOfLineContains(lines, "TILES");
         int start = i + 1;
-//        int end = start + height; // <-- todo: legal format check
+//        int end = startLaunchLevel + height; // <-- todo: legal format check
         Tile[][] tiles = new Tile[height][width];
         for (int row = 0; row < height; row++) {
             String line = lines.get(start + row);
@@ -70,7 +70,7 @@ public class MapParser {
 
                 if (tile.getType() == TileType.PLAYER_SPAWN) {
                     if (this.player != null) {
-                        throw new IllegalArgumentException(); // "multiple player spawns"
+                        throw new IllegalArgumentException("multiple player spawns");
                     }
                     this.player = new Player(row, col);
                 }
@@ -82,10 +82,10 @@ public class MapParser {
             }
         }
         if (this.player == null) {
-            throw new IllegalArgumentException(); // "no player spawn"
+            throw new IllegalArgumentException("no player spawn");
         }
         if (this.targetCount == 0) {
-            throw new IllegalArgumentException(); // "no target found"
+            throw new IllegalArgumentException("no target found");
         }
         return tiles;
     }
@@ -93,7 +93,7 @@ public class MapParser {
     private boolean[][] parseVertWalls(List<String> lines, int width, int height) {
         int i = indexOfLineContains(lines, "VERT");
         int start = i + 1;
-//        int end = start + height; // <-- todo: legal format check
+//        int end = startLaunchLevel + height; // <-- todo: legal format check
         boolean[][] vWalls = new boolean[height][width + 1];
         for (int row = 0; row < height; row++) {
             String line = lines.get(start + row);
@@ -116,7 +116,7 @@ public class MapParser {
     private boolean[][] parseHorzWalls(List<String> lines, int width, int height) {
         int i = indexOfLineContains(lines, "HORZ");
         int start = i + 1;
-//        int end = start + height; // <-- todo: legal format check
+//        int end = startLaunchLevel + height; // <-- todo: legal format check
         boolean[][] hWalls = new boolean[height + 1][width];
         for (int row = 0; row < height + 1; row++) {
             String line = lines.get(start + row);
@@ -141,7 +141,7 @@ public class MapParser {
             case 'S' -> new Tile(TileType.PLAYER_SPAWN);
             case '!' -> new Tile(TileType.TARGET);
             case '.' -> new Tile(TileType.CLEAR);
-            default  -> throw new IllegalArgumentException(); // todo: msg
+            default  -> throw new IllegalArgumentException("unknown tile symbol: " + ch);
         };
     }
     private int indexOfLineContains(List<String> lines, String part) {

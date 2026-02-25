@@ -13,8 +13,8 @@ public class GameController {
     private volatile Direction pending = null;
     private volatile Direction activeDir = null;
 
-    private static final long PENDING_SAFE_BOUND_NS = 300_000_000L;
-     private volatile long pendingSavedNs = 0;
+    private static final long PENDING_SAFE_BOUND_NS = 250_000_000L;
+    private volatile long pendingSavedNs = 0;
 
     public GameController(Field mapField, Player player) {
         this.mapField = mapField;

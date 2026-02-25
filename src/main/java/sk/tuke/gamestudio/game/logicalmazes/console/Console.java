@@ -1,14 +1,13 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
-import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-import org.jline.utils.InfoCmp;
-import org.jline.utils.NonBlockingReader;
+import org.jline.utils.*;
+import org.jline.terminal.Terminal;
 
 import java.io.PrintWriter;
 
 public class Console {
-    public enum InputAction { UP, DOWN, LEFT, RIGHT, QUIT, NONE }
+    public enum InputAction { UP, DOWN, LEFT, RIGHT, ENTER, QUIT, NONE }
 
     private final Terminal terminal;
     private final NonBlockingReader reader;
@@ -26,17 +25,27 @@ public class Console {
         terminal.flush();
     }
 
-    public InputAction readAction() throws Exception {
-        int ch = reader.read(10);
+    private int readInput(long timeout) {
+        try {
+            return reader.read(timeout);
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Cannot read input", e);
+        }
+    }
+
+    public InputAction readAction() {
+        int ch = readInput(10);
 
         if (ch == 'q') return InputAction.QUIT;
+        else if (ch == '\r' || ch == '\n') return InputAction.ENTER;
         if (ch != 27) return InputAction.NONE; // not ESC
 
-        int second = reader.read(300);
+        int second = readInput(300);
         if (second < 0) return InputAction.NONE;
 
         if (second == '[' || second == 'O') {
-            int third = reader.read(300);
+            int third = readInput(300);
             if (third < 0) return InputAction.NONE;
 
             return switch (third) {
@@ -59,6 +68,10 @@ public class Console {
         terminal.flush();
     }
 
+    private void setCursorPosition(int x, int y) {
+        terminal.puts(InfoCmp.Capability.cursor_address, y, x);
+    }
+
     public void print(String text) {
         out.print(text);
     }
@@ -67,25 +80,36 @@ public class Console {
         out.print(ch);
     }
 
-    private void setCursorPosition(int x, int y) {
-        terminal.puts(InfoCmp.Capability.cursor_address, y, x);
-    }
-
     public void print(String text, int x, int y) {
         setCursorPosition(x, y);
-        out.print(text);
+        print(text);
     }
 
-//    public void print(String text, int x, int y, int fgColor) {
-//        setCursorPosition(x, y);
-//
-//        AttributedStyle style = AttributedStyle.DEFAULT.foreground(fgColor);
-//        new AttributedString(text, style).print(terminal);
-//    }
+    public void print(String text, AttributedStyle style) {
+        new AttributedString(text, style).print(terminal);
+        terminal.flush();
+    }
 
-    public void close() throws Exception {
+    public void print(String text, int x, int y, AttributedStyle style) {
+        setCursorPosition(x, y);
+        print(text, style);
+    }
+
+    public void print(AttributedStringBuilder asb, int x, int y) {
+        setCursorPosition(x, y);
+
+        asb.toAttributedString().print(terminal);
+        terminal.flush();
+    }
+
+    public void close() {
         terminal.puts(InfoCmp.Capability.cursor_normal);
         terminal.flush();
-        terminal.close();
+        try {
+            terminal.close();
+        }
+        catch (Exception e) {
+            throw new RuntimeException("can not close console", e);
+        }
     }
 }
