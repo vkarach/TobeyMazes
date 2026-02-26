@@ -10,10 +10,6 @@ import sk.tuke.gamestudio.game.logicalmazes.core.TileType;
 public class LevelUI {
     private final Console console;
 
-//    private final AttributedStyle wallStyle =
-//            AttributedStyle.DEFAULT
-//                    .foreground(AttributedStyle.BRIGHT | AttributedStyle.CYAN);
-
     private final AttributedStyle wallStyle =
         AttributedStyle.DEFAULT.foreground(103);
 
@@ -49,7 +45,7 @@ public class LevelUI {
         console.print('\n');
     }
 
-    private String getTimerString(long startTime) {
+    private String formatTimerString(long startTime) {
         final long nowNs = System.nanoTime();
         long durationMs = (nowNs - startTime) / 1_000_000L;
 
@@ -85,7 +81,7 @@ public class LevelUI {
     }
 
     public void renderHud(long startTime, int targetCount, int x, int y) {
-        String timeString     = String.format(" %-10s", getTimerString(startTime));
+        String timeString     = String.format(" %-10s", formatTimerString(startTime));
         String targetCountStr = String.format(" %-10s", "   " + (targetCount > 0 ? targetCount: '✓') + ' ' + targetCh);
 
         String vBound = "+" + "-".repeat(11) + "+";

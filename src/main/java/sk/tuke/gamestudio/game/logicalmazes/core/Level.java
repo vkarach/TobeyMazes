@@ -1,7 +1,7 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
 public enum Level {
-    INTRODUCTION("Introduction", Difficulty.EASY, "map_1.txt");
+    INTRODUCTION("Introduction", Difficulty.EASY, "maps/map_1.txt");
 
     Level(String title, Difficulty difficulty, String filename) {
         this.title = title;

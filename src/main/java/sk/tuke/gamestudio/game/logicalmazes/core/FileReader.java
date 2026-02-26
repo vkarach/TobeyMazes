@@ -17,7 +17,15 @@ public class FileReader {
         return stream;
     }
 
-    static List<String> readFileLines(String filename) {
+    public static boolean checkFileExists(String filename) {
+        InputStream stream = MapParser.class
+                .getClassLoader()
+                .getResourceAsStream(filename);
+
+        return stream != null;
+    }
+
+    public static List<String> readFileLines(String filename) {
         InputStream stream = getInputStream(filename);
 
         List<String> lines = new ArrayList<>();

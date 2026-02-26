@@ -1,5 +1,7 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
+import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
+
 import java.awt.*;
 
 public class GameMenu {
@@ -37,25 +39,25 @@ public class GameMenu {
         };
 
         while (true) {
-            Console.InputAction inputAction = console.readAction();
+            InputType inputType = console.readAction();
             console.moveCursorToStart();
 
-            if (inputAction == Console.InputAction.DOWN) {
+            if (inputType == InputType.DOWN) {
                 choose++;
                 if (choose > menuActions.length - 1) {
                     choose = 0;
                 }
             }
-            else if (inputAction == Console.InputAction.UP) {
+            else if (inputType == InputType.UP) {
                 choose--;
                 if (choose < 0) {
                     choose = menuActions.length - 1;
                 }
             }
-            else if (inputAction == Console.InputAction.QUIT) {
+            else if (inputType == InputType.QUIT) {
                 break;
             }
-            else if (inputAction == Console.InputAction.ENTER) {
+            else if (inputType == InputType.ENTER) {
                 return menuActions[choose];
             }
 

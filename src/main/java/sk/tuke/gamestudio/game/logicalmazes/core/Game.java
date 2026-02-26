@@ -5,6 +5,7 @@ import sk.tuke.gamestudio.game.logicalmazes.console.LevelUI;
 import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
 
 public class Game {
+    private final MapParser mapParser = new MapParser();
     private final Console console;
     private final LevelUI levelUI;
 
@@ -20,10 +21,10 @@ public class Game {
     }
 
     public void loadLevel(String filename) {
-        MapParser mapParser = new MapParser(filename);
-        this.gameField = mapParser.getMapField();
-        this.player = mapParser.getPlayer();
-        this.targetCount = mapParser.getTargetCount();
+        MapParser.Result result = mapParser.parseMap(filename);
+        this.gameField = result.mapField;
+        this.player = result.player;
+        this.targetCount = result.targetCount;
     }
 
     public void launch() {
@@ -45,13 +46,13 @@ public class Game {
 
         console.clear();
         while (gameState == GameState.PLAYING) {
-            Console.InputAction inputAction = console.readAction();
+            InputType inputType = console.readAction();
 
-            if (inputAction == Console.InputAction.QUIT) {
+            if (inputType == InputType.QUIT) {
                 gameState = GameState.EXITED;
             }
-            else if (inputAction != Console.InputAction.NONE) {
-                controller.onInput(Direction.InputToDirection(inputAction));
+            else if (inputType != InputType.NONE) {
+                controller.onInput(Direction.InputToDirection(inputType));
             }
             if (gameField.takeTarget(player)) {
                 targetCount--;

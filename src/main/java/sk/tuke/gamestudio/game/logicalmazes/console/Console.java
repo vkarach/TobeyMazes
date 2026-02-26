@@ -3,21 +3,25 @@ package sk.tuke.gamestudio.game.logicalmazes.console;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.*;
 import org.jline.terminal.Terminal;
+import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 
 import java.io.PrintWriter;
 
 public class Console {
-    public enum InputAction { UP, DOWN, LEFT, RIGHT, ENTER, QUIT, NONE }
-
     private final Terminal terminal;
     private final NonBlockingReader reader;
     private final PrintWriter out;
 
-    public Console() throws Exception {
-        terminal = TerminalBuilder.builder()
-                .system(true)
-                .jna(true)
-                .build();
+    public Console() {
+        try {
+            terminal = TerminalBuilder.builder()
+                    .system(true)
+                    .jna(true)
+                    .build();
+        }
+        catch (Exception e) {
+            throw new RuntimeException("can not start console");
+        }
         terminal.enterRawMode();
         reader = terminal.reader();
         this.out = terminal.writer();
@@ -34,30 +38,30 @@ public class Console {
         }
     }
 
-    public InputAction readAction() {
+    public InputType readAction() {
         int ch = readInput(10);
 
-        if (ch == 'q') return InputAction.QUIT;
-        else if (ch == '\r' || ch == '\n') return InputAction.ENTER;
-        if (ch != 27) return InputAction.NONE; // not ESC
+        if (ch == 'q') return InputType.QUIT;
+        else if (ch == '\r' || ch == '\n') return InputType.ENTER;
+        if (ch != 27) return InputType.NONE; // not ESC
 
         int second = readInput(300);
-        if (second < 0) return InputAction.NONE;
+        if (second < 0) return InputType.NONE;
 
         if (second == '[' || second == 'O') {
             int third = readInput(300);
-            if (third < 0) return InputAction.NONE;
+            if (third < 0) return InputType.NONE;
 
             return switch (third) {
-                case 'A' -> InputAction.UP;
-                case 'B' -> InputAction.DOWN;
-                case 'C' -> InputAction.RIGHT;
-                case 'D' -> InputAction.LEFT;
-                default -> InputAction.NONE;
+                case 'A' -> InputType.UP;
+                case 'B' -> InputType.DOWN;
+                case 'C' -> InputType.RIGHT;
+                case 'D' -> InputType.LEFT;
+                default -> InputType.NONE;
             };
         }
 
-        return InputAction.NONE;
+        return InputType.NONE;
     }
     public void clear() {
         terminal.puts(InfoCmp.Capability.clear_screen);

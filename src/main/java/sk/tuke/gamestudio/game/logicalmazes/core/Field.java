@@ -15,11 +15,11 @@ public class Field {
         this.colCount = tiles.length > 0 ? tiles[0].length : 0;
     }
 
-    public boolean canStep(Player p, Direction dir) {
-        int x = p.getX();
-        int y = p.getY();
+    public boolean canStep(Player player, Direction direction) {
+        int x = player.getX();
+        int y = player.getY();
 
-        return switch (dir) {
+        return switch (direction) {
             case DOWN -> (y + 1 < rowCount) && !hWalls[y + 1][x];
             case UP -> (y > 0) && !hWalls[y][x];
             case LEFT -> (x > 0) && !vWalls[y][x];
@@ -28,22 +28,23 @@ public class Field {
         };
     }
 
-    public void step(Player p, Direction dir) {
-        switch (dir) {
-            case DOWN -> p.setY(p.getY() + 1);
-            case UP -> p.setY(p.getY() - 1);
-            case LEFT -> p.setX(p.getX() - 1);
-            case RIGHT -> p.setX(p.getX() + 1);
+    public void step(Player player, Direction direction) {
+        if (!canStep(player, direction)) return;
+        switch (direction) {
+            case DOWN -> player.setY(player.getY() + 1);
+            case UP -> player.setY(player.getY() - 1);
+            case LEFT -> player.setX(player.getX() - 1);
+            case RIGHT -> player.setX(player.getX() + 1);
         }
     }
 
-    public boolean onTarget(Player p) {
-        return tiles[p.getY()][p.getX()].getType() == TileType.TARGET;
+    public boolean onTarget(Player player) {
+        return tiles[player.getY()][player.getX()].getType() == TileType.TARGET;
     }
 
-    public boolean takeTarget(Player p) {
-        if (onTarget(p)) {
-            tiles[p.getY()][p.getX()].setType(TileType.CLEAR);
+    public boolean takeTarget(Player player) {
+        if (onTarget(player)) {
+            tiles[player.getY()][player.getX()].setType(TileType.CLEAR);
             return true;
         }
         return false;

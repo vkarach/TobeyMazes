@@ -3,38 +3,36 @@ package sk.tuke.gamestudio.game.logicalmazes.core;
 import static sk.tuke.gamestudio.game.logicalmazes.core.FileReader.readFileLines;
 import java.util.List;
 
-
 public class MapParser {
-    private final Field mapField;
-    private Player player;
-    private int targetCount;
+    public static class Result {
+        public Field mapField;
+        public Player player;
+        public int targetCount;
 
-    public MapParser(String filename) {
-        List<String> mapLines = readFileLines(filename);
-        System.out.println("started parsing...");
-        this.mapField = parseMap(mapLines);
+        public Result(Field field, Player player, int targetCount) {
+            this.mapField = field;
+            this.player = player;
+            this.targetCount = targetCount;
+        }
     }
+    private Player player;      // maybe add function parsePlayer
+    private int targetCount;    // maybe add function parseTargetCount
 
-    private Field parseMap(List<String> mapLines) {
+    public Result parseMap(String filename) {
+        List<String> mapLines = readFileLines(filename);
         int[] wh = parseMapSize(mapLines);
         int width = wh[0];
         int height = wh[1];
 
-        System.out.println("width: " + width + ", height: " + height);
-
-        Tile[][] tiles = parseMapTiles(mapLines, width, height);
-
-        System.out.println("Parsed tiles");
+        Tile[][] tiles = parseMapTiles(mapLines, width, height); // also parses player and targetCount
 
         boolean[][] vWalls = parseVertWalls(mapLines, width, height);
 
-        System.out.println("Parsed vWalls");
-
         boolean[][] hWalls = parseHorzWalls(mapLines, width, height);
 
-        System.out.println("Parsed hWalls");
+        Field field = new Field(tiles, vWalls, hWalls);
 
-        return new Field(tiles, vWalls, hWalls);
+        return new Result(field, player, targetCount);
     }
 
     private int[] parseMapSize(List<String> lines) {
@@ -72,7 +70,7 @@ public class MapParser {
                     if (this.player != null) {
                         throw new IllegalArgumentException("multiple player spawns");
                     }
-                    this.player = new Player(row, col);
+                    this.player = new Player(col, row);
                 }
                 else if (tile.getType() == TileType.TARGET) {
                     this.targetCount++;
@@ -101,7 +99,7 @@ public class MapParser {
             if (line.length() != width + 1) {
                 throw new IllegalArgumentException(
                     "VERT section: invalid row length at row=" + row +
-                    " (expected=" + width + ", got=" + line.length() + ")"
+                    " (expected=" + width + 1 + ", got=" + line.length() + ")"
                 );
             }
 
@@ -153,15 +151,15 @@ public class MapParser {
         return -1;
     }
 
-    public Field getMapField() {
-        return mapField;
-    }
+//    public Field getMapField() {
+//        return mapField;
+//    }
 
-    public Player getPlayer() {
-        return player;
-    }
+//    public Player getPlayer() {
+//        return player;
+//    }
 
-    public int getTargetCount() {
-        return this.targetCount;
-    }
+//    public int getTargetCount() {
+//        return this.targetCount;
+//    }
 }
