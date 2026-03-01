@@ -1,0 +1,4 @@
+Game made by Valentyn.
+This is my fourth game.
+It is written in Java and runs in the terminal using the JLine library.
+Thanks for participating in beta testing :)
