@@ -18,8 +18,8 @@ public class MapParser {
     private Player player;      // maybe add function parsePlayer
     private int targetCount;    // maybe add function parseTargetCount
 
-    public Result parseMap(String filename) {
-        List<String> mapLines = readFileLines(filename);
+    public Result parseMap(String filepath) {
+        List<String> mapLines = readFileLines(filepath);
         int[] wh = parseMapSize(mapLines);
         int width = wh[0];
         int height = wh[1];
@@ -150,16 +150,4 @@ public class MapParser {
         }
         return -1;
     }
-
-//    public Field getMapField() {
-//        return mapField;
-//    }
-
-//    public Player getPlayer() {
-//        return player;
-//    }
-
-//    public int getTargetCount() {
-//        return this.targetCount;
-//    }
 }

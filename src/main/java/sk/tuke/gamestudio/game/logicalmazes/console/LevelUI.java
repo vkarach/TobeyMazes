@@ -169,7 +169,4 @@ public class LevelUI {
         // bottom horizontal line
         renderHorizontalWallLine(hWalls, rowCount, colCount);
     }
-    // play
-    // >/▶/➤/▸/» settings or A_REVERSE A_BOLD
-    // records
 }

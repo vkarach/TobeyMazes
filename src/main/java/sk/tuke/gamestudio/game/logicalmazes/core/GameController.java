@@ -10,7 +10,7 @@ public class GameController {
     private ScheduledFuture<?> movementTask;
 
     private volatile boolean moving = false;
-    private volatile Direction pending = null;
+    private volatile Direction pendingDir = null;
     private volatile Direction activeDir = null;
 
     private static final long PENDING_SAFE_BOUND_NS = 250_000_000L;
@@ -21,19 +21,19 @@ public class GameController {
         this.player = player;
     }
 
-    public void onInput(Direction dir) {
+    public void onInput(Direction direction) {
         if (moving) {
-            pending = dir;
+            pendingDir = direction;
             pendingSavedNs = System.nanoTime();
             return;
         }
-        startMove(dir);
+        startMove(direction);
     }
 
-    private void startMove(Direction dir) {
+    private void startMove(Direction direction) {
         moving = true;
-        activeDir = dir;
-        pending = null;
+        activeDir = direction;
+        pendingDir = null;
 
         movementTask = scheduler.scheduleAtFixedRate(() -> {
             if (!mapField.canStep(player, activeDir)) {
@@ -53,8 +53,8 @@ public class GameController {
         activeDir = null;
         long pendingAgeNs = System.nanoTime() - pendingSavedNs;
 
-        Direction next = pending;
-        pending = null;
+        Direction next = pendingDir;
+        pendingDir = null;
         pendingSavedNs = 0;
 
         if (next != null && pendingAgeNs < PENDING_SAFE_BOUND_NS) {

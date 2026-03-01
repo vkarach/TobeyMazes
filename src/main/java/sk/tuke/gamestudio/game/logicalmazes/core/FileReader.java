@@ -6,27 +6,27 @@ import java.util.List;
 import java.util.Scanner;
 
 public class FileReader {
-    private static InputStream getInputStream(String filename) {
+    private static InputStream getInputStream(String filepath) {
         InputStream stream = MapParser.class
                 .getClassLoader()
-                .getResourceAsStream(filename);
+                .getResourceAsStream(filepath);
 
         if (stream == null) {
-            throw new RuntimeException("Resource not found: " + filename);
+            throw new RuntimeException("Resource not found: " + filepath);
         }
         return stream;
     }
 
-    public static boolean checkFileExists(String filename) {
+    public static boolean checkFileExists(String filepath) {
         InputStream stream = MapParser.class
                 .getClassLoader()
-                .getResourceAsStream(filename);
+                .getResourceAsStream(filepath);
 
         return stream != null;
     }
 
-    public static List<String> readFileLines(String filename) {
-        InputStream stream = getInputStream(filename);
+    public static List<String> readFileLines(String filepath) {
+        InputStream stream = getInputStream(filepath);
 
         List<String> lines = new ArrayList<>();
         try (Scanner scanner = new Scanner(stream)) {

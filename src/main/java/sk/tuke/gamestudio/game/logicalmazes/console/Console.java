@@ -20,7 +20,7 @@ public class Console {
                     .build();
         }
         catch (Exception e) {
-            throw new RuntimeException("can not start console");
+            throw new RuntimeException("can not launch console");
         }
         terminal.enterRawMode();
         reader = terminal.reader();
@@ -72,7 +72,7 @@ public class Console {
         terminal.flush();
     }
 
-    private void setCursorPosition(int x, int y) {
+    public void setCursorPosition(int x, int y) {
         terminal.puts(InfoCmp.Capability.cursor_address, y, x);
     }
 

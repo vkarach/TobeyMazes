@@ -10,7 +10,7 @@ public class LogicalMaze {
         LevelUI levelUI = new LevelUI(console);
 
         Game game = new Game(console, levelUI);
-        game.loadLevel("maps/map_1.txt");
+//        game.loadLevel("maps/map_2.txt");
 
         game.launch();
 
