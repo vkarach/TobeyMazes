@@ -1,30 +1,38 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
 public enum Level {
-    INTRODUCTION("Introduction", Difficulty.EASY, "maps/map_1.txt");
+    INTRODUCTION("Introduction", Difficulty.EASY, "maps/map_1.txt"),
+    IDK_FOR_NOW("Unnamed", Difficulty.EASY, "maps/map_2.txt");
 
-    Level(String title, Difficulty difficulty, String filename) {
-        this.title = title;
-        this.difficulty = difficulty;
-        this.filename = filename;
-    }
-
-    public enum Difficulty { // maybe in Difficulty.class
+    public enum Difficulty {
         EASY, MEDIUM, HARD
     }
 
     private final String title;
     private final Difficulty difficulty;
-    private final String filename;
+    private final String filepath;
 //    private long record;
 
-    public String getTitle() {
-        return title;
+    Level(String title, Difficulty difficulty, String filepath) {
+        if (!FileReader.checkFileExists(filepath)) {
+            throw new IllegalArgumentException(String.format("file %s not exist!", filepath));
+        }
+        this.title = title;
+        this.difficulty = difficulty;
+        this.filepath = filepath;
+
     }
+
     public Difficulty getDifficulty() {
         return difficulty;
     }
-    public String getFilename() {
-        return filename;
+
+    public String getFilepath() {
+        return filepath;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%-15s %-5s (best time soon)", title, difficulty);
     }
 }

@@ -5,9 +5,9 @@ import sk.tuke.gamestudio.game.logicalmazes.console.LevelUI;
 import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
 
 public class Game {
-    private final MapParser mapParser = new MapParser();
     private final Console console;
     private final LevelUI levelUI;
+    private final GameMenu gameMenu;
 
     private Field gameField;
     private Player player;
@@ -18,28 +18,41 @@ public class Game {
     public Game(Console console, LevelUI levelUI) {
         this.console = console;
         this.levelUI = levelUI;
+        this.gameMenu = new GameMenu(console);
     }
 
-    public void loadLevel(String filename) {
-        MapParser.Result result = mapParser.parseMap(filename);
+    public void loadLevel(String filepath) {
+        MapParser.Result result = new MapParser().parseMap(filepath);
         this.gameField = result.mapField;
         this.player = result.player;
         this.targetCount = result.targetCount;
     }
 
     public void launch() {
-        GameMenu gameMenu = new GameMenu(console);
-        GameMenu.MenuAction menuAction = gameMenu.start();
-        if (menuAction == GameMenu.MenuAction.START) {
-            startLevel(); // todo: how to choose level???
-        }
-        else if (menuAction == GameMenu.MenuAction.EXIT) {
-            exit();
+        while (true) {
+            GameMenu.MenuOption menuOption = gameMenu.launch();
+            if (menuOption == GameMenu.MenuOption.START) {
+                while (true) {
+                    Level level = gameMenu.selectLevel();
+                    if (level == null) {
+                        break;
+                    }
+                    loadLevel(level.getFilepath());
+                    startLevel();
+                }
+            }
+            else if (menuOption == GameMenu.MenuOption.ABOUT) {
+                gameMenu.showAbout();
+            }
+            else if (menuOption == GameMenu.MenuOption.EXIT) {
+                exit();
+                break;
+            }
         }
     }
 
     public void startLevel() {
-        GameController controller = new GameController(gameField, player); // todo: where?
+        GameController controller = new GameController(gameField, player);
         gameState = GameState.PLAYING;
 
         long startTime = System.nanoTime();

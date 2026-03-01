@@ -1,75 +1,146 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
+import org.jline.utils.AttributedStyle;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
-
-import java.awt.*;
+import sk.tuke.gamestudio.game.logicalmazes.core.Level;
 
 public class GameMenu {
     private final Console console;
+    private final TextRenderer textRenderer;
 
-    public enum MenuAction {
+    private final int selectUIX = 30;
 
+    public enum MenuOption {
         START("Start game"),
         ABOUT("About"),
         EXIT("Exit");
 
         private final String title;
 
-        MenuAction(String title) {
+        MenuOption(String title) {
             this.title = title;
         }
 
-        public String getTitle() {
+        @Override
+        public String toString() {
             return title;
+        }
+    }
+
+    public enum LevelOption {
+        INTRODUCTION(Level.INTRODUCTION, null),
+        IDK_FOR_NOW(Level.IDK_FOR_NOW, null),
+        BACK(null, "Back");
+
+        private final Level level;
+        private final String title;
+
+        LevelOption(Level level, String title) {
+            this.level = level;
+            this.title = title;
+        }
+
+        public Level getLevel() {
+            return level;
+        }
+
+        @Override
+        public String toString() {
+            return title != null ? title : level.toString();
         }
     }
 
     public GameMenu(Console console) {
         this.console = console;
+        this.textRenderer = new TextRenderer(console);
     }
 
-    public MenuAction start() {
+    public MenuOption launch() {
         console.clear();
-        int choose = 0;
 
-        MenuAction[] menuActions = new MenuAction[]{
-                MenuAction.START,
-                MenuAction.ABOUT,
-                MenuAction.EXIT,
+        textRenderer.renderFromFile("uiTexts/game_name.txt", 0, 0);
+
+        MenuOption[] actions = new MenuOption[]{
+                MenuOption.START,
+                MenuOption.ABOUT,
+                MenuOption.EXIT,
         };
 
-        while (true) {
-            InputType inputType = console.readAction();
-            console.moveCursorToStart();
+        MenuOption result = select(actions);
 
-            if (inputType == InputType.DOWN) {
-                choose++;
-                if (choose > menuActions.length - 1) {
-                    choose = 0;
-                }
-            }
-            else if (inputType == InputType.UP) {
-                choose--;
-                if (choose < 0) {
-                    choose = menuActions.length - 1;
-                }
-            }
-            else if (inputType == InputType.QUIT) {
+        return result == null ? MenuOption.EXIT : result;
+    }
+
+    public Level selectLevel() {
+        console.clear();
+
+        textRenderer.renderFromFile("uiTexts/select_level.txt", 0, 0);
+
+        LevelOption[] options = LevelOption.values();
+
+        LevelOption selected = select(options);
+
+        if (selected == null || selected == LevelOption.BACK) {
+            return null;
+        }
+
+        return selected.getLevel();
+    }
+
+    public void showAbout() {
+        console.clear();
+
+        textRenderer.renderFromFile("uiTexts/about_title.txt", 0, 0);
+        textRenderer.renderFromFile("uiTexts/about_text.txt", 0, 10);
+
+        console.print("▶ Back",
+                selectUIX, 15,
+                AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)
+        );
+
+        while (true) {
+            InputType input = console.readAction();
+            if (input == InputType.ENTER || input == InputType.QUIT) {
                 break;
             }
-            else if (inputType == InputType.ENTER) {
-                return menuActions[choose];
+        }
+    }
+
+    private <T> T select(T[] items) {
+        int choose = 0;
+
+        int longest = 0;
+        for (T item: items) {
+            longest = Math.max(longest, item.toString().length());
+        }
+
+        selectLoop:
+        while (true) {
+            InputType input = console.readAction();
+
+            switch (input) {
+                case DOWN  -> choose = (choose + 1) % items.length;
+                case UP    -> choose = (choose - 1 + items.length) % items.length;
+                case ENTER -> { return items[choose]; }
+                case QUIT  -> { break selectLoop; }
             }
 
-            for (int i = 0; i < menuActions.length; i++) {
+            int x = selectUIX;
+            int y = 20;
+            for (int i = 0; i < items.length; i++) {
+                String str = String.format("%-" + longest + "s", items[i].toString());
                 if (i == choose) {
-                    console.print("> " + menuActions[i].getTitle() + '\n');
+                    console.print("▶ " + str,
+                            x, y + i,
+                            AttributedStyle.DEFAULT.inverse()
+                    );
                 }
                 else {
-                    console.print("  " + menuActions[i].getTitle() + '\n');
+                    console.print("  " + str, x, y + i);
                 }
             }
         }
-        return MenuAction.START; // plug
+        return null;
     }
 }
+// >/▶/➤/▸/» settings or A_REVERSE A_BOLD
