@@ -1,6 +1,7 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import org.jline.utils.AttributedStyle;
+import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import sk.tuke.gamestudio.game.logicalmazes.core.Level;
 
@@ -99,7 +100,7 @@ public class GameMenu {
         textRenderer.renderFromFile("uiTexts/about_title.txt", 0, 0);
         textRenderer.renderFromFile("uiTexts/about_text.txt", 0, 10);
 
-        fakeChoose();
+        fakeChoose(15);
     }
 
     public String profilePage() {
@@ -113,6 +114,19 @@ public class GameMenu {
         };
 
         return select(options);
+    }
+
+    public void profilePage(User user) { // maybe rename or that even better???
+        console.clear();
+
+        textRenderer.renderFromFile("uiTexts/your_profile.txt", 0, 0);
+
+        String name = String.format("Name: %s", user.getName());
+        // todo: more information
+
+        console.print(name, 20, 20);
+
+        fakeChoose(25); // todo choose to logout return just chosen option handle in AuthService
     }
 
     public void winPage(long playedTime) {
@@ -129,12 +143,12 @@ public class GameMenu {
 
         console.print(String.format("you win in %02d:%02d:%02d :)",  minutes, seconds, millis));
 
-        fakeChoose();
+        fakeChoose(15);
     }
 
-    private void fakeChoose() {
+    private void fakeChoose(int y) {
         console.print("▶ Back",
-                selectUIX, 15,
+                selectUIX, y,
                 AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)
         );
 

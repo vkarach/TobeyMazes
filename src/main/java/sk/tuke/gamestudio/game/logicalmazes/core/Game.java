@@ -1,15 +1,17 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
+import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.LevelUI;
 import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
-
-import java.util.Objects;
 
 public class Game {
     private final Console console;
     private final LevelUI levelUI;
     private final GameMenu gameMenu;
+    private final AuthService authService;
+
+    private User currentUser;
 
     private Field gameField;
     private Player player;
@@ -19,6 +21,8 @@ public class Game {
         this.console = console;
         this.levelUI = levelUI;
         this.gameMenu = new GameMenu(console);
+        this.authService = new AuthService(console);
+        this.currentUser = authService.loadUserSession();
     }
 
     public void loadLevel(String filepath) {
@@ -32,26 +36,10 @@ public class Game {
         while (true) {
             GameMenu.MenuOption menuOption = gameMenu.launch();
             if (menuOption == GameMenu.MenuOption.START) {
-                while (true) {
-                    Level level = gameMenu.selectLevel();
-                    if (level == null) {
-                        break;
-                    }
-                    loadLevel(level.getFilepath());
-                    long startTime = System.nanoTime();
-
-                    GameState gameState = startLevel(startTime);
-                    if (gameState == GameState.SOLVED) {
-                        long playedTime = (System.nanoTime() - startTime);
-                        gameMenu.winPage(playedTime);
-                    }
-                }
+                handleStartLevel();
             }
             else if (menuOption == GameMenu.MenuOption.PROFILE) {
-                String selected = gameMenu.profilePage();
-                if (selected.equals("Login")) {
-                    new Login(console).startLogin();
-                }
+                handleProfile();
             }
             else if (menuOption == GameMenu.MenuOption.ABOUT) {
                 gameMenu.aboutPage();
@@ -97,4 +85,34 @@ public class Game {
         console.print("exiting...\n");
         console.close();
     }
+
+    private void handleStartLevel() {
+        while (true) {
+            Level level = gameMenu.selectLevel();
+            if (level == null) {
+                break;
+            }
+            loadLevel(level.getFilepath());
+            long startTime = System.nanoTime();
+
+            GameState gameState = startLevel(startTime);
+            if (gameState == GameState.SOLVED) {
+                long playedTime = (System.nanoTime() - startTime);
+                gameMenu.winPage(playedTime);
+            }
+        }
+    }
+
+    private void handleProfile() {
+        if (currentUser == null) {
+            String selected = gameMenu.profilePage();
+            if (selected.equals("Login")) { // fuck you ide :)
+                currentUser = authService.startLogin();
+            }
+        }
+        if (currentUser != null) {
+            gameMenu.profilePage(currentUser);
+        }
+    }
+
 }
