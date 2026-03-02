@@ -2,10 +2,7 @@ package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
-import sk.tuke.gamestudio.game.logicalmazes.core.Field;
-import sk.tuke.gamestudio.game.logicalmazes.core.Player;
-import sk.tuke.gamestudio.game.logicalmazes.core.Tile;
-import sk.tuke.gamestudio.game.logicalmazes.core.TileType;
+import sk.tuke.gamestudio.game.logicalmazes.core.*;
 
 public class LevelUI {
     private final Console console;
@@ -103,14 +100,8 @@ public class LevelUI {
         console.print(vBound, x, y, wallStyle);
     }
 
-    public void renderGameField(Field mapField, Player player, boolean clear) {
-        if (clear) {
-            console.moveCursorToStart();
-        }
-        renderGameField(mapField, player);
-    }
-
     public void renderGameField(Field mapField, Player player) {
+        console.moveCursorToStart();
         final char playerCh = '♞';
 //        final char targetCh = '✿';
 

@@ -13,7 +13,7 @@ public class GameController {
     private volatile Direction pendingDir = null;
     private volatile Direction activeDir = null;
 
-    private static final long PENDING_SAFE_BOUND_NS = 250_000_000L;
+    private static final long PENDING_SAFE_BOUND_NS = 200_000_000L;
     private volatile long pendingSavedNs = 0;
 
     public GameController(Field mapField, Player player) {
@@ -42,7 +42,7 @@ public class GameController {
             }
 
             mapField.step(player, activeDir);
-        }, 0, 100, TimeUnit.MILLISECONDS);
+        }, 0, 75, TimeUnit.MILLISECONDS);
     }
 
     private void stopMove() {

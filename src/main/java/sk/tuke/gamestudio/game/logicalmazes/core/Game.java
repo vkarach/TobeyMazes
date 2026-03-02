@@ -4,6 +4,8 @@ import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.LevelUI;
 import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
 
+import java.util.Objects;
+
 public class Game {
     private final Console console;
     private final LevelUI levelUI;
@@ -12,8 +14,6 @@ public class Game {
     private Field gameField;
     private Player player;
     private int targetCount;
-
-    private GameState gameState;
 
     public Game(Console console, LevelUI levelUI) {
         this.console = console;
@@ -38,11 +38,23 @@ public class Game {
                         break;
                     }
                     loadLevel(level.getFilepath());
-                    startLevel();
+                    long startTime = System.nanoTime();
+
+                    GameState gameState = startLevel(startTime);
+                    if (gameState == GameState.SOLVED) {
+                        long playedTime = (System.nanoTime() - startTime);
+                        gameMenu.winPage(playedTime);
+                    }
+                }
+            }
+            else if (menuOption == GameMenu.MenuOption.PROFILE) {
+                String selected = gameMenu.profilePage();
+                if (selected.equals("Login")) {
+                    new Login(console).startLogin();
                 }
             }
             else if (menuOption == GameMenu.MenuOption.ABOUT) {
-                gameMenu.showAbout();
+                gameMenu.aboutPage();
             }
             else if (menuOption == GameMenu.MenuOption.EXIT) {
                 exit();
@@ -51,11 +63,9 @@ public class Game {
         }
     }
 
-    public void startLevel() {
+    public GameState startLevel(long startTime) {
         GameController controller = new GameController(gameField, player);
-        gameState = GameState.PLAYING;
-
-        long startTime = System.nanoTime();
+        GameState gameState = GameState.PLAYING;
 
         console.clear();
         while (gameState == GameState.PLAYING) {
@@ -71,15 +81,15 @@ public class Game {
                 targetCount--;
             }
             levelUI.renderHud(startTime, targetCount, gameField.getRowCount() * 3 + 5, 0);
-            levelUI.renderGameField(gameField, player, true);
+            levelUI.renderGameField(gameField, player);
 
             if (targetCount == 0) {
                 gameState = GameState.SOLVED;
             }
         }
         controller.shutdown();
-        console.clear();
-        console.print("game state is " + gameState + '\n');
+
+        return gameState;
     }
 
     public void exit() {

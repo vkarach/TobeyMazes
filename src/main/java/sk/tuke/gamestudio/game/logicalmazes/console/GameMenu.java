@@ -4,6 +4,8 @@ import org.jline.utils.AttributedStyle;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import sk.tuke.gamestudio.game.logicalmazes.core.Level;
 
+import java.time.Duration;
+
 public class GameMenu {
     private final Console console;
     private final TextRenderer textRenderer;
@@ -12,6 +14,8 @@ public class GameMenu {
 
     public enum MenuOption {
         START("Start game"),
+        PROFILE("Profile"),
+        LEADERBOARD("Leader board"),
         ABOUT("About"),
         EXIT("Exit");
 
@@ -62,6 +66,8 @@ public class GameMenu {
 
         MenuOption[] actions = new MenuOption[]{
                 MenuOption.START,
+                MenuOption.PROFILE,
+                MenuOption.LEADERBOARD,
                 MenuOption.ABOUT,
                 MenuOption.EXIT,
         };
@@ -87,12 +93,46 @@ public class GameMenu {
         return selected.getLevel();
     }
 
-    public void showAbout() {
+    public void aboutPage() {
         console.clear();
 
         textRenderer.renderFromFile("uiTexts/about_title.txt", 0, 0);
         textRenderer.renderFromFile("uiTexts/about_text.txt", 0, 10);
 
+        fakeChoose();
+    }
+
+    public String profilePage() {
+        console.clear();
+
+        textRenderer.renderFromFile("uiTexts/login_to_continue.txt", 0, 0);
+
+        String[] options = new String[] {
+                "Login",
+                "Back"
+        };
+
+        return select(options);
+    }
+
+    public void winPage(long playedTime) {
+        Duration duration = Duration.ofNanos(playedTime);
+
+        long minutes = duration.toMinutes();
+        long seconds = duration.minusMinutes(minutes).toSeconds();
+        long millis = duration.minusMinutes(minutes)
+                .minusSeconds(seconds)
+                .toMillis();
+        millis /= 10;
+
+        console.clear();
+
+        console.print(String.format("you win in %02d:%02d:%02d :)",  minutes, seconds, millis));
+
+        fakeChoose();
+    }
+
+    private void fakeChoose() {
         console.print("▶ Back",
                 selectUIX, 15,
                 AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)

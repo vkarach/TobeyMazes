@@ -1,16 +1,22 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
-import org.jline.terminal.TerminalBuilder;
-import org.jline.utils.*;
-import org.jline.terminal.Terminal;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.terminal.Attributes;
+import org.jline.reader.LineReader;
+import org.jline.terminal.Terminal;
+import org.jline.utils.*;
 
 import java.io.PrintWriter;
 
 public class Console {
     private final Terminal terminal;
     private final NonBlockingReader reader;
+    private LineReader lineReader;
     private final PrintWriter out;
+
+    private Attributes originalAttributes;
 
     public Console() {
         try {
@@ -22,11 +28,26 @@ public class Console {
         catch (Exception e) {
             throw new RuntimeException("can not launch console");
         }
-        terminal.enterRawMode();
+        enterRawMode();
         reader = terminal.reader();
+        lineReader = LineReaderBuilder.builder()
+                .terminal(terminal)
+                .build();
+
         this.out = terminal.writer();
         terminal.puts(InfoCmp.Capability.cursor_invisible);
         terminal.flush();
+    }
+
+    public void enterRawMode() {
+        originalAttributes = terminal.enterRawMode();
+    }
+
+    public void exitRawMode() {
+        if (originalAttributes == null) {
+            return;
+        }
+        terminal.setAttributes(originalAttributes);
     }
 
     private int readInput(long timeout) {
@@ -63,6 +84,11 @@ public class Console {
 
         return InputType.NONE;
     }
+
+    public String readLine(String prompt) {
+        return lineReader.readLine(prompt);
+    }
+
     public void clear() {
         terminal.puts(InfoCmp.Capability.clear_screen);
     }
