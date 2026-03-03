@@ -50,9 +50,7 @@ public class AuthService {
         console.print(" ".repeat(50));
     }
 
-    private void saveSession(User user) {
-        String sessionToken = userService.generateSession(user.getId());
-
+    private void saveSession(String sessionToken) {
         String baseDir = System.getProperty("user.home");
         Path sessionDir = Paths.get(baseDir, ".logicalmaze");
         try {
@@ -113,7 +111,7 @@ public class AuthService {
         while (!correctName(name));
 
         int userId;
-        if (userService.userExists(name)) { // plug todo: delete
+        if (userService.userExists(name)) {
             userId = userService.getUserIdByUserName(name);
             console.print(name + ", love to see ya again :)", x , y + 2);
         }
@@ -123,7 +121,12 @@ public class AuthService {
         }
 
         User user = new User(userId, name);
-        saveSession(user);
+
+        String sessionToken = userService.getSessionTokenByUserId(userId);
+        if (sessionToken == null) {
+             sessionToken = userService.generateSession(user.getId());
+        }
+        saveSession(sessionToken);
 
         console.print("▶ Refresh",
                 x, y + 5,
@@ -135,6 +138,17 @@ public class AuthService {
             if (input == InputType.ENTER || input == InputType.QUIT) {
                 return user;
             }
+        }
+    }
+
+    public void deleteSession() {
+        String baseDir = System.getProperty("user.home");
+        Path sessionDir = Paths.get(baseDir, ".logicalmaze");
+        Path sessionFile = sessionDir.resolve("session.token");
+        try {
+            Files.deleteIfExists(sessionFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

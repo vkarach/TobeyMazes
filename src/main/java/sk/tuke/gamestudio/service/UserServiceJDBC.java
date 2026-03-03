@@ -10,7 +10,8 @@ public class UserServiceJDBC implements UserService {
 
     public static final String SELECT_USER_ID_BY_USER_NAME = "SELECT user_id FROM users WHERE user_name = ?";
     public static final String SELECT_USER_NAME_BY_USER_ID = "SELECT user_name FROM users WHERE user_id = ?";
-    public static final String SELECT_USER_BY_SESSION_TOKEN = "SELECT user_id FROM user_sessions WHERE session_token = ?";
+    public static final String SELECT_USER_ID_BY_SESSION_TOKEN = "SELECT user_id FROM user_sessions WHERE session_token = ?";
+    public static final String SELECT_USER_SESSION_TOKEN_BY_ID = "SELECT session_token FROM user_sessions WHERE user_id = ?";
 
     public static final String INSERT_USER = "INSERT INTO users (user_name) VALUES (?) RETURNING user_id";
     public static final String INSERT_SESSION = "INSERT INTO user_sessions (user_id, session_token) VALUES (?, ?)";
@@ -42,7 +43,7 @@ public class UserServiceJDBC implements UserService {
             statement.setString(1, userName);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("user_id"); // id
+                    return rs.getInt("user_id");
                 }
             }
         }
@@ -55,8 +56,8 @@ public class UserServiceJDBC implements UserService {
     @Override
     public String getUserNameByUserId(int userId) {
         try (
-                Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(SELECT_USER_NAME_BY_USER_ID)
+            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            PreparedStatement statement = connection.prepareStatement(SELECT_USER_NAME_BY_USER_ID)
         ) {
             statement.setInt(1, userId);
 
@@ -77,14 +78,14 @@ public class UserServiceJDBC implements UserService {
             throw new UserException("User with this name already exist");
         }
         try (
-                Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(INSERT_USER)
+            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            PreparedStatement statement = connection.prepareStatement(INSERT_USER)
         ) {
             statement.setString(1, userName);
 
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1); // user_id
+                    return rs.getInt("user_id");
                 }
             }
         }
@@ -97,8 +98,8 @@ public class UserServiceJDBC implements UserService {
 
     public void deleteUserByName(String userName) {
         try (
-                Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(DELETE_USER)
+            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            PreparedStatement statement = connection.prepareStatement(DELETE_USER)
         ) {
             statement.setString(1, userName);
 
@@ -118,13 +119,11 @@ public class UserServiceJDBC implements UserService {
             PreparedStatement statement = connection.prepareStatement(INSERT_SESSION)
         ) {
             String token = UUID.randomUUID().toString();
-            System.out.print("token in generateSession when generated: " + token);
 
             statement.setInt(1, userId);
             statement.setString(2, token);
             statement.executeUpdate();
 
-            System.out.print("token in generateSession before return: " + token);
             return token;
         }
         catch (SQLException e) {
@@ -134,16 +133,14 @@ public class UserServiceJDBC implements UserService {
 
     @Override
     public int getUserIdBySessionToken(String sessionToken) {
-        System.out.println("getUserIdBySessionToken: got token: " + sessionToken);
         try (
-                Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(SELECT_USER_BY_SESSION_TOKEN)
+            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            PreparedStatement statement = connection.prepareStatement(SELECT_USER_ID_BY_SESSION_TOKEN)
         ) {
             statement.setString(1, sessionToken);
-            System.out.println("executed statement.setString(1, sessionToken) with: " + sessionToken);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1); // id
+                    return rs.getInt("user_id");
                 }
             }
         }
@@ -153,4 +150,21 @@ public class UserServiceJDBC implements UserService {
         throw new UserException("Can not get user id by session token" + sessionToken);
     }
 
+    public String getSessionTokenByUserId(int userId) {
+        try (
+            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            PreparedStatement statement = connection.prepareStatement(SELECT_USER_SESSION_TOKEN_BY_ID)
+        ) {
+            statement.setInt(1, userId);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("session_token");
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new UserException("Problem finding user", e);
+        }
+        return null;
+    }
 }

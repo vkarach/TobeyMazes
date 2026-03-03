@@ -55,6 +55,23 @@ public class GameMenu {
         }
     }
 
+    public enum ProfileOption {
+        LOGIN("Login"),
+        LOGOUT("Logout"),
+        BACK("Back");
+
+        private final String title;
+
+        ProfileOption(String title) {
+            this.title = title;
+        }
+
+        @Override
+        public String toString() {
+            return title;
+        }
+    }
+
     public GameMenu(Console console) {
         this.console = console;
         this.textRenderer = new TextRenderer(console);
@@ -103,20 +120,20 @@ public class GameMenu {
         fakeChoose(15);
     }
 
-    public String profilePage() {
+    public ProfileOption profilePage() {
         console.clear();
 
         textRenderer.renderFromFile("uiTexts/login_to_continue.txt", 0, 0);
 
-        String[] options = new String[] {
-                "Login",
-                "Back"
+        ProfileOption[] options = new ProfileOption[] {
+          ProfileOption.LOGIN,
+          ProfileOption.BACK,
         };
 
         return select(options);
     }
 
-    public void profilePage(User user) { // maybe rename or that even better???
+    public ProfileOption profilePage(User user) {
         console.clear();
 
         textRenderer.renderFromFile("uiTexts/your_profile.txt", 0, 0);
@@ -126,7 +143,12 @@ public class GameMenu {
 
         console.print(name, 20, 20);
 
-        fakeChoose(25); // todo choose to logout return just chosen option handle in AuthService
+        ProfileOption[] options = new ProfileOption[] {
+                ProfileOption.LOGOUT,
+                ProfileOption.BACK
+        };
+
+        return select(options, selectUIX, 25);
     }
 
     public void winPage(long playedTime) {
@@ -161,6 +183,10 @@ public class GameMenu {
     }
 
     private <T> T select(T[] items) {
+        return select(items, selectUIX, 20);
+    }
+
+    private <T> T select(T[] items, int x, int y) {
         int choose = 0;
 
         int longest = 0;
@@ -179,8 +205,6 @@ public class GameMenu {
                 case QUIT  -> { break selectLoop; }
             }
 
-            int x = selectUIX;
-            int y = 20;
             for (int i = 0; i < items.length; i++) {
                 String str = String.format("%-" + longest + "s", items[i].toString());
                 if (i == choose) {

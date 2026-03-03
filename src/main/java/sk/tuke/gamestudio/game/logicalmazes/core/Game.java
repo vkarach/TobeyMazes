@@ -105,13 +105,17 @@ public class Game {
 
     private void handleProfile() {
         if (currentUser == null) {
-            String selected = gameMenu.profilePage();
-            if (selected.equals("Login")) { // fuck you ide :)
+            GameMenu.ProfileOption selected = gameMenu.profilePage();
+            if (selected == GameMenu.ProfileOption.LOGIN) {
                 currentUser = authService.startLogin();
             }
         }
-        if (currentUser != null) {
-            gameMenu.profilePage(currentUser);
+        else {
+            GameMenu.ProfileOption choose = gameMenu.profilePage(currentUser);
+            if (choose == GameMenu.ProfileOption.LOGOUT) {
+                authService.deleteSession();
+                currentUser = null;
+            }
         }
     }
 

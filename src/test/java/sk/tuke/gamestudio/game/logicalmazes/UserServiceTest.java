@@ -73,11 +73,12 @@ public class UserServiceTest {
         assertTrue(userService.userExists(userName));
 
         String sessionToken = userService.generateSession(userId);
-        System.out.println("generateSessionTest: got token from generateSession: " + sessionToken);
         int id = userService.getUserIdBySessionToken(sessionToken);
 
         assertEquals(userId, id);
 
         userService.deleteUserByName(userName); // cleanup
     }
+
+    // todo: test getUserIdBySessionToken, getSessionTokenByUserId
 }

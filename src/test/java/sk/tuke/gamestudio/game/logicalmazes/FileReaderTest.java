@@ -37,7 +37,6 @@ public class FileReaderTest {
                 "000"
         );
         List<String> fileLines = FileReader.readFileLines("maps/test_map.txt");
-        System.out.println(fileLines);
         assertEquals(expected, fileLines);
     }
 }
