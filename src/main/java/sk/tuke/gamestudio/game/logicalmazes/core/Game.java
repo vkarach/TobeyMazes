@@ -64,8 +64,10 @@ public class Game {
             if (gameField.takeTarget(player)) {
                 targetCount--;
             }
-            levelUI.renderHud(startTime, targetCount, gameField.getRowCount() * 3 + 5, 0);
-            levelUI.renderGameField(gameField, player);
+            int x = 0;
+            int y = 0;
+            levelUI.renderHud(startTime, targetCount, x + gameField.getRowCount() * 3 + 5, y);
+            levelUI.renderGameField(gameField, player, x, y);
 
             if (targetCount == 0) {
                 gameState = GameState.SOLVED;
@@ -119,5 +121,4 @@ public class Game {
             }
         }
     }
-
 }

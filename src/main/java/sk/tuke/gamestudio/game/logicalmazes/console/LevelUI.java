@@ -29,9 +29,10 @@ public class LevelUI {
         this.console = console;
     }
 
-    private void renderHorizontalWallLine(boolean[][] hWalls, int rowIndex, int colCount) {
+    private void renderHorizontalWallLine(boolean[][] hWalls, int rowIndex, int colCount, int x, int y) {
+        console.setCursorPosition(x, y);
         for (int col = 0; col < colCount; col++) {
-            console.print("+", crossWallStyle); // todo: "+" <-- wall style or other???
+            console.print("+", crossWallStyle);
             if (hWalls[rowIndex][col]) {
                 console.print("--", wallStyle);
             } else {
@@ -100,7 +101,7 @@ public class LevelUI {
         console.print(vBound, x, y, wallStyle);
     }
 
-    public void renderGameField(Field mapField, Player player) {
+    public void renderGameField(Field mapField, Player player, int x, int y) {
         console.moveCursorToStart();
         final char playerCh = '♞';
 //        final char targetCh = '✿';
@@ -116,19 +117,23 @@ public class LevelUI {
         boolean[][] vWalls = mapField.getVWalls();
 
         for (int row = 0; row < rowCount; row++) {
-            // render horizontal walls
-            renderHorizontalWallLine(hWalls, row, colCount);
+            int yHoriz = y + row * 2;
+            int yCells = y + row * 2 + 1;
 
-            // render vertical walls and tiles
+            // horizontal walls line
+            renderHorizontalWallLine(hWalls, row, colCount, x, yHoriz);
+
+            // vertical walls + tiles line
+            int cx = x;
+
             for (int col = 0; col < colCount; col++) {
-
-                // left vertical wall
+                // left vertical wall for this cell
                 if (vWalls[row][col]) {
-                    console.print("|", wallStyle);
+                    console.print("|", cx, yCells, wallStyle);
+                } else {
+                    console.print(" ", cx, yCells);
                 }
-                else {
-                    console.print(' ');
-                }
+                cx += 1;
 
                 Tile tile = tiles[row][col];
 
@@ -137,27 +142,29 @@ public class LevelUI {
                 if (col == px && row == py) {
                     c = playerCh;
                     style = playerStyle;
-                }
-                else if (tile.getType() == TileType.TARGET) {
+                } else if (tile.getType() == TileType.TARGET) {
                     c = targetCh;
                     style = targetStyle;
-                }
-                else {
+                } else {
                     c = ' ';
                     style = textStyle;
                 }
-                console.print(c + " ", style);
+
+                // cell content width = 2 chars (same as "c + space")
+                console.print(String.valueOf(c), cx, yCells, style);
+                console.print(" ", cx + 1, yCells);
+                cx += 2;
             }
 
             // right outer wall
             if (vWalls[row][colCount]) {
-                console.print("|", wallStyle);
+                console.print("|", cx, yCells, wallStyle);
+            } else {
+                console.print(" ", cx, yCells);
             }
-
-            console.print('\n');
         }
 
         // bottom horizontal line
-        renderHorizontalWallLine(hWalls, rowCount, colCount);
+        renderHorizontalWallLine(hWalls, rowCount, colCount, x, y + rowCount * 2);
     }
 }
