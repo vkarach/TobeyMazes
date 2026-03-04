@@ -19,6 +19,7 @@ public class Game {
 
     public Game(Console console, LevelUI levelUI) {
         this.console = console;
+//        console.waitForScale(w, h); // todo: maybe this
         this.levelUI = levelUI;
         this.gameMenu = new GameMenu(console);
         this.authService = new AuthService(console);
@@ -33,20 +34,15 @@ public class Game {
     }
 
     public void launch() {
+        mainLoop:
         while (true) {
             GameMenu.MenuOption menuOption = gameMenu.launch();
-            if (menuOption == GameMenu.MenuOption.START) {
-                handleStartLevel();
-            }
-            else if (menuOption == GameMenu.MenuOption.PROFILE) {
-                handleProfile();
-            }
-            else if (menuOption == GameMenu.MenuOption.ABOUT) {
-                gameMenu.aboutPage();
-            }
-            else if (menuOption == GameMenu.MenuOption.EXIT) {
-                exit();
-                break;
+            switch (menuOption) {
+                case START       -> handleStartLevel();
+                case PROFILE     -> handleProfile();
+                case LEADERBOARD -> gameMenu.leaderboardPage(currentUser);
+                case ABOUT       -> gameMenu.aboutPage();
+                case EXIT        -> { exit(); break mainLoop; }
             }
         }
     }
@@ -105,12 +101,17 @@ public class Game {
 
     private void handleProfile() {
         if (currentUser == null) {
-            GameMenu.ProfileOption selected = gameMenu.profilePage();
-            if (selected == GameMenu.ProfileOption.LOGIN) {
-                currentUser = authService.startLogin();
+            GameMenu.ProfileOption selected;
+            do {
+                selected = gameMenu.profilePage();
+                switch (selected) {
+                    case REGISTER -> currentUser = authService.register();
+                    case LOGIN -> currentUser = authService.login();
+                }
             }
+            while (selected != GameMenu.ProfileOption.BACK);
         }
-        else {
+        if (currentUser != null) {
             GameMenu.ProfileOption choose = gameMenu.profilePage(currentUser);
             if (choose == GameMenu.ProfileOption.LOGOUT) {
                 authService.deleteSession();

@@ -13,17 +13,18 @@ public class ScoreServiceJDBC implements ScoreService {
     public static final String PASSWORD = "as2368";
     public static final String SELECT = "SELECT game, player, points, playedOn FROM score WHERE game = ? ORDER BY points DESC LIMIT 10";
     public static final String DELETE = "DELETE FROM score";
-    public static final String INSERT = "INSERT INTO score (game, player, points, playedOn) VALUES (?, ?, ?, ?)";
+    public static final String INSERT = "INSERT INTO score (user_id, game, player, points, playedOn) VALUES (?, ?, ?, ?, ?)";
 
     @Override
-    public void addScore(Score score) {
+    public void addScore(int userId, Score score) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(INSERT)
         ) {
-            statement.setString(1, score.getGame());
-            statement.setString(2, score.getPlayer());
-            statement.setInt(3, score.getPoints());
-            statement.setTimestamp(4, new Timestamp(score.getPlayedOn().getTime()));
+            statement.setInt(1, userId);
+            statement.setString(2, score.getGame());
+            statement.setString(3, score.getPlayer());
+            statement.setInt(4, score.getPoints());
+            statement.setTimestamp(5, new Timestamp(score.getPlayedOn().getTime()));
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new ScoreException("Problem inserting score", e);

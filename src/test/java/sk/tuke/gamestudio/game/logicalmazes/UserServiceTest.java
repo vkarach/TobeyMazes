@@ -80,5 +80,5 @@ public class UserServiceTest {
         userService.deleteUserByName(userName); // cleanup
     }
 
-    // todo: test getUserIdBySessionToken, getSessionTokenByUserId
+    // todo: test getUserIdBySessionToken, getSessionTokenByUserId, updateSessionTokenExpireDate
 }

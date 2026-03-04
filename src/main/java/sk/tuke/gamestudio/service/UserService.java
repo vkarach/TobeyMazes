@@ -7,4 +7,5 @@ public interface UserService {
     int createUser(String userName) throws UserException;
     String generateSession(int userId) throws UserException;
     int getUserIdBySessionToken(String sessionToken) throws UserException;
+    void updateSessionTokenExpireDate(String sessionToken) throws UserException;
 }

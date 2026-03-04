@@ -1,5 +1,7 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.UserInterruptException;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.reader.LineReaderBuilder;
@@ -13,7 +15,7 @@ import java.io.PrintWriter;
 public class Console {
     private final Terminal terminal;
     private final NonBlockingReader reader;
-    private LineReader lineReader;
+    private final LineReader lineReader;
     private final PrintWriter out;
 
     private Attributes originalAttributes;
@@ -86,7 +88,12 @@ public class Console {
     }
 
     public String readLine(String prompt) {
-        return lineReader.readLine(prompt);
+        try {
+            return lineReader.readLine(prompt);
+        }
+        catch (UserInterruptException | EndOfFileException e) {
+            return null;
+        }
     }
 
     public void clear() {

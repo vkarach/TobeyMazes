@@ -16,7 +16,7 @@ CREATE TABLE user_sessions (
     user_id         INTEGER PRIMARY KEY,
     session_token   VARCHAR(255)    NOT NULL UNIQUE,
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expire_at       TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP + INTERVAL '1 month',
+    expire_at       TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (user_id)
     REFERENCES users(user_id)
