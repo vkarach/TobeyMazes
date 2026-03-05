@@ -21,13 +21,14 @@ public class GameController {
         this.player = player;
     }
 
-    public void onInput(Direction direction) {
+    public boolean onInput(Direction direction) {
         if (moving) {
             pendingDir = direction;
             pendingSavedNs = System.nanoTime();
-            return;
+            return false;
         }
         startMove(direction);
+        return true;
     }
 
     private void startMove(Direction direction) {

@@ -22,14 +22,11 @@ public class AuthService {
     }
 
     private String checkCorrectNameWithErrorMsg(String name) {
-        if (name.isEmpty()) {
-            return String.format("name '%s' is incorrect", name);
-        }
-        else if (name.length() < 3) {
+        if (name.length() < 3) {
             return String.format("name %s is to short (min 3)", name);
         }
         else if (name.length() > 16) {
-            return String.format("name %s is to long (max 16)", name);
+            return String.format("name %s is too long (max 16)", name);
         }
 
         String blocked = "'\";:\\/|<>,.?*&%$#!@()[]{}=+~`^";
@@ -117,13 +114,17 @@ public User register() {
 
     String name = getName();
     if (name == null) { // interrupted by user
+        console.enterRawMode();
         return null;
     }
 
     if (userService.userExists(name)) {
         // todo: error user with this name already exist
+        console.enterRawMode();
         return null;
     }
+
+    console.print("loading...", 20, 20);
 
     int userId = userService.createUser(name);
     updateSession(userId);
@@ -145,20 +146,21 @@ public User login() {
         return null;
     }
 
-    if (userService.userExists(name)) {
-        int userId = userService.getUserIdByUserName(name);
-        updateSession(userId);
-
-        console.print(name + ", love to see ya again :)", 20, 20);
-
-        waitForRefresh(20, 22);
-
-        return new User(userId, name);
-    }
-    else {
+    if (!userService.userExists(name)) {
 //        todo: error user not exist
         return null;
     }
+
+    console.print("loading...", 20, 20);
+
+    int userId = userService.getUserIdByUserName(name);
+    updateSession(userId);
+
+    console.print(name + ", love to see ya again :)", 20, 20);
+
+    waitForRefresh(20, 22);
+
+    return new User(userId, name);
 
 }
 
@@ -176,6 +178,7 @@ private String getName() {
 
         String name = console.readLine(prompt);
         if (name == null) {
+            console.enterRawMode();
             return null;
         }
         String errorMsg = checkCorrectNameWithErrorMsg(name);

@@ -20,6 +20,8 @@ public class Console {
 
     private Attributes originalAttributes;
 
+    public final Object consoleLock = new Object();
+
     public Console() {
         try {
             terminal = TerminalBuilder.builder()
@@ -37,15 +39,18 @@ public class Console {
                 .build();
 
         this.out = terminal.writer();
-        terminal.puts(InfoCmp.Capability.cursor_invisible);
         terminal.flush();
     }
 
     public void enterRawMode() {
         originalAttributes = terminal.enterRawMode();
+        terminal.flush();
+        terminal.puts(InfoCmp.Capability.cursor_invisible);
     }
 
     public void exitRawMode() {
+        terminal.puts(InfoCmp.Capability.cursor_normal);
+        terminal.flush();
         if (originalAttributes == null) {
             return;
         }
@@ -140,8 +145,7 @@ public class Console {
     }
 
     public void close() {
-        terminal.puts(InfoCmp.Capability.cursor_normal);
-        terminal.flush();
+        exitRawMode();
         try {
             terminal.close();
         }

@@ -38,7 +38,7 @@ public class Game {
         while (true) {
             GameMenu.MenuOption menuOption = gameMenu.launch();
             switch (menuOption) {
-                case START       -> handleStartLevel();
+                case START       -> handleStartAndPlayLevel();
                 case PROFILE     -> handleProfile();
                 case LEADERBOARD -> gameMenu.leaderboardPage(currentUser);
                 case ABOUT       -> gameMenu.aboutPage();
@@ -47,10 +47,44 @@ public class Game {
         }
     }
 
-    public GameState startLevel(long startTime) {
+    private int computePoints(Level.Difficulty difficulty, int stepsCount, long playedTimeMs) {
+        int maxPoints;
+        int kTime;
+        int kStep;
+        float playedTimeSec = (float) playedTimeMs / 1000;
+
+        switch (difficulty) { // todo: balance this shit
+            case EASY   -> {
+                maxPoints = 500;
+                kTime = 30;
+                kStep = 10;
+            }
+            case MEDIUM -> {
+                maxPoints = 2000;
+                kTime = 10;
+                kStep = 25;
+            }
+            case HARD   -> {
+                maxPoints = 5000;
+                kTime = 30;
+                kStep = 50;
+            }
+            default -> {
+                return -1;
+            }
+        }
+        int timePenalty =  stepsCount * kStep;
+        int stepsPenalty = (int) (playedTimeSec * kTime);
+
+        int points = maxPoints - timePenalty - stepsPenalty;
+
+        return Math.max(0, points);
+    }
+
+    public PlayedResult startLevel(long startTime) {
         GameController controller = new GameController(gameField, player);
         GameState gameState = GameState.PLAYING;
-
+        int stepCont = 0;
         console.clear();
         while (gameState == GameState.PLAYING) {
             InputType inputType = console.readAction();
@@ -59,7 +93,9 @@ public class Game {
                 gameState = GameState.EXITED;
             }
             else if (inputType != InputType.NONE) {
-                controller.onInput(Direction.InputToDirection(inputType));
+                if (controller.onInput(Direction.InputToDirection(inputType))) {
+                    stepCont++;
+                }
             }
             if (gameField.takeTarget(player)) {
                 targetCount--;
@@ -75,7 +111,19 @@ public class Game {
         }
         controller.shutdown();
 
-        return gameState;
+        return new PlayedResult(gameState, stepCont, System.nanoTime() - startTime);
+    }
+
+    public static class PlayedResult {
+        public GameState gameState;
+        public int stepCount;
+        public long playedTimeNs;
+
+        public PlayedResult(GameState gameState, int stepCount, long playedTimeNs) {
+            this.gameState = gameState;
+            this.stepCount = stepCount;
+            this.playedTimeNs = playedTimeNs;
+        }
     }
 
     public void exit() {
@@ -84,7 +132,7 @@ public class Game {
         console.close();
     }
 
-    private void handleStartLevel() {
+    private void handleStartAndPlayLevel() {
         while (true) {
             Level level = gameMenu.selectLevel();
             if (level == null) {
@@ -93,10 +141,14 @@ public class Game {
             loadLevel(level.getFilepath());
             long startTime = System.nanoTime();
 
-            GameState gameState = startLevel(startTime);
-            if (gameState == GameState.SOLVED) {
-                long playedTime = (System.nanoTime() - startTime);
-                gameMenu.winPage(playedTime);
+            PlayedResult playedResult = startLevel(startTime);
+            if (playedResult.gameState == GameState.SOLVED) {
+                int points = computePoints(
+                        level.getDifficulty(),
+                        playedResult.stepCount,
+                        playedResult.playedTimeNs / 1_000_000
+                );
+                gameMenu.winPage(playedResult.playedTimeNs, points);
             }
         }
     }
@@ -106,12 +158,13 @@ public class Game {
             GameMenu.ProfileOption selected;
             do {
                 selected = gameMenu.profilePage();
+                if (selected == null) return;
                 switch (selected) {
                     case REGISTER -> currentUser = authService.register();
                     case LOGIN -> currentUser = authService.login();
                 }
             }
-            while (selected != GameMenu.ProfileOption.BACK);
+            while (currentUser == null && selected != GameMenu.ProfileOption.BACK);
         }
         if (currentUser != null) {
             GameMenu.ProfileOption choose = gameMenu.profilePage(currentUser);

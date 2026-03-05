@@ -87,6 +87,30 @@ public class GameMenu {
 
         textRenderer.renderFromFile("uiTexts/game_name.txt");
 
+//        Thread konekThread = new Thread(() -> {
+//            while (true) {
+//                for (int i = 0; i < 50; i++) {
+//                    textRenderer.renderFromFile("uiTexts/konek_tobey.txt", 30 + i, 20);
+//                    for (int j = 15; j < 20 + 15; j++) {
+//                        console.print(" ", 30 + i - 1, j);
+//                    }
+//                    try {
+//                        Thread.sleep(150);
+//                    } catch (InterruptedException ignored) {}
+//                }
+//                for (int i = 50; i > 0; i--) {
+//                    textRenderer.renderFromFile("uiTexts/konek_tobey.txt", 30 + i, 20);
+//                    for (int j = 15; j < 20 + 15; j++) {
+//                        console.print(" ", 30 + i - 1, j);
+//                    }
+//                    try {
+//                        Thread.sleep(150);
+//                    } catch (InterruptedException ignored) {}
+//                }
+//            }
+//        });
+//        konekThread.start();
+
         MenuOption[] actions = new MenuOption[]{
                 MenuOption.START,
                 MenuOption.PROFILE,
@@ -96,6 +120,8 @@ public class GameMenu {
         };
 
         MenuOption result = select(actions);
+
+        konekThread.interrupt();
 
         return result == null ? MenuOption.EXIT : result;
     }
@@ -157,7 +183,7 @@ public class GameMenu {
         return select(options, selectUIX, 25);
     }
 
-    public void winPage(long playedTime) {
+    public void winPage(long playedTime, int points) {
         Duration duration = Duration.ofNanos(playedTime);
 
         long minutes = duration.toMinutes();
@@ -169,7 +195,7 @@ public class GameMenu {
 
         console.clear();
 
-        console.print(String.format("you win in %02d:%02d:%02d :)",  minutes, seconds, millis));
+        console.print(String.format("you win in %02d:%02d:%02d and got %d points :)\n",  minutes, seconds, millis, points));
 
         fakeChoose();
     }
@@ -238,17 +264,6 @@ public class GameMenu {
         textRenderer.renderStringList(scrollEnd, x - 2, y);
         y += scrollEnd.length;
 
-//        int j = 0;
-//        int q = 0;
-//        for (int i = 0; i < 256; i++) {
-//            if (q % 40 == 0) {
-//                j += 10;
-//                q = 0;
-//            }
-//            q++;
-//            console.print("color " + i, j, q, AttributedStyle.DEFAULT.foreground(i));
-//        }
-
         fakeChoose(x, y + 2);
     }
 
@@ -293,16 +308,17 @@ public class GameMenu {
                 case QUIT  -> { break selectLoop; }
             }
 
-            for (int i = 0; i < items.length; i++) {
-                String str = String.format("%-" + longest + "s", items[i].toString());
-                if (i == choose) {
-                    console.print("▶ " + str,
-                            x, y + i,
-                            AttributedStyle.DEFAULT.inverse() // .blink()
-                    );
-                }
-                else {
-                    console.print("  " + str, x, y + i);
+            synchronized (console.consoleLock) {
+                for (int i = 0; i < items.length; i++) {
+                    String str = String.format("%-" + longest + "s", items[i].toString());
+                    if (i == choose) {
+                        console.print("▶ " + str,
+                                x, y + i,
+                                AttributedStyle.DEFAULT.inverse() // .blink()
+                        );
+                    } else {
+                        console.print("  " + str, x, y + i);
+                    }
                 }
             }
         }

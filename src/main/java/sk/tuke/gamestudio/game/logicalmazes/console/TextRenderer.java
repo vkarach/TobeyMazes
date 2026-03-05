@@ -14,7 +14,7 @@ public class TextRenderer {
         this.console = console;
         replacers.put("\\033", "\033");
         replacers.put("YELLOW", "\033[33m");
-        replacers.put("END", "\033[0m");
+        replacers.put("OFF", "\033[0m");
     }
 
     public String parseString(String str) {
@@ -36,10 +36,12 @@ public class TextRenderer {
 
     public void renderFromFile(String filepath, int x, int y) {
         List<String> lines = FileReader.readFileLines(filepath);
-        for (int i = 0; i < lines.size(); i++) {
-            String line = lines.get(i);
-            line = parseString(line);
-            console.print(line, x, y + i);
+        synchronized (console.consoleLock) {
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                line = parseString(line);
+                console.print(line, x, y + i);
+            }
         }
     }
 }
