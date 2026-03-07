@@ -42,6 +42,32 @@ public class Console {
         terminal.flush();
     }
 
+    public void warnIfTerminalTooSmall(int expectedHeight) {
+        int x = terminal.getWidth() - 40;
+        int y = 0;
+        AttributedStyle style = AttributedStyle.DEFAULT.inverse();
+        while (true) {
+            int h = terminal.getHeight();
+
+            synchronized (consoleLock) {
+                if (h < expectedHeight) {
+                    moveCursorToStart();
+                    print("Increase your terminal size (Ctrl -)", x, y, style);
+                    print(String.format("your height: %d expected: >%d", h, expectedHeight), x, y + 1, style);
+                } else {
+                    print(" ".repeat(50), x, y);
+                    print(" ".repeat(50), x, y + 1);
+                }
+            }
+
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
+    }
+
     public void enterRawMode() {
         originalAttributes = terminal.enterRawMode();
         terminal.flush();
@@ -92,6 +118,14 @@ public class Console {
         return InputType.NONE;
     }
 
+    public int getWidth() {
+        return terminal.getWidth();
+    }
+
+    public int getHeight() {
+        return terminal.getHeight();
+    }
+
     public String readLine(String prompt) {
         try {
             return lineReader.readLine(prompt);
@@ -102,46 +136,64 @@ public class Console {
     }
 
     public void clear() {
-        terminal.puts(InfoCmp.Capability.clear_screen);
+        synchronized (consoleLock) {
+            terminal.puts(InfoCmp.Capability.clear_screen);
+        }
     }
 
     public void moveCursorToStart() {
-        terminal.puts(InfoCmp.Capability.cursor_home);
-        terminal.flush();
+        synchronized (consoleLock) {
+            terminal.puts(InfoCmp.Capability.cursor_home);
+            terminal.flush();
+        }
     }
 
     public void setCursorPosition(int x, int y) {
-        terminal.puts(InfoCmp.Capability.cursor_address, y, x);
+        synchronized (consoleLock) {
+            terminal.puts(InfoCmp.Capability.cursor_address, y, x);
+        }
     }
 
     public void print(String text) {
-        out.print(text);
+        synchronized (consoleLock) {
+            out.print(text);
+        }
     }
 
     public void print(char ch) {
-        out.print(ch);
+        synchronized (consoleLock) {
+            out.print(ch);
+        }
     }
 
     public void print(String text, int x, int y) {
-        setCursorPosition(x, y);
-        print(text);
+        synchronized (consoleLock) {
+            setCursorPosition(x, y);
+            print(text);
+        }
     }
 
     public void print(String text, AttributedStyle style) {
-        new AttributedString(text, style).print(terminal);
-        terminal.flush();
+        synchronized (consoleLock) {
+            new AttributedString(text, style).print(terminal);
+            terminal.flush();
+        }
     }
 
     public void print(String text, int x, int y, AttributedStyle style) {
-        setCursorPosition(x, y);
-        print(text, style);
+        synchronized (consoleLock) {
+            setCursorPosition(x, y);
+            print(text, style);
+        }
     }
 
     public void print(AttributedStringBuilder asb, int x, int y) {
-        setCursorPosition(x, y);
+        synchronized (consoleLock) {
+            setCursorPosition(x, y);
 
-        asb.toAttributedString().print(terminal);
-        terminal.flush();
+            asb.toAttributedString().print(terminal);
+            terminal.flush();
+        }
     }
 
     public void close() {

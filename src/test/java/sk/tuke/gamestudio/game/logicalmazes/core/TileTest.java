@@ -1,8 +1,6 @@
-package sk.tuke.gamestudio.game.logicalmazes;
+package sk.tuke.gamestudio.game.logicalmazes.core;
 
 import org.junit.jupiter.api.Test;
-import sk.tuke.gamestudio.game.logicalmazes.core.Tile;
-import sk.tuke.gamestudio.game.logicalmazes.core.TileType;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -27,8 +27,13 @@ public class GameController {
             pendingSavedNs = System.nanoTime();
             return false;
         }
-        startMove(direction);
-        return true;
+
+        if (mapField.canStep(player, direction)) {
+            startMove(direction);
+            return true;
+        }
+
+        return false;
     }
 
     private void startMove(Direction direction) {

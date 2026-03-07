@@ -6,6 +6,7 @@ import sk.tuke.gamestudio.entity.Score;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import sk.tuke.gamestudio.game.logicalmazes.core.Level;
+import sk.tuke.gamestudio.service.BestResultServiceJDBC;
 import sk.tuke.gamestudio.service.ScoreServiceJDBC;
 
 import java.time.Duration;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class GameMenu {
     private final Console console;
-    private final TextRenderer textRenderer;
+    private final ConsoleRenderer consoleRenderer;
 
     private final int selectUIX = 30;
 
@@ -37,12 +38,12 @@ public class GameMenu {
     }
 
     public enum LevelOption {
-        INTRODUCTION(Level.INTRODUCTION, null),
-        IDK_FOR_NOW(Level.IDK_FOR_NOW, null),
+        INTRODUCTION(Level.INTRODUCTION, Level.INTRODUCTION.toString()),
+        IDK_FOR_NOW(Level.IDK_FOR_NOW,   Level.INTRODUCTION.toString()),
         BACK(null, "Back");
 
         private final Level level;
-        private final String title;
+        private String title;
 
         LevelOption(Level level, String title) {
             this.level = level;
@@ -53,9 +54,13 @@ public class GameMenu {
             return level;
         }
 
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
         @Override
         public String toString() {
-            return title != null ? title : level.toString();
+            return title;
         }
     }
 
@@ -79,37 +84,15 @@ public class GameMenu {
 
     public GameMenu(Console console) {
         this.console = console;
-        this.textRenderer = new TextRenderer(console);
+        this.consoleRenderer = new ConsoleRenderer(console);
     }
 
     public MenuOption launch() {
         console.clear();
 
-        textRenderer.renderFromFile("uiTexts/game_name.txt");
+        consoleRenderer.renderFromFile("uiTexts/game_name.txt");
 
-//        Thread konekThread = new Thread(() -> {
-//            while (true) {
-//                for (int i = 0; i < 50; i++) {
-//                    textRenderer.renderFromFile("uiTexts/konek_tobey.txt", 30 + i, 20);
-//                    for (int j = 15; j < 20 + 15; j++) {
-//                        console.print(" ", 30 + i - 1, j);
-//                    }
-//                    try {
-//                        Thread.sleep(150);
-//                    } catch (InterruptedException ignored) {}
-//                }
-//                for (int i = 50; i > 0; i--) {
-//                    textRenderer.renderFromFile("uiTexts/konek_tobey.txt", 30 + i, 20);
-//                    for (int j = 15; j < 20 + 15; j++) {
-//                        console.print(" ", 30 + i - 1, j);
-//                    }
-//                    try {
-//                        Thread.sleep(150);
-//                    } catch (InterruptedException ignored) {}
-//                }
-//            }
-//        });
-//        konekThread.start();
+//        Thread anim = consoleRenderer.renderAnimation("animations/horse.txt", 50, 50, 20);
 
         MenuOption[] actions = new MenuOption[]{
                 MenuOption.START,
@@ -121,19 +104,47 @@ public class GameMenu {
 
         MenuOption result = select(actions);
 
-        konekThread.interrupt();
+//        anim.interrupt();
 
         return result == null ? MenuOption.EXIT : result;
     }
 
-    public Level selectLevel() {
+    private LevelOption[] buildLevelOption(User currentUser) {
+        LevelOption[] options = LevelOption.values();
+        if (currentUser == null) {
+            return options;
+        }
+
+        BestResultServiceJDBC bestTimeServiceJDBC = new BestResultServiceJDBC();
+        for (LevelOption option : options) {
+            if (option.getLevel() == null) continue;
+
+            String str;
+            Integer bestTimeMs = bestTimeServiceJDBC.getBestTime(currentUser.getId(), option.getLevel().getId());
+            if (bestTimeMs != null) {
+                str = String.format("%d:%02d", bestTimeMs / 1000, (bestTimeMs % 1000) / 10);
+            }
+            else {
+                str = "N/A";
+            }
+
+            option.setTitle(option.getLevel() + str);
+        }
+        return options;
+    }
+
+    public Level selectLevel(User currentUser) {
         console.clear();
 
-        textRenderer.renderFromFile("uiTexts/select_level.txt");
+        consoleRenderer.renderFromFile("uiTexts/select_level.txt");
 
-        LevelOption[] options = LevelOption.values();
+        LevelOption[] options = buildLevelOption(currentUser);
 
-        LevelOption selected = select(options);
+
+        if (currentUser == null) {
+            console.print("Login/Register to save your best time", selectUIX + 2, 20);
+        }
+        LevelOption selected = select(options, selectUIX, 22);
 
         if (selected == null || selected == LevelOption.BACK) {
             return null;
@@ -145,8 +156,8 @@ public class GameMenu {
     public void aboutPage() {
         console.clear();
 
-        textRenderer.renderFromFile("uiTexts/about_title.txt");
-        textRenderer.renderFromFile("uiTexts/about_text.txt", 0, 10);
+        consoleRenderer.renderFromFile("uiTexts/about_title.txt");
+        consoleRenderer.renderFromFile("uiTexts/about_text.txt", 0, 10);
 
         fakeChoose();
     }
@@ -154,7 +165,7 @@ public class GameMenu {
     public ProfileOption profilePage() {
         console.clear();
 
-        textRenderer.renderFromFile("uiTexts/login_or_register.txt");
+        consoleRenderer.renderFromFile("uiTexts/login_or_register.txt");
 
         ProfileOption[] options = new ProfileOption[] {
             ProfileOption.REGISTER,
@@ -168,7 +179,7 @@ public class GameMenu {
     public ProfileOption profilePage(User user) {
         console.clear();
 
-        textRenderer.renderFromFile("uiTexts/your_profile.txt");
+        consoleRenderer.renderFromFile("uiTexts/your_profile.txt");
 
         String name = String.format("Name: %s", user.getName());
         // todo: more information
@@ -183,7 +194,7 @@ public class GameMenu {
         return select(options, selectUIX, 25);
     }
 
-    public void winPage(long playedTime, int points) {
+    public void winPage(long playedTime, int points, boolean isTimeRecord, boolean isScoreRecord) {
         Duration duration = Duration.ofNanos(playedTime);
 
         long minutes = duration.toMinutes();
@@ -197,7 +208,17 @@ public class GameMenu {
 
         console.print(String.format("you win in %02d:%02d:%02d and got %d points :)\n",  minutes, seconds, millis, points));
 
-        fakeChoose();
+        if (isTimeRecord) {
+            console.print("Its a new time record record!!!", 0, 1);
+        }
+        if (isScoreRecord) {
+            console.print("Its a new score record record!!!", 0, 2);
+        }
+//      Thread anim = consoleRenderer.renderAnimation("animations/dansing.txt", 35, 55, 0);
+
+        fakeChoose(30, 30);
+
+//        if (anim != null) anim.interrupt();
     }
 
     public void leaderboardPage(User user) {
@@ -215,11 +236,20 @@ public class GameMenu {
             "=(________________________________)="
         };
 
-        textRenderer.renderFromFile("uiTexts/leaderboard.txt");
-        textRenderer.renderFromFile("uiTexts/trophy.txt", 85, 10);
+        consoleRenderer.renderFromFile("uiTexts/leaderboard.txt");
+
+        ConsoleRenderer.RenderSize size = consoleRenderer.getRenderFromFileSize("uiTexts/trophy.txt");
+//        consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, 10);
+        consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, console.getHeight() - size.height);
 
         ScoreServiceJDBC scoreService = new ScoreServiceJDBC();
+        console.print("loading..." , 30, 13);
         List<Score> topScores = scoreService.getTopScores("logicalmaze");
+        if (topScores.isEmpty()) {
+            console.print("No one here yet :(", 30, 13);
+            fakeChoose();
+            return;
+        }
 
         String bestPlayerName = topScores.getFirst().getPlayer();
 
@@ -231,7 +261,7 @@ public class GameMenu {
         int x = 40;
         int y = 15;
 
-        textRenderer.renderStringList(scrollStart, x - 2, y);
+        consoleRenderer.renderStringList(scrollStart, x - 2, y);
         y+=scrollStart.length;
 
         AttributedStyle[] topColors = new AttributedStyle[] {
@@ -261,7 +291,7 @@ public class GameMenu {
             idx++;
         }
 
-        textRenderer.renderStringList(scrollEnd, x - 2, y);
+        consoleRenderer.renderStringList(scrollEnd, x - 2, y);
         y += scrollEnd.length;
 
         fakeChoose(x, y + 2);
@@ -308,17 +338,15 @@ public class GameMenu {
                 case QUIT  -> { break selectLoop; }
             }
 
-            synchronized (console.consoleLock) {
-                for (int i = 0; i < items.length; i++) {
-                    String str = String.format("%-" + longest + "s", items[i].toString());
-                    if (i == choose) {
-                        console.print("▶ " + str,
-                                x, y + i,
-                                AttributedStyle.DEFAULT.inverse() // .blink()
-                        );
-                    } else {
-                        console.print("  " + str, x, y + i);
-                    }
+            for (int i = 0; i < items.length; i++) {
+                String str = String.format("%-" + longest + "s", items[i].toString());
+                if (i == choose) {
+                    console.print("▶ " + str,
+                            x, y + i,
+                            AttributedStyle.DEFAULT.inverse() // .blink()
+                    );
+                } else {
+                    console.print("  " + str, x, y + i);
                 }
             }
         }

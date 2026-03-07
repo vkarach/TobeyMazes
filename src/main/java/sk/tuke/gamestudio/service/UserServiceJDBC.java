@@ -8,7 +8,9 @@ public class UserServiceJDBC implements UserService {
     public static final String USER = "postgres";
     public static final String PASSWORD = "as2368";
 
-    public static final String SELECT_USER_ID_BY_USER_NAME = "SELECT user_id FROM users WHERE user_name = ?";
+    public static final String SELECT_USER_ID_BY_USER_NAME =
+            "SELECT user_id FROM users WHERE LOWER(user_name) = LOWER(?)";
+
     public static final String SELECT_USER_NAME_BY_USER_ID = "SELECT user_name FROM users WHERE user_id = ?";
     public static final String SELECT_USER_ID_BY_SESSION_TOKEN = "SELECT user_id FROM user_sessions WHERE session_token = ?";
     public static final String SELECT_USER_SESSION_TOKEN_BY_ID = "SELECT session_token FROM user_sessions WHERE user_id = ?";
@@ -43,7 +45,7 @@ public class UserServiceJDBC implements UserService {
     }
 
     @Override
-    public int getUserIdByUserName(String userName) {
+    public Integer getUserIdByUserName(String userName) {
         try (
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
             PreparedStatement statement = connection.prepareStatement(SELECT_USER_ID_BY_USER_NAME)
@@ -54,11 +56,11 @@ public class UserServiceJDBC implements UserService {
                     return rs.getInt("user_id");
                 }
             }
+            return null;
         }
         catch (SQLException e) {
             throw new UserException("Problem finding user" + userName, e);
         }
-        throw new UserException("Can not get user id by name" + userName);
     }
 
     @Override

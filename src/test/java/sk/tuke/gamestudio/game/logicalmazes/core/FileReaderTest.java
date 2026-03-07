@@ -1,7 +1,6 @@
-package sk.tuke.gamestudio.game.logicalmazes;
+package sk.tuke.gamestudio.game.logicalmazes.core;
 
 import org.junit.jupiter.api.Test;
-import sk.tuke.gamestudio.game.logicalmazes.core.FileReader;
 
 import static org.junit.jupiter.api.Assertions.*;
 

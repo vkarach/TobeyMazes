@@ -1,8 +1,10 @@
-package sk.tuke.gamestudio.game.logicalmazes;
+package sk.tuke.gamestudio.game.logicalmazes.service;
 
 import sk.tuke.gamestudio.service.UserServiceJDBC;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
+
+import java.util.Locale;
 import java.util.UUID;
 
 
@@ -46,9 +48,19 @@ public class UserServiceTest {
 
         assertTrue(userService.userExists(userName));
 
-        int id = userService.getUserIdByUserName(userName);
+        Integer id = userService.getUserIdByUserName(userName);
 
         assertEquals(userId, id);
+
+        userService.deleteUserByName(userName); // cleanup
+    }
+
+    @Test
+    public void userExistsTest() {
+        String userName = "UserWIthSomeLowerAnDUpperCase";
+        userService.createUser(userName);
+
+        assertTrue(userService.userExists(userName.toLowerCase()));
 
         userService.deleteUserByName(userName); // cleanup
     }

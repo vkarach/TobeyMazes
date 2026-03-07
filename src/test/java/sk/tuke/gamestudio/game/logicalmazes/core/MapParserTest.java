@@ -1,9 +1,6 @@
-package sk.tuke.gamestudio.game.logicalmazes;
+package sk.tuke.gamestudio.game.logicalmazes.core;
 
 import org.junit.jupiter.api.Test;
-import sk.tuke.gamestudio.game.logicalmazes.core.Field;
-import sk.tuke.gamestudio.game.logicalmazes.core.MapParser;
-import sk.tuke.gamestudio.game.logicalmazes.core.Player;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

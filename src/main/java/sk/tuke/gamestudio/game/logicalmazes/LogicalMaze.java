@@ -7,9 +7,8 @@ import sk.tuke.gamestudio.game.logicalmazes.core.*;
 public class LogicalMaze {
     public static void main(String[] args) {
         Console console = new Console();
-        LevelUI levelUI = new LevelUI(console);
 
-        Game game = new Game(console, levelUI);
+        Game game = new Game(console);
 
         game.launch();
 

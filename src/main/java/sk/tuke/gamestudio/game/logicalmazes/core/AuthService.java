@@ -3,7 +3,7 @@ package sk.tuke.gamestudio.game.logicalmazes.core;
 import org.jline.utils.AttributedStyle;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
-import sk.tuke.gamestudio.game.logicalmazes.console.TextRenderer;
+import sk.tuke.gamestudio.game.logicalmazes.console.ConsoleRenderer;
 import sk.tuke.gamestudio.service.UserServiceJDBC;
 import java.nio.file.NoSuchFileException;
 
@@ -110,7 +110,7 @@ public class AuthService {
 public User register() {
     console.clear();
 
-    new TextRenderer(console).renderFromFile("uiTexts/register.txt");
+    new ConsoleRenderer(console).renderFromFile("uiTexts/register.txt");
 
     String name = getName();
     if (name == null) { // interrupted by user
@@ -139,21 +139,24 @@ public User register() {
 public User login() {
     console.clear();
 
-    new TextRenderer(console).renderFromFile("uiTexts/login.txt");
+    new ConsoleRenderer(console).renderFromFile("uiTexts/login.txt");
 
     String name = getName();
     if (name == null) { // interrupted by user
         return null;
     }
 
-    if (!userService.userExists(name)) {
+    Integer userId = userService.getUserIdByUserName(name);
+
+    if (userId == null) {
 //        todo: error user not exist
         return null;
     }
 
+    name = userService.getUserNameByUserId(userId);
+
     console.print("loading...", 20, 20);
 
-    int userId = userService.getUserIdByUserName(name);
     updateSession(userId);
 
     console.print(name + ", love to see ya again :)", 20, 20);
@@ -209,69 +212,6 @@ private void waitForRefresh(int x, int y) {
         }
     }
 }
-
-//    public User startLogin() {
-//        console.clear();
-//
-//        console.exitRawMode();
-//
-//        new TextRenderer(console).renderFromFile("uiArts/login.txt", 0, 0);
-//
-//        int x = 30;
-//        int y = 20;
-//        String prompt = "enter your name (Ctrl+D exit): ";
-//        console.setCursorPosition(x, y);
-//
-//        String name;
-//        while (true) {
-//            console.setCursorPosition(x, y);
-//            console.print(" ".repeat(200));
-//            console.setCursorPosition(x, y);
-//
-//            name = console.readLine(prompt);
-//            if (name == null) {
-//                return null;
-//            }
-//            String errorMsg = checkCorrectNameWithErrorMsg(name);
-//            if (errorMsg != null) {
-//                showError(name, x, y + 2, errorMsg);
-//                continue;
-//            }
-//            break;
-//        }
-//
-//        int userId;
-//        if (userService.userExists(name)) {
-//            userId = userService.getUserIdByUserName(name);
-//            console.print(name + ", love to see ya again :)", x , y + 2);
-//        }
-//        else {
-//            userId = userService.createUser(name);
-//            console.print(name + " now you registered!", x, y + 2);
-//        }
-//
-//        User user = new User(userId, name);
-//
-//        String sessionToken = userService.getSessionTokenByUserId(userId);
-//        if (sessionToken == null) {
-//             sessionToken = userService.generateSession(user.getId());
-//        }
-//        userService.updateSessionTokenExpireDate(sessionToken);
-//        saveSession(sessionToken);
-//
-//        console.print("▶ Refresh",
-//                x, y + 5,
-//                AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)
-//        );
-//
-//        while (true) {
-//            InputType input = console.readAction();
-//            if (input == InputType.ENTER || input == InputType.QUIT) {
-//                return user;
-//            }
-//        }
-//    }
-
     public void deleteSession() {
         String baseDir = System.getProperty("user.home");
         Path sessionDir = Paths.get(baseDir, ".logicalmaze");

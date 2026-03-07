@@ -1,9 +1,8 @@
-package sk.tuke.gamestudio.game.logicalmazes;
+package sk.tuke.gamestudio.game.logicalmazes.core;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import sk.tuke.gamestudio.game.logicalmazes.core.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

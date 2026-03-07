@@ -84,19 +84,19 @@ public class LevelUI {
 
         String vBound = "+" + "-".repeat(11) + "+";
 
-        console.print(vBound, x, y, wallStyle); y++;
+        console.print(vBound, x, y++, wallStyle); // todo just y++ in print
 
         AttributedStringBuilder asb = new AttributedStringBuilder();
         asb.style(wallStyle).append('|');
         asb.style(textStyle).append(timeString);
         asb.style(wallStyle).append('|');
-        console.print(asb, x, y); y++;
+        console.print(asb, x, y++);
 
         asb = new AttributedStringBuilder();
         asb.style(wallStyle).append('|');
         asb.style(textStyle).append(targetCountStr);
         asb.style(wallStyle).append('|');
-        console.print(asb, x, y); y++;
+        console.print(asb, x, y++);
 
         console.print(vBound, x, y, wallStyle);
     }

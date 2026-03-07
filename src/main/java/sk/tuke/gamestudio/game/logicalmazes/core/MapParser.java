@@ -32,7 +32,11 @@ public class MapParser {
 
         Field field = new Field(tiles, vWalls, hWalls);
 
-        return new Result(field, player, targetCount);
+        Result result = new Result(field, player, targetCount);
+        player = null;
+        targetCount = 0;
+
+        return result;
     }
 
     private int[] parseMapSize(List<String> lines) {
