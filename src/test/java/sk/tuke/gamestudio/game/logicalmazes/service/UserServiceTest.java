@@ -4,7 +4,6 @@ import sk.tuke.gamestudio.service.UserServiceJDBC;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Locale;
 import java.util.UUID;
 
 

@@ -2,15 +2,15 @@ package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
-import sk.tuke.gamestudio.entity.Score;
 import sk.tuke.gamestudio.entity.User;
+import sk.tuke.gamestudio.entity.UserScore;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import sk.tuke.gamestudio.game.logicalmazes.core.Level;
 import sk.tuke.gamestudio.service.BestResultServiceJDBC;
-import sk.tuke.gamestudio.service.ScoreServiceJDBC;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameMenu {
     private final Console console;
@@ -92,7 +92,20 @@ public class GameMenu {
 
         consoleRenderer.renderFromFile("uiTexts/game_name.txt");
 
-//        Thread anim = consoleRenderer.renderAnimation("animations/horse.txt", 50, 50, 20);
+//        Thread anim = consoleRenderer.renderAnimation("animations/anim_test.txt", 50, 50, 20);
+
+//        AtomicInteger oldH = new AtomicInteger(console.getHeight());
+//        Thread cleaner = new Thread(() -> {
+//            while (true) {
+//                if (console.getHeight() != oldH.get()) {
+//                    oldH.set(console.getHeight());
+//                    console.clear();
+//                    consoleRenderer.renderFromFile("uiTexts/game_name.txt");
+//                }
+//            }
+//        });
+//        cleaner.setDaemon(true);
+//        cleaner.start();
 
         MenuOption[] actions = new MenuOption[]{
                 MenuOption.START,
@@ -105,7 +118,7 @@ public class GameMenu {
         MenuOption result = select(actions);
 
 //        anim.interrupt();
-
+//        cleaner.interrupt();
         return result == null ? MenuOption.EXIT : result;
     }
 
@@ -222,8 +235,9 @@ public class GameMenu {
     }
 
     public void leaderboardPage(User user) {
-        console.clear();
+        Integer curUserId = user != null ? user.getId() : null;
 
+        console.clear();
         final String[] scrollStart = new String[] {
             "  ________________________________  ",
             "=(__    ___    ___   __    ___   _)=",
@@ -242,21 +256,24 @@ public class GameMenu {
 //        consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, 10);
         consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, console.getHeight() - size.height);
 
-        ScoreServiceJDBC scoreService = new ScoreServiceJDBC();
-        console.print("loading..." , 30, 13);
-        List<Score> topScores = scoreService.getTopScores("logicalmaze");
-        if (topScores.isEmpty()) {
+        List<UserScore> topUserScores = new BestResultServiceJDBC().getTopByScore();
+        if (topUserScores.isEmpty()) {
             console.print("No one here yet :(", 30, 13);
             fakeChoose();
             return;
         }
+        String bestUserName = topUserScores.getFirst().getUserName();
 
-        String bestPlayerName = topScores.getFirst().getPlayer();
 
-        int leftPadding = (24 - bestPlayerName.length()) / 2;
+        int leftPadding = (24 - bestUserName.length()) / 2;
 
-        console.print("The best of the best", 98, 37);
-        console.print(bestPlayerName, 95 + leftPadding, 39, AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
+        console.print("The best of the best",
+                98, console.getHeight() - 6
+        );
+        console.print(bestUserName,
+                95 + leftPadding, console.getHeight() - 4,
+                AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)
+        );
 
         int x = 40;
         int y = 15;
@@ -271,7 +288,7 @@ public class GameMenu {
         };
 
         int idx = 0;
-        for (Score score : topScores) {
+        for (UserScore score : topUserScores) {
             AttributedStringBuilder asb = new AttributedStringBuilder();
 
             asb.append("| ");
@@ -280,11 +297,16 @@ public class GameMenu {
                 asb.style(topColors[idx]);
             }
 
-            asb.append(String.format("%02d: %-20s", idx + 1, score.getPlayer()));
+            asb.append(String.format("%02d: %-20s", idx + 1, score.getUserName()));
 
             asb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.WHITE));
 
-            asb.append(String.format(" %03d |", score.getPoints()));
+            asb.append(String.format(" %03d |", score.getTotalScore()));
+
+            if (curUserId != null && score.getUserId() == curUserId) {
+                asb.append("<-- its you!!");
+            }
+
             console.print(asb, x, y);
 
             y++;
@@ -296,6 +318,82 @@ public class GameMenu {
 
         fakeChoose(x, y + 2);
     }
+
+//    public void leaderboardPage(User user) {
+//        console.clear();
+//
+//        final String[] scrollStart = new String[] {
+//            "  ________________________________  ",
+//            "=(__    ___    ___   __    ___   _)=",
+//            "  |                              |  "
+//
+//        };
+//        final String[] scrollEnd = new String[] {
+//            "  |                              |",
+//            "  |__  __   ___     __    __  ___|",
+//            "=(________________________________)="
+//        };
+//
+//        consoleRenderer.renderFromFile("uiTexts/leaderboard.txt");
+//
+//        ConsoleRenderer.RenderSize size = consoleRenderer.getRenderFromFileSize("uiTexts/trophy.txt");
+////        consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, 10);
+//        consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, console.getHeight() - size.height);
+//
+//        ScoreServiceJDBC scoreService = new ScoreServiceJDBC();
+//        console.print("loading..." , 30, 13);
+//        List<Score> topScores = scoreService.getTopScores("logicalmaze");
+//        if (topScores.isEmpty()) {
+//            console.print("No one here yet :(", 30, 13);
+//            fakeChoose();
+//            return;
+//        }
+//
+//        String bestPlayerName = topScores.getFirst().getPlayer();
+//
+//        int leftPadding = (24 - bestPlayerName.length()) / 2;
+//
+//        console.print("The best of the best", 98, 37);
+//        console.print(bestPlayerName, 95 + leftPadding, 39, AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
+//
+//        int x = 40;
+//        int y = 15;
+//
+//        consoleRenderer.renderStringList(scrollStart, x - 2, y);
+//        y+=scrollStart.length;
+//
+//        AttributedStyle[] topColors = new AttributedStyle[] {
+//                AttributedStyle.DEFAULT.foreground(220), // gold
+//                AttributedStyle.DEFAULT.foreground(159), // silver
+//                AttributedStyle.DEFAULT.foreground(130), // bronze 130, 166
+//        };
+//
+//        int idx = 0;
+//        for (Score score : topScores) {
+//            AttributedStringBuilder asb = new AttributedStringBuilder();
+//
+//            asb.append("| ");
+//
+//            if (idx < topColors.length) {
+//                asb.style(topColors[idx]);
+//            }
+//
+//            asb.append(String.format("%02d: %-20s", idx + 1, score.getPlayer()));
+//
+//            asb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.WHITE));
+//
+//            asb.append(String.format(" %03d |", score.getPoints()));
+//            console.print(asb, x, y);
+//
+//            y++;
+//            idx++;
+//        }
+//
+//        consoleRenderer.renderStringList(scrollEnd, x - 2, y);
+//        y += scrollEnd.length;
+//
+//        fakeChoose(x, y + 2);
+//    }
 
     private void fakeChoose() {
         fakeChoose(selectUIX, 15);

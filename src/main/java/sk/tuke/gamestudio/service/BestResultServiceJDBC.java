@@ -1,6 +1,10 @@
 package sk.tuke.gamestudio.service;
 
+import sk.tuke.gamestudio.entity.UserScore;
+
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BestResultServiceJDBC implements BestResultService {
     public static final String URL = "jdbc:postgresql://localhost/gamestudio";
@@ -22,6 +26,14 @@ public class BestResultServiceJDBC implements BestResultService {
     public static final String GET_BEST_TIME = "SELECT best_time_ms FROM best_level_results WHERE user_id = ? AND level_id = ?";
 
     public static final String GET_BEST_SCORE = "SELECT best_score FROM best_level_results WHERE user_id = ? AND level_id = ?";
+
+    public static final String GET_TOP_TEN_BY_SCORE =
+            "SELECT u.user_id, u.user_name, SUM(br.best_score) AS total_score " +
+            "FROM best_level_results br " +
+            "JOIN users u ON u.user_id = br.user_id " +
+            "GROUP BY u.user_id, u.user_name " +
+            "ORDER BY total_score DESC " +
+            "LIMIT 10";
 
     @Override
     public void updateBestTime(int userId, int levelId, int timeMs) {
@@ -87,6 +99,26 @@ public class BestResultServiceJDBC implements BestResultService {
         }
         catch (SQLException e) {
             throw new BestResultException("Problem getting best score", e);
+        }
+    }
+
+    public List<UserScore> getTopByScore() {
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(GET_TOP_TEN_BY_SCORE)
+        ) {
+            try (ResultSet rs = statement.executeQuery()) {
+                List<UserScore> userScores = new ArrayList<>();
+                while (rs.next()) {
+                    int userId = rs.getInt("user_id");
+                    String userName = rs.getString("user_name");
+                    int totalScore = rs.getInt("total_score");
+                    userScores.add(new UserScore(userId, userName, totalScore));
+                }
+                return userScores;
+            }
+        }
+        catch (SQLException e) {
+            throw new BestResultException("Problem getting best players id", e);
         }
     }
 }
