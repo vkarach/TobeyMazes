@@ -1,6 +1,8 @@
-package sk.tuke.gamestudio.service;
+package sk.tuke.gamestudio.service.impl;
 
 import sk.tuke.gamestudio.game.logicalmazes.core.Level;
+import sk.tuke.gamestudio.service.LevelService;
+import sk.tuke.gamestudio.service.exception.ScoreException;
 
 import java.sql.*;
 

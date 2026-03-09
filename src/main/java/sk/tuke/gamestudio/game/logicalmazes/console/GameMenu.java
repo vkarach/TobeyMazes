@@ -6,17 +6,24 @@ import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.entity.UserScore;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import sk.tuke.gamestudio.game.logicalmazes.core.Level;
-import sk.tuke.gamestudio.service.BestResultServiceJDBC;
+import sk.tuke.gamestudio.service.impl.BestResultServiceJDBC;
+import sk.tuke.gamestudio.service.BestResultService;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameMenu {
     private final Console console;
     private final ConsoleRenderer consoleRenderer;
+    private final BestResultService bestResultService;
 
     private final int selectUIX = 30;
+
+    public GameMenu(Console console) {
+        this.console = console;
+        this.consoleRenderer = new ConsoleRenderer(console);
+        this.bestResultService = new BestResultServiceJDBC();
+    }
 
     public enum MenuOption {
         START("Start game"),
@@ -82,11 +89,6 @@ public class GameMenu {
         }
     }
 
-    public GameMenu(Console console) {
-        this.console = console;
-        this.consoleRenderer = new ConsoleRenderer(console);
-    }
-
     public MenuOption launch() {
         console.clear();
 
@@ -128,12 +130,11 @@ public class GameMenu {
             return options;
         }
 
-        BestResultServiceJDBC bestTimeServiceJDBC = new BestResultServiceJDBC();
         for (LevelOption option : options) {
             if (option.getLevel() == null) continue;
 
             String str;
-            Integer bestTimeMs = bestTimeServiceJDBC.getBestTime(currentUser.getId(), option.getLevel().getId());
+            Integer bestTimeMs = bestResultService.getBestTime(currentUser.getId(), option.getLevel().getId());
             if (bestTimeMs != null) {
                 str = String.format("%d:%02d", bestTimeMs / 1000, (bestTimeMs % 1000) / 10);
             }
@@ -256,7 +257,7 @@ public class GameMenu {
 //        consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, 10);
         consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, console.getHeight() - size.height);
 
-        List<UserScore> topUserScores = new BestResultServiceJDBC().getTopByScore();
+        List<UserScore> topUserScores = bestResultService.getTopByScore();
         if (topUserScores.isEmpty()) {
             console.print("No one here yet :(", 30, 13);
             fakeChoose();

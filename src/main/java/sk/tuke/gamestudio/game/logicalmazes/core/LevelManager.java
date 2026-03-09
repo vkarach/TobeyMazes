@@ -3,13 +3,14 @@ package sk.tuke.gamestudio.game.logicalmazes.core;
 
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.LevelUI;
-import sk.tuke.gamestudio.service.BestResultServiceJDBC;
+import sk.tuke.gamestudio.service.impl.BestResultServiceJDBC;
+import sk.tuke.gamestudio.service.BestResultService;
 
 public class LevelManager {
     private final Console console;
     private final LevelUI levelUI;
     private final MapParser mapParser;
-    private final BestResultServiceJDBC bestResultService;
+    private final BestResultService bestResultService;
 
     private Level currentLevel;
     private Field gameField;

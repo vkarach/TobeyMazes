@@ -1,4 +1,4 @@
-package sk.tuke.gamestudio.service;
+package sk.tuke.gamestudio.service.exception;
 
 public class CommentException extends RuntimeException {
     public CommentException(String message) {

@@ -1,7 +1,6 @@
 package sk.tuke.gamestudio.game.logicalmazes;
 
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
-import sk.tuke.gamestudio.game.logicalmazes.console.LevelUI;
 import sk.tuke.gamestudio.game.logicalmazes.core.*;
 
 public class LogicalMaze {

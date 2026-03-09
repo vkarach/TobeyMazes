@@ -3,7 +3,7 @@ package sk.tuke.gamestudio.game.logicalmazes.core;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
-import sk.tuke.gamestudio.service.LevelServiceJDBC;
+import sk.tuke.gamestudio.service.impl.LevelServiceJDBC;
 
 public class Game {
     private final Console console;
@@ -22,6 +22,8 @@ public class Game {
 
         new LevelServiceJDBC().syncLevelsFromEnum(Level.class);
 //        Thread scaleThread = new Thread(() -> console.warnIfTerminalTooSmall(43));
+//        scaleThread.setDaemon(true);
+//        scaleThread.start();
 //        todo: coordination must depend on terminal w/h
     }
 

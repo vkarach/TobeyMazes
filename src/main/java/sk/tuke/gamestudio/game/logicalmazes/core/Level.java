@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public enum Level {
-    INTRODUCTION(1,"Introduction", Difficulty.EASY, "maps/map_1.txt"),
-    IDK_FOR_NOW(2,"Unnamed :)", Difficulty.EASY, "maps/map_2.txt");
+    INTRODUCTION(1,"Level 1", Difficulty.EASY, "maps/level_1.txt"),
+    IDK_FOR_NOW(2,"Level 2", Difficulty.EASY, "maps/level_2.txt");
 
     public enum Difficulty {
         EASY, MEDIUM, HARD
@@ -18,9 +18,6 @@ public enum Level {
 //    private long record;
 
     Level(int id, String title, Difficulty difficulty, String filepath) {
-        if (!FileReader.checkFileExists(filepath)) {
-            throw new IllegalArgumentException(String.format("file %s not exist!", filepath));
-        }
         this.id = id;
         this.title = title;
         this.difficulty = difficulty;
@@ -34,6 +31,18 @@ public enum Level {
             if (!ids.add(level.id)) {
                 throw new IllegalStateException(
                         String.format("level with id %d already exists!", level.id)
+                );
+            }
+            String filepath = level.getFilepath();
+            if (!FileReader.checkFileExists(filepath)) {
+                throw new IllegalArgumentException(String.format("file %s not exist!", filepath));
+            }
+            try {
+                new MapParser().parseMap(filepath); // check for the correct map format
+            }
+            catch (Exception e) {
+                throw new IllegalArgumentException(
+                        String.format("level (id=%d) with map (file=%s) is not valid", level.getId(), filepath), e
                 );
             }
         }

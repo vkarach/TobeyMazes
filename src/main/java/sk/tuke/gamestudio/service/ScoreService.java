@@ -1,6 +1,7 @@
 package sk.tuke.gamestudio.service;
 
 import sk.tuke.gamestudio.entity.Score;
+import sk.tuke.gamestudio.service.exception.ScoreException;
 
 import java.util.List;
 

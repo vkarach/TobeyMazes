@@ -1,5 +1,7 @@
-package sk.tuke.gamestudio.service;
+package sk.tuke.gamestudio.service.impl;
 
+import sk.tuke.gamestudio.service.BestResultService;
+import sk.tuke.gamestudio.service.exception.BestResultException;
 import sk.tuke.gamestudio.entity.UserScore;
 
 import java.sql.*;
@@ -102,6 +104,7 @@ public class BestResultServiceJDBC implements BestResultService {
         }
     }
 
+    @Override
     public List<UserScore> getTopByScore() {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(GET_TOP_TEN_BY_SCORE)

@@ -101,9 +101,9 @@ public class MapParser {
             String line = lines.get(start + row);
 
             if (line.length() != width + 1) {
-                throw new IllegalArgumentException(
-                    "VERT section: invalid row length at row=" + row +
-                    " (expected=" + width + 1 + ", got=" + line.length() + ")"
+                throw new IllegalArgumentException(String.format(
+                        "VERT section: invalid row length at row=%d (expected= %d, got=%d)",
+                        row, width + 1, line.length())
                 );
             }
 

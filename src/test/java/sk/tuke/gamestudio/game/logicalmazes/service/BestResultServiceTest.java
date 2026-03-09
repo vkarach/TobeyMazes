@@ -1,18 +1,20 @@
 package sk.tuke.gamestudio.game.logicalmazes.service;
 
 import sk.tuke.gamestudio.entity.UserScore;
-import sk.tuke.gamestudio.service.BestResultServiceJDBC;
+import sk.tuke.gamestudio.service.BestResultService;
+import sk.tuke.gamestudio.service.UserService;
+import sk.tuke.gamestudio.service.impl.BestResultServiceJDBC;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-import sk.tuke.gamestudio.service.UserServiceJDBC;
+import sk.tuke.gamestudio.service.impl.UserServiceJDBC;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class BestResultServiceTest {
-    private final BestResultServiceJDBC bestResultService;
-    private final UserServiceJDBC userService;
+    private final BestResultService bestResultService;
+    private final UserService userService;
 
     public BestResultServiceTest() {
         this.bestResultService = new BestResultServiceJDBC();

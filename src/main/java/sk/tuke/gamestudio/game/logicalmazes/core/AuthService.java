@@ -1,11 +1,14 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
+import sk.tuke.gamestudio.game.logicalmazes.console.ConsoleRenderer;
+import sk.tuke.gamestudio.game.logicalmazes.console.Console;
+import sk.tuke.gamestudio.service.impl.UserServiceJDBC;
+import sk.tuke.gamestudio.service.UserService;
+
+import java.nio.file.NoSuchFileException;
+
 import org.jline.utils.AttributedStyle;
 import sk.tuke.gamestudio.entity.User;
-import sk.tuke.gamestudio.game.logicalmazes.console.Console;
-import sk.tuke.gamestudio.game.logicalmazes.console.ConsoleRenderer;
-import sk.tuke.gamestudio.service.UserServiceJDBC;
-import java.nio.file.NoSuchFileException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,26 +17,26 @@ import java.nio.file.Paths;
 
 public class AuthService {
     private final Console console;
-    private final UserServiceJDBC userService;
+    private final UserService userService;
 
     public AuthService(Console console) {
         this.console = console;
         this.userService = new UserServiceJDBC();
     }
 
-    private String checkCorrectNameWithErrorMsg(String name) {
+    private String checkCorrectInputWithErrorMsg(String name) {
         if (name.length() < 3) {
-            return String.format("name %s is to short (min 3)", name);
+            return String.format("input '%s' is too short (min 3)", name);
         }
         else if (name.length() > 16) {
-            return String.format("name %s is too long (max 16)", name);
+            return String.format("input '%s' is too long (max 16)", name);
         }
 
         String blocked = "'\";:\\/|<>,.?*&%$#!@()[]{}=+~`^";
 
         for (char c : name.toCharArray()) {
             if (blocked.indexOf(c) >= 0) {
-                return String.format("name '%s' can't contain '%c'", name, c);
+                return String.format("input '%s' can't contain '%c'", name, c);
             }
         }
         return null;
@@ -107,111 +110,128 @@ public class AuthService {
         saveSession(sessionToken);
     }
 
-public User register() {
-    console.clear();
-
-    new ConsoleRenderer(console).renderFromFile("uiTexts/register.txt");
-
-    String name = getName();
-    if (name == null) { // interrupted by user
-        console.enterRawMode();
-        return null;
+    private String[] getNamePassword() {
+        String name, password;
+        while (true) {
+            name = getUserInput("your name (Ctrl+D exit): ", 30, 20);
+            if (name == null) { // interrupted by a user
+                console.enterRawMode();
+                return null;
+            }
+            password = getUserInput("password  (Ctrl+D back): ", 30, 20);
+            if (password == null) {
+                continue;
+            }
+            break;
+        }
+        return new String[] {
+                name, password
+        };
     }
 
-    if (userService.userExists(name)) {
-        // todo: error user with this name already exist
-        console.enterRawMode();
-        return null;
-    }
+    public User register() {
+        console.clear();
 
-    console.print("loading...", 20, 20);
+        new ConsoleRenderer(console).renderFromFile("uiTexts/register.txt");
 
-    int userId = userService.createUser(name);
-    updateSession(userId);
+        String[] namePassword = getNamePassword();
+        if (namePassword == null) {
+            return null;
+        }
+        String name = namePassword[0];
+        String password = namePassword[1];
 
-    console.print(name + " now you registered!", 20, 20);
-
-    waitForRefresh(20, 22);
-
-    return new User(userId, name);
-}
-
-public User login() {
-    console.clear();
-
-    new ConsoleRenderer(console).renderFromFile("uiTexts/login.txt");
-
-    String name = getName();
-    if (name == null) { // interrupted by user
-        return null;
-    }
-
-    Integer userId = userService.getUserIdByUserName(name);
-
-    if (userId == null) {
-//        todo: error user not exist
-        return null;
-    }
-
-    name = userService.getUserNameByUserId(userId);
-
-    console.print("loading...", 20, 20);
-
-    updateSession(userId);
-
-    console.print(name + ", love to see ya again :)", 20, 20);
-
-    waitForRefresh(20, 22);
-
-    return new User(userId, name);
-
-}
-
-private String getName() {
-    int x = 30;
-    int y = 20;
-    String prompt = "enter your name (Ctrl+D exit): ";
-    console.setCursorPosition(x, y);
-
-    console.exitRawMode();
-
-    while (true) {
-        console.print(" ".repeat(200), x, y);
-        console.setCursorPosition(x, y);
-
-        String name = console.readLine(prompt);
-        if (name == null) {
+        if (userService.userExists(name)) {
+            // todo: error user with this name already exist
             console.enterRawMode();
             return null;
         }
-        String errorMsg = checkCorrectNameWithErrorMsg(name);
-        if (errorMsg != null) {
-            showError(errorMsg, x, y + 2);
-            continue;
+
+        console.print("loading...", 20, 20);
+
+        int userId = userService.createUser(name);
+        updateSession(userId);
+
+        console.print(name + " now you registered!", 20, 20);
+
+        waitForRefresh(20, 22);
+
+        return new User(userId, name);
+    }
+
+    public User login() {
+        console.clear();
+
+        new ConsoleRenderer(console).renderFromFile("uiTexts/login.txt");
+
+        String name = getUserInput("enter your name (Ctrl+D exit): ", 30, 20);
+        if (name == null) { // interrupted by a user
+            return null;
         }
 
-        console.print(" ".repeat(200), x, y);
+        Integer userId = userService.getUserIdByUserName(name);
+
+        if (userId == null) {
+    //        todo: error user not exist
+            return null;
+        }
+
+        name = userService.getUserNameByUserId(userId);
+
+        console.print("loading...", 20, 20);
+
+        updateSession(userId);
+
+        console.print(name + ", love to see ya again :)", 20, 20);
+
+        waitForRefresh(20, 22);
+
+        return new User(userId, name);
+
+    }
+
+    private String getUserInput(String prompt, int x, int y) {
         console.setCursorPosition(x, y);
 
-        console.enterRawMode();
+        console.exitRawMode();
 
-        return name;
-    }
-}
+        while (true) {
+            console.print(" ".repeat(200), x, y);
+            console.setCursorPosition(x, y);
 
-private void waitForRefresh(int x, int y) {
-    console.print("▶ Refresh",
-            x, y,
-            AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)
-    );
+            String input = console.readLine(prompt);
+            if (input == null) {
+                console.enterRawMode();
+                return null;
+            }
+            String errorMsg = checkCorrectInputWithErrorMsg(input);
+            if (errorMsg != null) {
+                showError(errorMsg, x, y + 2);
+                continue;
+            }
 
-    while (true) {
-        InputType input = console.readAction();
-        if (input == InputType.ENTER || input == InputType.QUIT) {
-            return;
+            console.print(" ".repeat(200), x, y);
+            console.setCursorPosition(x, y);
+
+            console.enterRawMode();
+
+            return input;
         }
     }
-}
+
+    private void waitForRefresh(int x, int y) {
+        console.print("▶ Refresh",
+                x, y,
+                AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)
+        );
+
+        while (true) {
+            InputType input = console.readAction();
+            if (input == InputType.ENTER || input == InputType.QUIT) {
+                return;
+            }
+        }
+    }
     public void deleteSession() {
         String baseDir = System.getProperty("user.home");
         Path sessionDir = Paths.get(baseDir, ".logicalmaze");

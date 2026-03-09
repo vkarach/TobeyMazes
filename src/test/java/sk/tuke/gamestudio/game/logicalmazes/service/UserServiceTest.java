@@ -1,6 +1,7 @@
 package sk.tuke.gamestudio.game.logicalmazes.service;
 
-import sk.tuke.gamestudio.service.UserServiceJDBC;
+import sk.tuke.gamestudio.service.UserService;
+import sk.tuke.gamestudio.service.impl.UserServiceJDBC;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +9,7 @@ import java.util.UUID;
 
 
 public class UserServiceTest {
-    private final UserServiceJDBC userService;
+    private final UserService userService;
 
     public UserServiceTest() {
         this.userService = new UserServiceJDBC();

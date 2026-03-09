@@ -1,4 +1,7 @@
-package sk.tuke.gamestudio.service;
+package sk.tuke.gamestudio.service.impl;
+
+import sk.tuke.gamestudio.service.UserService;
+import sk.tuke.gamestudio.service.exception.UserException;
 
 import java.util.UUID;
 import java.sql.*;
@@ -83,6 +86,7 @@ public class UserServiceJDBC implements UserService {
         throw new UserException("Can not get user id by name with id" + userId);
     }
 
+    @Override
     public int createUser(String userName) {
         if (userExists(userName)) {
             throw new UserException("User with this name already exist");
@@ -106,6 +110,7 @@ public class UserServiceJDBC implements UserService {
         throw new UserException("Failed to insert user");
     }
 
+    @Override
     public void deleteUserByName(String userName) {
         try (
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -123,6 +128,7 @@ public class UserServiceJDBC implements UserService {
         }
     }
 
+    @Override
     public String generateSession(int userId) {
         try (
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -160,6 +166,7 @@ public class UserServiceJDBC implements UserService {
         throw new UserException("Can not get user id by session token" + sessionToken);
     }
 
+    @Override
     public String getSessionTokenByUserId(int userId) {
         try (
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -178,6 +185,7 @@ public class UserServiceJDBC implements UserService {
         return null;
     }
 
+    @Override
     public boolean sessionTokenExpired(String sessionToken) {
         try (
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -196,6 +204,7 @@ public class UserServiceJDBC implements UserService {
         }
     }
 
+    @Override
     public void updateSessionTokenExpireDate(String sessionToken) {
         try (
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);

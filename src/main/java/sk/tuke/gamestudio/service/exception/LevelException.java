@@ -1,4 +1,4 @@
-package sk.tuke.gamestudio.service;
+package sk.tuke.gamestudio.service.exception;
 
 public class LevelException extends RuntimeException {
     public LevelException(String message) {

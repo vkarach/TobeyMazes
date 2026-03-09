@@ -1,4 +1,4 @@
-package sk.tuke.gamestudio.service;
+package sk.tuke.gamestudio.service.exception;
 
 public class UserException extends RuntimeException {
     public UserException(String message) {
