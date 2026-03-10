@@ -1,63 +1,19 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
-import sk.tuke.gamestudio.game.logicalmazes.console.ConsoleRenderer;
-import sk.tuke.gamestudio.game.logicalmazes.console.Console;
-import sk.tuke.gamestudio.service.impl.UserServiceJDBC;
-import sk.tuke.gamestudio.service.UserService;
-
-import java.nio.file.NoSuchFileException;
-
-import org.jline.utils.AttributedStyle;
 import sk.tuke.gamestudio.entity.User;
+import sk.tuke.gamestudio.service.UserService;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class AuthService {
-    private final Console console;
     private final UserService userService;
 
-    public AuthService(Console console) {
-        this.console = console;
-        this.userService = new UserServiceJDBC();
-    }
-
-    private String checkCorrectInputWithErrorMsg(String name) {
-        if (name.length() < 3) {
-            return String.format("input '%s' is too short (min 3)", name);
-        }
-        else if (name.length() > 16) {
-            return String.format("input '%s' is too long (max 16)", name);
-        }
-
-        String blocked = "'\";:\\/|<>,.?*&%$#!@()[]{}=+~`^";
-
-        for (char c : name.toCharArray()) {
-            if (blocked.indexOf(c) >= 0) {
-                return String.format("input '%s' can't contain '%c'", name, c);
-            }
-        }
-        return null;
-    }
-
-    private void showError(String msg, int x, int y) {
-        console.print(
-            msg,
-            x, y,
-            AttributedStyle.DEFAULT.foreground(AttributedStyle.RED)
-        );
-
-        try {
-            Thread.sleep(2000);
-        }
-        catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        console.setCursorPosition(x, y);
-        console.print(" ".repeat(200));
+    public AuthService(UserService userService) {
+        this.userService = userService;
     }
 
     private void saveSession(String sessionToken) {
@@ -110,135 +66,37 @@ public class AuthService {
         saveSession(sessionToken);
     }
 
-    private String[] getNamePassword() {
-        String name, password;
-        while (true) {
-            name = getUserInput("your name (Ctrl+D exit): ", 30, 20);
-            if (name == null) { // interrupted by a user
-                console.enterRawMode();
-                return null;
-            }
-            password = getUserInput("password  (Ctrl+D back): ", 30, 20);
-            if (password == null) {
-                continue;
-            }
-            break;
-        }
-        return new String[] {
-                name, password
-        };
-    }
-
-    public User register() {
-        console.clear();
-
-        new ConsoleRenderer(console).renderFromFile("uiTexts/register.txt");
-
-        String[] namePassword = getNamePassword();
-        if (namePassword == null) {
-            return null;
-        }
-        String name = namePassword[0];
-        String password = namePassword[1];
-
+    public User register(String name) {
         if (userService.userExists(name)) {
-            // todo: error user with this name already exist
-            console.enterRawMode();
             return null;
         }
-
-        console.print("loading...", 20, 20);
 
         int userId = userService.createUser(name);
         updateSession(userId);
 
-        console.print(name + " now you registered!", 20, 20);
-
-        waitForRefresh(20, 22);
-
         return new User(userId, name);
     }
 
-    public User login() {
-        console.clear();
-
-        new ConsoleRenderer(console).renderFromFile("uiTexts/login.txt");
-
-        String name = getUserInput("enter your name (Ctrl+D exit): ", 30, 20);
-        if (name == null) { // interrupted by a user
-            return null;
-        }
-
+    public User login(String name) {
         Integer userId = userService.getUserIdByUserName(name);
-
         if (userId == null) {
-    //        todo: error user not exist
             return null;
         }
 
         name = userService.getUserNameByUserId(userId);
-
-        console.print("loading...", 20, 20);
-
         updateSession(userId);
 
-        console.print(name + ", love to see ya again :)", 20, 20);
-
-        waitForRefresh(20, 22);
-
         return new User(userId, name);
-
     }
 
-    private String getUserInput(String prompt, int x, int y) {
-        console.setCursorPosition(x, y);
-
-        console.exitRawMode();
-
-        while (true) {
-            console.print(" ".repeat(200), x, y);
-            console.setCursorPosition(x, y);
-
-            String input = console.readLine(prompt);
-            if (input == null) {
-                console.enterRawMode();
-                return null;
-            }
-            String errorMsg = checkCorrectInputWithErrorMsg(input);
-            if (errorMsg != null) {
-                showError(errorMsg, x, y + 2);
-                continue;
-            }
-
-            console.print(" ".repeat(200), x, y);
-            console.setCursorPosition(x, y);
-
-            console.enterRawMode();
-
-            return input;
-        }
-    }
-
-    private void waitForRefresh(int x, int y) {
-        console.print("▶ Refresh",
-                x, y,
-                AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)
-        );
-
-        while (true) {
-            InputType input = console.readAction();
-            if (input == InputType.ENTER || input == InputType.QUIT) {
-                return;
-            }
-        }
-    }
     public void deleteSession() {
         String baseDir = System.getProperty("user.home");
         Path sessionDir = Paths.get(baseDir, ".logicalmaze");
         Path sessionFile = sessionDir.resolve("session.token");
         try {
             Files.deleteIfExists(sessionFile);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

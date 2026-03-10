@@ -1,30 +1,39 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
 import sk.tuke.gamestudio.entity.User;
+import sk.tuke.gamestudio.game.logicalmazes.console.AuthConsole;
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
+import sk.tuke.gamestudio.service.ReviewService;
+import sk.tuke.gamestudio.service.impl.BestResultServiceJDBC;
 import sk.tuke.gamestudio.service.impl.LevelServiceJDBC;
+import sk.tuke.gamestudio.service.impl.ReviewServiceJDBC;
+import sk.tuke.gamestudio.service.impl.UserServiceJDBC;
 
 public class Game {
     private final Console console;
     private final LevelManager levelManager;
     private final GameMenu gameMenu;
     private final AuthService authService;
+    private final AuthConsole authConsole;
+    private final ReviewService reviewService;
 
     private User currentUser;
 
     public Game(Console console) {
         this.console = console;
         this.levelManager = new LevelManager(console);
-        this.gameMenu = new GameMenu(console);
-        this.authService = new AuthService(console);
+        this.gameMenu = new GameMenu(console, new BestResultServiceJDBC());
+        this.authService = new AuthService(new UserServiceJDBC());
+        this.authConsole = new AuthConsole(console, authService);
         this.currentUser = authService.loadUserSession();
-
+        this.reviewService = new ReviewServiceJDBC();
         new LevelServiceJDBC().syncLevelsFromEnum(Level.class);
 //        Thread scaleThread = new Thread(() -> console.warnIfTerminalTooSmall(43));
 //        scaleThread.setDaemon(true);
 //        scaleThread.start();
 //        todo: coordination must depend on terminal w/h
+//        gameMenu.reviewPage(currentUser, reviewService);
     }
 
     public void launch() {
@@ -35,6 +44,7 @@ public class Game {
                 case START       -> handleStartAndPlayLevel();
                 case PROFILE     -> handleProfile();
                 case LEADERBOARD -> gameMenu.leaderboardPage(currentUser);
+                case RATE        -> gameMenu.reviewPage(currentUser, reviewService);
                 case ABOUT       -> gameMenu.aboutPage();
                 case EXIT        -> { exit(); break mainLoop; }
             }
@@ -42,7 +52,7 @@ public class Game {
     }
 
     public void exit() {
-        console.clear(); // clear??
+        console.clear();
         console.print("exiting...\n");
         console.close();
     }
@@ -91,8 +101,8 @@ public class Game {
                 selected = gameMenu.profilePage();
                 if (selected == null) return;
                 switch (selected) {
-                    case REGISTER -> currentUser = authService.register();
-                    case LOGIN -> currentUser = authService.login();
+                    case REGISTER -> currentUser = authConsole.register();
+                    case LOGIN -> currentUser = authConsole.login();
                 }
             }
             while (currentUser == null && selected != GameMenu.ProfileOption.BACK);

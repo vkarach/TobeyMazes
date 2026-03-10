@@ -93,17 +93,17 @@ public class Console {
     }
 
     public InputType readAction() {
-        int ch = readInput(10);
+        int ch = readInput(50);
 
-        if (ch == 'q') return InputType.QUIT;
+        if (ch == 'q' || ch == -1 || ch == 4) return InputType.QUIT;
         else if (ch == '\r' || ch == '\n') return InputType.ENTER;
         if (ch != 27) return InputType.NONE; // not ESC
 
-        int second = readInput(300);
+        int second = readInput(100);
         if (second < 0) return InputType.NONE;
 
         if (second == '[' || second == 'O') {
-            int third = readInput(300);
+            int third = readInput(100);
             if (third < 0) return InputType.NONE;
 
             return switch (third) {

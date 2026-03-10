@@ -137,6 +137,7 @@ public class LevelManager {
             console.print(str, x, y - 1);
             levelUI.renderHud(startTime, targetCount, x + gameField.getRowCount() * 3 + 5, y);
             levelUI.renderGameField(gameField, player, x, y);
+
         }
         controller.shutdown();
 

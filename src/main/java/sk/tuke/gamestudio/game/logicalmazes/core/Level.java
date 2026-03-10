@@ -8,14 +8,13 @@ public enum Level {
     IDK_FOR_NOW(2,"Level 2", Difficulty.EASY, "maps/level_2.txt");
 
     public enum Difficulty {
-        EASY, MEDIUM, HARD
+        EASY, NORMAL, MEDIUM, HARD
     }
 
     private final int id;
     private final String title;
     private final Difficulty difficulty;
     private final String filepath;
-//    private long record;
 
     Level(int id, String title, Difficulty difficulty, String filepath) {
         this.id = id;
