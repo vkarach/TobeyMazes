@@ -1,17 +1,11 @@
-SELECT current_database();
-
-DROP TABLE score;
-DROP TABLE users;
-DROP TABLE user_sessions;
-
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id   INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_name VARCHAR(60)   NOT NULL UNIQUE,
+    password  VARCHAR(60)   NOT NULL,
     added_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
-    -- maybe password
 );
 
-CREATE TABLE user_sessions (
+CREATE TABLE IF NOT EXISTS user_sessions (
     user_id         INTEGER         NOT NULL PRIMARY KEY,
     session_token   VARCHAR(255)    NOT NULL UNIQUE,
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -22,26 +16,12 @@ CREATE TABLE user_sessions (
     ON DELETE CASCADE
 );
 
--- ALTER TABLE users RENAME COLUMN
-
--- CREATE TABLE score (
---     user_id      INTEGER     NOT NULL PRIMARY KEY,
---     player       VARCHAR(64) NOT NULL UNIQUE, -- user_name?
---     game         VARCHAR(64) NOT NULL,
---     points       INTEGER     NOT NULL,
---     playedon     TIMESTAMP   NOT NULL,
---
---     FOREIGN KEY (user_id)
---     REFERENCES users(user_id)
---     ON DELETE CASCADE
--- );
-
-CREATE TABLE levels (
+CREATE TABLE IF NOT EXISTS levels (
     level_id    INTEGER PRIMARY KEY,
     level_name  VARCHAR(64) NOT NULL
 );
 
-CREATE TABLE best_level_results (
+CREATE TABLE IF NOT EXISTS best_level_results (
     user_id       INTEGER    NOT NULL,
     level_id      INTEGER    NOT NULL,
     best_time_ms  BIGINT,
@@ -58,8 +38,8 @@ CREATE TABLE best_level_results (
         REFERENCES users(user_id)
         ON DELETE CASCADE
 );
-DROP TABLE reviews;
-CREATE TABLE reviews (
+
+CREATE TABLE IF NOT EXISTS reviews (
     user_id INTEGER PRIMARY KEY,
     rating  SMALLINT NOT NULL,
     comment TEXT,

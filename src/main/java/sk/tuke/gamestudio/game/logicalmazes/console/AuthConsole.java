@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
+import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.core.AuthService;
@@ -54,24 +55,31 @@ public class AuthConsole {
 
         consoleRenderer.renderFromFile("uiTexts/register.txt");
 
-        String[] namePassword = getNamePassword(); // todo password
+        String[] namePassword = getNamePassword();
         if (namePassword == null) { // interrupted by a user
             return null;
         }
 
         String name = namePassword[0];
+        String password = namePassword[1];
 
-        console.print("loading...", 20, 20);
+        int x = 20, y = 20;
+        console.print("loading...", x, y);
 
-        User user = authService.register(name);
+        User user = authService.register(name, password);
         if (user == null) {
+            notifier.showError("User with this name already exists", x, y);
+            register();
             console.enterRawMode();
             return null;
         }
 
-        console.print(user.getName() + " now you registered!", 20, 20);
+        AttributedStringBuilder sb = new AttributedStringBuilder();
+        sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.getName());
+        sb.style(AttributedStyle.DEFAULT).append(" now you registered!");
+        console.print(sb, x, y);
 
-        waitForRefresh(20, 22);
+        waitForRefresh(x, y + 2);
 
         return user;
     }
@@ -81,22 +89,29 @@ public class AuthConsole {
 
         consoleRenderer.renderFromFile("uiTexts/login.txt");
 
-        String[] namePassword = getNamePassword(); // todo password
+        String[] namePassword = getNamePassword();
         if (namePassword == null) { // interrupted by a user
             return null;
         }
         String name = namePassword[0];
+        String password = namePassword[1];
 
-        console.print("loading...", 20, 20);
+        int x = 20, y = 20;
+        console.print("loading...", x, y);
 
-        User user = authService.login(name);
+        User user = authService.login(name, password);
         if (user == null) {
+            notifier.showError("Wrong name or password", x, y);
+            login();
             return null;
         }
 
-        console.print(user.getName() + ", love to see ya again :)", 20, 20);
+        AttributedStringBuilder sb = new AttributedStringBuilder();
+        sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.getName());
+        sb.style(AttributedStyle.DEFAULT).append(", love to see ya again :)");
+        console.print(sb, x, y);
 
-        waitForRefresh(20, 22);
+        waitForRefresh(x, y + 2);
 
         return user;
     }

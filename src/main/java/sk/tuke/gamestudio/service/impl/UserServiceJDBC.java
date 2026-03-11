@@ -14,11 +14,20 @@ public class UserServiceJDBC implements UserService {
     public static final String SELECT_USER_ID_BY_USER_NAME =
             "SELECT user_id FROM users WHERE LOWER(user_name) = LOWER(?)";
 
-    public static final String SELECT_USER_NAME_BY_USER_ID = "SELECT user_name FROM users WHERE user_id = ?";
-    public static final String SELECT_USER_ID_BY_SESSION_TOKEN = "SELECT user_id FROM user_sessions WHERE session_token = ?";
-    public static final String SELECT_USER_SESSION_TOKEN_BY_ID = "SELECT session_token FROM user_sessions WHERE user_id = ?";
+    public static final String SELECT_USER_NAME_BY_USER_ID =
+            "SELECT user_name FROM users WHERE user_id = ?";
 
-    public static final String IS_SESSION_TOKEN_EXPIRED = "SELECT expire_at < CURRENT_TIMESTAMP FROM user_sessions WHERE session_token = ?";
+    public static final String SELECT_PASSWORD_BY_USER_ID =
+            "SELECT password FROM users WHERE user_id = ?";
+
+    public static final String SELECT_USER_ID_BY_SESSION_TOKEN =
+            "SELECT user_id FROM user_sessions WHERE session_token = ?";
+
+    public static final String SELECT_USER_SESSION_TOKEN_BY_ID =
+            "SELECT session_token FROM user_sessions WHERE user_id = ?";
+
+    public static final String IS_SESSION_TOKEN_EXPIRED =
+            "SELECT expire_at < CURRENT_TIMESTAMP FROM user_sessions WHERE session_token = ?";
 
     public static final String UPDATE_SESSION_TOKEN_EXPIRE_DATE =
         "UPDATE user_sessions " +
@@ -26,7 +35,9 @@ public class UserServiceJDBC implements UserService {
         "WHERE session_token = ?";
 
 
-    public static final String INSERT_USER = "INSERT INTO users (user_name) VALUES (?) RETURNING user_id";
+    public static final String INSERT_USER =
+            "INSERT INTO users (user_name, password) VALUES (?, ?) RETURNING user_id";
+
     public static final String INSERT_SESSION = "INSERT INTO user_sessions (user_id, session_token) VALUES (?, ?)";
 
     public static final String DELETE_USER = "DELETE FROM users WHERE user_name = ?";
@@ -87,7 +98,26 @@ public class UserServiceJDBC implements UserService {
     }
 
     @Override
-    public int createUser(String userName) {
+    public String getPasswordByUserId(int userId) {
+        try (
+            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            PreparedStatement statement = connection.prepareStatement(SELECT_PASSWORD_BY_USER_ID)
+        ) {
+            statement.setInt(1, userId);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("password");
+                }
+            }
+            return null;
+        }
+        catch (SQLException e) {
+            throw new UserException("Problem finding user with id" + userId, e);
+        }
+    }
+
+    @Override
+    public int createUser(String userName, String password) {
         if (userExists(userName)) {
             throw new UserException("User with this name already exist");
         }
@@ -96,7 +126,7 @@ public class UserServiceJDBC implements UserService {
             PreparedStatement statement = connection.prepareStatement(INSERT_USER)
         ) {
             statement.setString(1, userName);
-
+            statement.setString(2, password);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt("user_id");

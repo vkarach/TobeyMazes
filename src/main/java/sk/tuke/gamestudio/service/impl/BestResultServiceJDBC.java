@@ -6,7 +6,9 @@ import sk.tuke.gamestudio.entity.UserScore;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BestResultServiceJDBC implements BestResultService {
     public static final String URL = "jdbc:postgresql://localhost/gamestudio";
@@ -36,6 +38,12 @@ public class BestResultServiceJDBC implements BestResultService {
             "GROUP BY u.user_id, u.user_name " +
             "ORDER BY total_score DESC " +
             "LIMIT 10";
+
+    public static final String GET_OVERALL_SCORE =
+            "SELECT SUM(best_score) AS overall_score FROM best_level_results WHERE user_id = ?";
+
+    public static final String GET_ALL_BEST_TIMES =
+            "SELECT level_id, best_time_ms FROM best_level_results WHERE user_id = ?";
 
     @Override
     public void updateBestTime(int userId, int levelId, int timeMs) {
@@ -122,6 +130,47 @@ public class BestResultServiceJDBC implements BestResultService {
         }
         catch (SQLException e) {
             throw new BestResultException("Problem getting best players id", e);
+        }
+    }
+
+    @Override
+    public Integer getBestOverallScore(int userId) {
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(GET_OVERALL_SCORE)
+        ) {
+            statement.setInt(1, userId);
+            try(ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("overall_score");
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new BestResultException("Problem getting best players id", e);
+        }
+        return null;
+    }
+
+    @Override
+    public Map<Integer, Integer> getBestTimesByUser(int userId) {
+        Map<Integer, Integer> bestTimes = new HashMap<>();
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(GET_ALL_BEST_TIMES)
+        ) {
+            statement.setInt(1, userId);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    bestTimes.put(
+                            rs.getInt("level_id"),
+                            rs.getInt("best_time_ms")
+                    );
+                }
+                return bestTimes;
+            }
+        }
+        catch (SQLException e) {
+            throw new BestResultException("Problem getting all player best level times", e);
         }
     }
 }

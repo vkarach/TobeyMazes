@@ -32,8 +32,8 @@ public class Game {
 //        Thread scaleThread = new Thread(() -> console.warnIfTerminalTooSmall(43));
 //        scaleThread.setDaemon(true);
 //        scaleThread.start();
-//        todo: coordination must depend on terminal w/h
 //        gameMenu.reviewPage(currentUser, reviewService);
+//        gameMenu.leaderboardPage(currentUser);
     }
 
     public void launch() {

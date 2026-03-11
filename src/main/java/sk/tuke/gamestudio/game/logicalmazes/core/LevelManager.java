@@ -67,14 +67,19 @@ public class LevelManager {
                 kTime = 30;
                 kStep = 10;
             }
+            case NORMAL -> {
+                maxPoints = 1000;
+                kTime = 60;
+                kStep = 20;
+            }
             case MEDIUM -> {
                 maxPoints = 2000;
-                kTime = 10;
-                kStep = 25;
+                kTime = 100;
+                kStep = 30;
             }
             case HARD   -> {
                 maxPoints = 5000;
-                kTime = 30;
+                kTime = 250;
                 kStep = 50;
             }
             default -> {
@@ -130,7 +135,7 @@ public class LevelManager {
             }
 
             String str  = String.format(
-                    "Points: %03d, steps: %d",
+                    "Points: %04d, steps: %02d",
                     computePoints(elapsedNs, stepCont, currentLevel.getDifficulty()),
                     stepCont
             );

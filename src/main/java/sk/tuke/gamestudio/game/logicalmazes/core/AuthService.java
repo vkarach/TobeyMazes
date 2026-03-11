@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
+import org.mindrot.jbcrypt.BCrypt;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.service.UserService;
 
@@ -66,20 +67,20 @@ public class AuthService {
         saveSession(sessionToken);
     }
 
-    public User register(String name) {
+    public User register(String name, String password) {
         if (userService.userExists(name)) {
             return null;
         }
 
-        int userId = userService.createUser(name);
+        int userId = userService.createUser(name, stringToHash(password));
         updateSession(userId);
 
         return new User(userId, name);
     }
 
-    public User login(String name) {
+    public User login(String name, String password) {
         Integer userId = userService.getUserIdByUserName(name);
-        if (userId == null) {
+        if (userId == null || !checkPassword(password, userService.getPasswordByUserId(userId))) {
             return null;
         }
 
@@ -99,5 +100,13 @@ public class AuthService {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String stringToHash(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+
+    boolean checkPassword(String inputPassword, String passwordHashFromDB) {
+        return BCrypt.checkpw(inputPassword, passwordHashFromDB);
     }
 }

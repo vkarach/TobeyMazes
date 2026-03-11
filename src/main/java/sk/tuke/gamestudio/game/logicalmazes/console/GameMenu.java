@@ -10,6 +10,7 @@ import sk.tuke.gamestudio.service.ReviewService;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 public class GameMenu {
     private final Console console;
@@ -45,8 +46,10 @@ public class GameMenu {
     }
 
     public enum LevelOption {
-        INTRODUCTION(Level.INTRODUCTION, Level.INTRODUCTION.toString()),
-        IDK_FOR_NOW(Level.IDK_FOR_NOW,   Level.INTRODUCTION.toString()),
+        LEVEL1(Level.LEVEL1,   Level.LEVEL1.toString()),
+        LEVEL2(Level.LEVEL2,   Level.LEVEL2.toString()),
+        LEVEL3(Level.LEVEL3,   Level.LEVEL3.toString()),
+        LEVEL4(Level.LEVEL4,   Level.LEVEL4.toString()),
         BACK(null, "Back");
 
         private final Level level;
@@ -114,11 +117,14 @@ public class GameMenu {
             return options;
         }
 
+        Map<Integer, Integer> bestTimesByLevel = bestResultService.getBestTimesByUser(currentUser.getId());
+
         for (LevelOption option : options) {
             if (option.getLevel() == null) continue;
 
             String str;
-            Integer bestTimeMs = bestResultService.getBestTime(currentUser.getId(), option.getLevel().getId());
+            Integer bestTimeMs = bestTimesByLevel.get(option.getLevel().getId());
+
             if (bestTimeMs != null) {
                 str = String.format("%d:%02d", bestTimeMs / 1000, (bestTimeMs % 1000) / 10);
             }
@@ -165,7 +171,7 @@ public class GameMenu {
         String ratingText = String.format("Overall rating: %s",
                 overallRating > 0 ? String.format("%.2f", overallRating) : "no one rated yet"
         );
-        console.print(ratingText, 65, y - 1);
+            console.print(ratingText, 65, y - 1);
 
         if (currentUser == null) {
             console.print("Login to rate the game", selectUIX, y);
@@ -193,16 +199,20 @@ public class GameMenu {
         Notifier notifier = new Notifier(console);
         String commentText;
         while (true) {
-            commentText = inputHelper.getUserInput("Comment (optional): ", 30, y + 1);
-            String error = inputHelper.validateInput(commentText, 6, 100);
+            commentText = inputHelper.getUserInput("Comment (optional): ", selectUIX, y + 1);
+            String error = inputHelper.validateInput(commentText, "", 6, 100);
             if (error != null) {
-                notifier.showError(error, 30, y + 2);
+                notifier.showError(error, selectUIX, y + 2);
                 continue;
             }
             break;
         }
 
         reviewService.addOrUpdateReview(new Review(currentUser.getId(), ratingValue, commentText));
+
+        console.print(commentText, selectUIX, y + 1);
+        console.print("Thank you for your feedback!", selectUIX, y + 3); // update overall rating ?
+        fakeChoose(selectUIX, y + 5);
     }
 
     public void aboutPage() {
@@ -233,10 +243,18 @@ public class GameMenu {
 
         consoleRenderer.renderFromFile("uiTexts/your_profile.txt");
 
-        String name = String.format("Name: %s", user.getName());
-        // todo: more information
+        Integer bestScore = bestResultService.getBestOverallScore(user.getId());
 
-        console.print(name, 20, 20);
+        String horzBound = "+" + "-".repeat(22) + "+";
+        String name = String.format("Name: %s", user.getName());
+        String score = String.format("Your score: %d", bestScore);
+
+        consoleRenderer.renderFromFile("uiTexts/konek_tobey_big.txt", 80, 0);
+        int x = 20, y = 20;
+        console.print(horzBound, x, y++);
+        console.print(String.format("| %-20s |", name),  x,  y++);
+        console.print(String.format("| %-20s |", score), x, y++);
+        console.print(horzBound, x, y++);
 
         ProfileOption[] options = new ProfileOption[] {
                 ProfileOption.LOGOUT,
@@ -323,30 +341,35 @@ public class GameMenu {
         AttributedStyle[] topColors = new AttributedStyle[] {
                 AttributedStyle.DEFAULT.foreground(220), // gold
                 AttributedStyle.DEFAULT.foreground(159), // silver
-                AttributedStyle.DEFAULT.foreground(130), // bronze 130, 166
+                AttributedStyle.DEFAULT.foreground(130), // bronze
         };
 
         int idx = 0;
         for (UserScore score : topUserScores) {
-            AttributedStringBuilder asb = new AttributedStringBuilder();
+            AttributedStringBuilder sb = new AttributedStringBuilder();
 
-            asb.append("| ");
+            sb.append("| ");
 
+            AttributedStyle style;
             if (idx < topColors.length) {
-                asb.style(topColors[idx]);
+                style = topColors[idx];
             }
-
-            asb.append(String.format("%02d: %-20s", idx + 1, score.getUserName()));
-
-            asb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.WHITE));
-
-            asb.append(String.format(" %03d |", score.getTotalScore()));
+            else {
+                style = AttributedStyle.DEFAULT;
+            }
 
             if (curUserId != null && score.getUserId() == curUserId) {
-                asb.append("<-- its you!!");
+                style = style.italic().bold();
             }
 
-            console.print(asb, x, y);
+            sb.style(style);
+            sb.append(String.format("%02d: %-16s", idx + 1, score.getUserName()));
+
+            sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.WHITE));
+
+            sb.append(String.format(" %7d |", score.getTotalScore()));
+
+            console.print(sb, x, y);
 
             y++;
             idx++;

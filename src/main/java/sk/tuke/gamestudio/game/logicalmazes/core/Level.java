@@ -4,8 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public enum Level {
-    INTRODUCTION(1,"Level 1", Difficulty.EASY, "maps/level_1.txt"),
-    IDK_FOR_NOW(2,"Level 2", Difficulty.EASY, "maps/level_2.txt");
+    LEVEL1(1,"Level 1", Difficulty.EASY,   "levels/level_1.txt"),
+    LEVEL2(2,"Level 2", Difficulty.NORMAL, "levels/level_2.txt"),
+    LEVEL3(3,"Level 3", Difficulty.NORMAL, "levels/level_3.txt"),
+    LEVEL4(4,"Level 4", Difficulty.NORMAL, "levels/level_4.txt");
 
     public enum Difficulty {
         EASY, NORMAL, MEDIUM, HARD
@@ -65,6 +67,6 @@ public enum Level {
 
     @Override
     public String toString() {
-        return String.format("%-15s %-5s", title, difficulty);
+        return String.format("%-15s %-8s", title, difficulty);
     }
 }

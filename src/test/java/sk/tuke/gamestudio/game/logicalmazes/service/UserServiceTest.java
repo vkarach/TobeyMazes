@@ -16,23 +16,11 @@ public class UserServiceTest {
     }
 
     @Test
-    public void addUserToDBTest() {
-        String userName = UUID.randomUUID().toString();
-
-        assertFalse(userService.userExists(userName));
-
-        userService.createUser(userName);
-
-        assertTrue(userService.userExists(userName));
-
-        userService.deleteUserByName(userName); // cleanup
-    }
-
-    @Test
     public void deleteUserFromDBTest() {
         String userName = UUID.randomUUID().toString();
+        String password = UUID.randomUUID().toString();
 
-        userService.createUser(userName);
+        userService.createUser(userName, password);
 
         assertTrue(userService.userExists(userName));
 
@@ -41,10 +29,27 @@ public class UserServiceTest {
         assertFalse(userService.userExists(userName));
     }
 
+
     @Test
-    public void getUserIdByUserName() {
+    public void addUserToDBTest() {
         String userName = UUID.randomUUID().toString();
-        int userId = userService.createUser(userName);
+        String password = UUID.randomUUID().toString();
+
+        assertFalse(userService.userExists(userName));
+
+        userService.createUser(userName, password);
+
+        assertTrue(userService.userExists(userName));
+
+        userService.deleteUserByName(userName); // cleanup
+    }
+
+    @Test
+    public void getUserIdByUserNameTest() {
+        String userName = UUID.randomUUID().toString();
+        String password = UUID.randomUUID().toString();
+
+        int userId = userService.createUser(userName, password);
 
         assertTrue(userService.userExists(userName));
 
@@ -56,9 +61,27 @@ public class UserServiceTest {
     }
 
     @Test
+    public void getPasswordByUserIdTest() {
+        String userName = UUID.randomUUID().toString();
+        String password = UUID.randomUUID().toString();
+
+        int userId = userService.createUser(userName, password);
+
+        assertTrue(userService.userExists(userName));
+
+        String passwordFromDb = userService.getPasswordByUserId(userId);
+
+        assertEquals(password, passwordFromDb);
+
+        userService.deleteUserByName(userName); // cleanup
+    }
+
+    @Test
     public void userExistsTest() {
         String userName = "UserWIthSomeLowerAnDUpperCase";
-        userService.createUser(userName);
+        String password = UUID.randomUUID().toString();
+
+        userService.createUser(userName, password);
 
         assertTrue(userService.userExists(userName.toLowerCase()));
 
@@ -68,19 +91,25 @@ public class UserServiceTest {
     @Test
     public void getUserNameByUserIdTest() {
         String userName = UUID.randomUUID().toString();
-        int userId = userService.createUser(userName);
+        String password = UUID.randomUUID().toString();
+
+        int userId = userService.createUser(userName, password);
 
         assertTrue(userService.userExists(userName));
 
         String name = userService.getUserNameByUserId(userId);
 
         assertEquals(userName, name);
+
+        userService.deleteUserByName(userName); // cleanup
     }
 
     @Test
     public void generateSessionTest() {
         String userName = UUID.randomUUID().toString();
-        int userId = userService.createUser(userName);
+        String password = UUID.randomUUID().toString();
+
+        int userId = userService.createUser(userName, password);
 
         assertTrue(userService.userExists(userName));
 

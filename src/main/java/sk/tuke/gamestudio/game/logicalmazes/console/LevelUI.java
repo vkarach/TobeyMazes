@@ -80,23 +80,23 @@ public class LevelUI {
 
     public void renderHud(long startTime, int targetCount, int x, int y) {
         String timeString     = String.format(" %-10s", formatTimerString(startTime));
-        String targetCountStr = String.format(" %-10s", "   " + (targetCount > 0 ? targetCount: '✓') + ' ' + targetCh);
+        String targetCountStr = String.format(" %-10s", "   " + targetCount + ' ' + targetCh);
 
         String vBound = "+" + "-".repeat(11) + "+";
 
         console.print(vBound, x, y++, wallStyle); // todo just y++ in print
 
-        AttributedStringBuilder asb = new AttributedStringBuilder();
-        asb.style(wallStyle).append('|');
-        asb.style(textStyle).append(timeString);
-        asb.style(wallStyle).append('|');
-        console.print(asb, x, y++);
+        AttributedStringBuilder sb = new AttributedStringBuilder();
+        sb.style(wallStyle).append('|');
+        sb.style(textStyle).append(timeString);
+        sb.style(wallStyle).append('|');
+        console.print(sb, x, y++);
 
-        asb = new AttributedStringBuilder();
-        asb.style(wallStyle).append('|');
-        asb.style(textStyle).append(targetCountStr);
-        asb.style(wallStyle).append('|');
-        console.print(asb, x, y++);
+        sb = new AttributedStringBuilder();
+        sb.style(wallStyle).append('|');
+        sb.style(textStyle).append(targetCountStr);
+        sb.style(wallStyle).append('|');
+        console.print(sb, x, y++);
 
         console.print(vBound, x, y, wallStyle);
     }

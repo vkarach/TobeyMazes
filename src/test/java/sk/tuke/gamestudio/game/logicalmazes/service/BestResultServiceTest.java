@@ -24,7 +24,9 @@ public class BestResultServiceTest {
     @Test
     public void updateAndGetBestTimeTest() {
         String userName = UUID.randomUUID().toString();
-        int userId = userService.createUser(userName);
+        String password = UUID.randomUUID().toString();
+
+        int userId = userService.createUser(userName, password);
 
         assertTrue(userService.userExists(userName));
 
@@ -47,7 +49,9 @@ public class BestResultServiceTest {
     @Test
     public void updateAndGetBestScoreTest() {
         String userName = UUID.randomUUID().toString();
-        int userId = userService.createUser(userName);
+        String password = UUID.randomUUID().toString();
+
+        int userId = userService.createUser(userName, password);
 
         assertTrue(userService.userExists(userName));
 
@@ -73,7 +77,9 @@ public class BestResultServiceTest {
 
         for (int i = 0; i < 10; i++) {
             String userName = UUID.randomUUID().toString();
-            int userId = userService.createUser(userName);
+            String password = UUID.randomUUID().toString();
+
+            int userId = userService.createUser(userName, password);
 
             assertTrue(userService.userExists(userName));
 
