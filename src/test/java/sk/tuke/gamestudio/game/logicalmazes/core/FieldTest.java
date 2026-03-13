@@ -12,8 +12,8 @@ public class FieldTest {
 
     public FieldTest() {
         MapParser.Result result = new MapParser().parseMap("maps/test_map.txt");
-        this.field = result.mapField;
-        this.player = result.player;
+        this.field = result.mapField();
+        this.player = result.player();
     }
 
     @Test

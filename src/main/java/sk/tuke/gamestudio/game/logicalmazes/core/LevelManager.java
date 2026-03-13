@@ -2,8 +2,8 @@ package sk.tuke.gamestudio.game.logicalmazes.core;
 
 
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
+import sk.tuke.gamestudio.game.logicalmazes.console.ConsoleRenderer;
 import sk.tuke.gamestudio.game.logicalmazes.console.LevelUI;
-import sk.tuke.gamestudio.service.impl.BestResultServiceJDBC;
 import sk.tuke.gamestudio.service.BestResultService;
 
 public class LevelManager {
@@ -11,30 +11,22 @@ public class LevelManager {
     private final LevelUI levelUI;
     private final MapParser mapParser;
     private final BestResultService bestResultService;
+    private final ConsoleRenderer consoleRenderer;
 
     private Level currentLevel;
     private Field gameField;
     private Player player;
     private int targetCount;
 
-    public LevelManager(Console console) {
+    public LevelManager(Console console, BestResultService bestResultService) {
         this.console = console;
         this.levelUI = new LevelUI(console);
         this.mapParser = new MapParser();
-        this.bestResultService = new BestResultServiceJDBC();
+        this.bestResultService = bestResultService;
+        this.consoleRenderer = new ConsoleRenderer(console);
     }
 
-    public static class LevelResult {
-        public GameState gameState;
-        public int stepCount;
-        public long playedTimeNs;
-
-        public LevelResult(GameState gameState, int stepCount, long playedTimeNs) {
-            this.gameState = gameState;
-            this.stepCount = stepCount;
-            this.playedTimeNs = playedTimeNs;
-        }
-    }
+    public record LevelResult(LevelState levelState, int stepCount, long playedTimeNs) {}
 
     private void cleanup() {
         currentLevel = null;
@@ -47,8 +39,6 @@ public class LevelManager {
         currentLevel = level;
 
         loadLevel(currentLevel.getFilepath());
-
-//        new ConsoleRenderer(console);
 
         LevelResult result = startLevel();
 
@@ -96,31 +86,46 @@ public class LevelManager {
 
     private void loadLevel(String filepath) {
         MapParser.Result result = mapParser.parseMap(filepath);
-        this.gameField = result.mapField;
-        this.player = result.player;
-        this.targetCount = result.targetCount;
+        this.gameField = result.mapField();
+        this.player = result.player();
+        this.targetCount = result.targetCount();
     }
 
     private LevelResult startLevel() {
         long startTime = System.nanoTime();
         long elapsedNs = 0;
         int x = (console.getWidth() / 2) - (gameField.getRowCount() * 3);
-        int y = 15;
+        int y = 20;
+        int lowerBoundPad = gameField.getRowCount() * 2;
+        int hudPadX = gameField.getRowCount() * 3 + 5;
+        int konekTobeyPadY = lowerBoundPad - consoleRenderer.getRenderFromFileSize("uiTexts/konek_tobey.txt").height() + 1;
+
+        console.clear();
+        consoleRenderer.renderFromFile("uiTexts/game_title.txt");
+        consoleRenderer.renderFromFile(
+                "uiTexts/konek_tobey.txt",
+                x + hudPadX,
+                y + konekTobeyPadY,
+                true
+        );
 
         int stepCont = 0;
 
         GameController controller = new GameController(gameField, player);
 
-        console.clear();
 
-        GameState gameState = GameState.PLAYING;
-        while (gameState == GameState.PLAYING) {
+        LevelState levelState = LevelState.PLAYING;
+        while (levelState == LevelState.PLAYING) {
             elapsedNs = System.nanoTime() - startTime;
 
             InputType inputType = console.readAction();
 
             if (inputType == InputType.QUIT) {
-                gameState = GameState.EXITED;
+                levelState = LevelState.EXITED;
+            }
+            if (inputType == InputType.RELOAD) {
+                loadLevel(currentLevel.getFilepath());
+                return startLevel();
             }
             else if (inputType != InputType.NONE) {
                 if (controller.onInput(Direction.InputToDirection(inputType))) {
@@ -130,23 +135,22 @@ public class LevelManager {
 
             if (gameField.takeTarget(player)) {
                 if (--targetCount == 0) {
-                    gameState = GameState.SOLVED;
+                    levelState = LevelState.SOLVED;
                 }
             }
 
-            String str  = String.format(
-                    "Points: %04d, steps: %02d",
+            levelUI.renderHud(
+                    startTime,
+                    targetCount,
                     computePoints(elapsedNs, stepCont, currentLevel.getDifficulty()),
-                    stepCont
+                    x + hudPadX, y
             );
-            console.print(str, x, y - 1);
-            levelUI.renderHud(startTime, targetCount, x + gameField.getRowCount() * 3 + 5, y);
             levelUI.renderGameField(gameField, player, x, y);
-
+            levelUI.renderTips(x, y + lowerBoundPad + 2);
         }
         controller.shutdown();
 
-        return new LevelResult(gameState, stepCont, elapsedNs);
+        return new LevelResult(levelState, stepCont, elapsedNs);
     }
 
     public boolean checkAndUpdateBestTime(int userId, int levelId, int playedTimeMs) {

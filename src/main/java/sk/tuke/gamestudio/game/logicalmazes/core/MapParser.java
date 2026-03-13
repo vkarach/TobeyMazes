@@ -4,17 +4,8 @@ import static sk.tuke.gamestudio.game.logicalmazes.core.FileReader.readFileLines
 import java.util.List;
 
 public class MapParser {
-    public static class Result {
-        public Field mapField;
-        public Player player;
-        public int targetCount;
+    public record Result(Field mapField, Player player, int targetCount) {}
 
-        public Result(Field field, Player player, int targetCount) {
-            this.mapField = field;
-            this.player = player;
-            this.targetCount = targetCount;
-        }
-    }
     private Player player;      // maybe add function parsePlayer
     private int targetCount;    // maybe add function parseTargetCount
 

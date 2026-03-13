@@ -1,0 +1,7 @@
+loading   END
+FRAME
+loading.  END
+FRAME
+loading.. END
+FRAME
+loading...END

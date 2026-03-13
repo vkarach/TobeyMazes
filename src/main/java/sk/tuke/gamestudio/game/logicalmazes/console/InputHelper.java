@@ -8,8 +8,11 @@ public class InputHelper {
     }
 
     public String getUserInput(String prompt, int x, int y) {
-        int clearLen = 80;
+        return getUserInput(prompt, x, y, 80);
+    }
 
+    public String getUserInput(String prompt, int x, int y, int clearLen) {
+        console.print(" ".repeat(50), x + prompt.length(), y);
         console.setCursorPosition(x, y);
 
         console.exitRawMode();

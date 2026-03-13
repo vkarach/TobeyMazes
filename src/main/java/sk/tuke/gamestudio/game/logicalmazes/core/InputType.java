@@ -6,6 +6,7 @@ public enum InputType {
     LEFT,
     RIGHT,
     ENTER,
+    RELOAD,
     QUIT,
     NONE
 }

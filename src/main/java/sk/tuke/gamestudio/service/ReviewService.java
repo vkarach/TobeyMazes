@@ -1,8 +1,6 @@
 package sk.tuke.gamestudio.service;
 
 
-import sk.tuke.gamestudio.entity.Comment;
-import sk.tuke.gamestudio.entity.Rating;
 import sk.tuke.gamestudio.entity.Review;
 import sk.tuke.gamestudio.service.exception.ReviewException;
 

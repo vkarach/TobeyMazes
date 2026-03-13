@@ -78,27 +78,36 @@ public class LevelUI {
         }
     }
 
-    public void renderHud(long startTime, int targetCount, int x, int y) {
-        String timeString     = String.format(" %-10s", formatTimerString(startTime));
-        String targetCountStr = String.format(" %-10s", "   " + targetCount + ' ' + targetCh);
-
+    public void renderHud(long startTime, int targetCount, int points, int x, int y) {
         String vBound = "+" + "-".repeat(11) + "+";
+        console.print(vBound, x, y++, wallStyle);
 
-        console.print(vBound, x, y++, wallStyle); // todo just y++ in print
+        String[] toPrint = new String[] {
+            String.format(" %-10s", formatTimerString(startTime)),
+            String.format(" %-10s", "🏆 " + points),
+            String.format(" %-10s", " " + targetCount + ' ' + targetCh)
+        };
 
+        for (String s : toPrint) {
+            AttributedStringBuilder sb = new AttributedStringBuilder();
+            sb.style(wallStyle).append('|');
+            sb.style(textStyle).append(s);
+            sb.style(wallStyle).append('|');
+            console.print(sb, x, y++);
+        }
+        console.print(vBound, x, y++, wallStyle);
+
+    }
+
+    public void renderTips(int x, int y) { // todo: do this
         AttributedStringBuilder sb = new AttributedStringBuilder();
-        sb.style(wallStyle).append('|');
-        sb.style(textStyle).append(timeString);
-        sb.style(wallStyle).append('|');
-        console.print(sb, x, y++);
-
-        sb = new AttributedStringBuilder();
-        sb.style(wallStyle).append('|');
-        sb.style(textStyle).append(targetCountStr);
-        sb.style(wallStyle).append('|');
-        console.print(sb, x, y++);
-
-        console.print(vBound, x, y, wallStyle);
+        sb.style(crossWallStyle).append("←↓↑→");
+        sb.style(textStyle).append(" move · ");
+        sb.style(crossWallStyle).append("Q");
+        sb.style(textStyle).append(" - Quit · ");
+        sb.style(crossWallStyle).append("R");
+        sb.style(textStyle).append(" - Restart");
+        console.print(sb, x, y);
     }
 
     public void renderGameField(Field mapField, Player player, int x, int y) {

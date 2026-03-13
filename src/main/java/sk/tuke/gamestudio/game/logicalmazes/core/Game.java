@@ -22,18 +22,16 @@ public class Game {
 
     public Game(Console console) {
         this.console = console;
-        this.levelManager = new LevelManager(console);
+        this.levelManager = new LevelManager(console, new BestResultServiceJDBC());
         this.gameMenu = new GameMenu(console, new BestResultServiceJDBC());
         this.authService = new AuthService(new UserServiceJDBC());
         this.authConsole = new AuthConsole(console, authService);
         this.currentUser = authService.loadUserSession();
         this.reviewService = new ReviewServiceJDBC();
         new LevelServiceJDBC().syncLevelsFromEnum(Level.class);
-//        Thread scaleThread = new Thread(() -> console.warnIfTerminalTooSmall(43));
-//        scaleThread.setDaemon(true);
-//        scaleThread.start();
-//        gameMenu.reviewPage(currentUser, reviewService);
-//        gameMenu.leaderboardPage(currentUser);
+
+//        levelManager.playLevel(Level.LEVEL3);
+//        gameMenu.winPage( 2_500_000_000L, 369, true, true);
     }
 
     public void launch() {
@@ -66,30 +64,30 @@ public class Game {
 
             LevelManager.LevelResult playedResult = levelManager.playLevel(level);
 
-            if (playedResult.gameState == GameState.SOLVED) {
-                int points = levelManager.computePoints(
-                        playedResult.playedTimeNs,
-                        playedResult.stepCount,
+            if (playedResult.levelState() == LevelState.SOLVED) {
+                int score = levelManager.computePoints(
+                        playedResult.playedTimeNs(),
+                        playedResult.stepCount(),
                         level.getDifficulty()
                 );
 
                 boolean isTimeRecord = false;
                 if (currentUser != null) {
-                 isTimeRecord = levelManager.checkAndUpdateBestTime( // it's only time, need points?
-                            currentUser.getId(),
+                 isTimeRecord = levelManager.checkAndUpdateBestTime(
+                            currentUser.id(),
                             level.getId(),
-                            (int) (playedResult.playedTimeNs / 1_000_000)
+                            (int) (playedResult.playedTimeNs() / 1_000_000)
                     );
                 }
                 boolean isScoreRecord = false;
                 if (currentUser != null) {
                     isScoreRecord = levelManager.checkAndUpdateBestScore(
-                            currentUser.getId(),
+                            currentUser.id(),
                             level.getId(),
-                            points
+                            score
                     );
                 }
-                gameMenu.winPage(playedResult.playedTimeNs, points, isTimeRecord, isScoreRecord);
+                gameMenu.winPage(playedResult.playedTimeNs(), score, isTimeRecord, isScoreRecord);
             }
         }
     }
@@ -108,8 +106,7 @@ public class Game {
             while (currentUser == null && selected != GameMenu.ProfileOption.BACK);
         }
         if (currentUser != null) {
-            GameMenu.ProfileOption choose = gameMenu.profilePage(currentUser);
-            if (choose == GameMenu.ProfileOption.LOGOUT) {
+            if (gameMenu.profilePage(currentUser) == GameMenu.ProfileOption.LOGOUT) {
                 authService.deleteSession();
                 currentUser = null;
             }

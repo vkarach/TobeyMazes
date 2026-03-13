@@ -24,7 +24,9 @@ public class AuthConsole {
     private String[] getNamePassword() {
         int x = 30, y = 20;
         while (true) {
-            String name = inputHelper.getUserInput("your name (Ctrl+D exit): ", x, y);
+            console.print(" ".repeat(50), x, y + 2);
+
+            String name = inputHelper.getUserInput("your name (Ctrl+D exit): ", x, y, 0);
             if (name == null) { // interrupted by a user
                 console.enterRawMode();
                 return null;
@@ -36,14 +38,17 @@ public class AuthConsole {
             }
 
             while (true) {
-                String password = inputHelper.getUserInput("password  (Ctrl+D back): ", x, y);
+                String password = inputHelper.getUserInput("password  (Ctrl+D back): ", x, y + 2, 0);
                 if (password == null) {
                     break; // back to name input
                 }
                 String passwordErrorMsg = inputHelper.validateInput(password, 3, 16);
                 if (passwordErrorMsg != null) {
-                    notifier.showError(passwordErrorMsg, x, y + 2);
+                    notifier.showError(passwordErrorMsg, x, y + 4);
                     continue;
+                }
+                for (int i = 0; i < 5; i++) {
+                    console.print(" ".repeat(50), x, y + i);
                 }
                 return new String[] { name, password };
             }
@@ -64,9 +69,11 @@ public class AuthConsole {
         String password = namePassword[1];
 
         int x = 20, y = 20;
-        console.print("loading...", x, y);
+        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 50, x, y); // can overwrite user input need to check
 
         User user = authService.register(name, password);
+
+        loadAnim.interrupt();
         if (user == null) {
             notifier.showError("User with this name already exists", x, y);
             register();
@@ -75,7 +82,7 @@ public class AuthConsole {
         }
 
         AttributedStringBuilder sb = new AttributedStringBuilder();
-        sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.getName());
+        sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.name());
         sb.style(AttributedStyle.DEFAULT).append(" now you registered!");
         console.print(sb, x, y);
 
@@ -97,9 +104,11 @@ public class AuthConsole {
         String password = namePassword[1];
 
         int x = 20, y = 20;
-        console.print("loading...", x, y);
+        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 50, x, y);
 
         User user = authService.login(name, password);
+
+        loadAnim.interrupt();
         if (user == null) {
             notifier.showError("Wrong name or password", x, y);
             login();
@@ -107,7 +116,7 @@ public class AuthConsole {
         }
 
         AttributedStringBuilder sb = new AttributedStringBuilder();
-        sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.getName());
+        sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.name());
         sb.style(AttributedStyle.DEFAULT).append(", love to see ya again :)");
         console.print(sb, x, y);
 

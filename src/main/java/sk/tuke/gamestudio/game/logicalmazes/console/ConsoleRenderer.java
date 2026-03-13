@@ -11,22 +11,15 @@ public class ConsoleRenderer {
     private final Console console;
     private final Map<String, String> replacers = new HashMap<>();
 
-    public ConsoleRenderer(Console console) {
+    public ConsoleRenderer(Console console) { // todo reverse
         this.console = console;
         replacers.put("\\033", "\033");
         replacers.put("YELLOW", "\033[33m");
         replacers.put("OFF", "\033[0m");
+        replacers.put("END", "");
     }
 
-    public static class RenderSize {
-        public int width;
-        public int height;
-
-        public RenderSize(int width, int height) {
-            this.width = width;
-            this.height = height;
-        }
-    }
+    public record RenderSize(int width, int height) {}
 
     public RenderSize getRenderFromFileSize(String filepath) {
         List<String> lines = FileReader.readFileLines(filepath);
@@ -53,14 +46,21 @@ public class ConsoleRenderer {
     }
 
     public void renderFromFile(String filepath) {
-        renderFromFile(filepath, 0, 0);
+        renderFromFile(filepath, 0, 0, false);
     }
 
     public void renderFromFile(String filepath, int x, int y) {
+        renderFromFile(filepath, x, y, false);
+    }
+
+    public void renderFromFile(String filepath, int x, int y, boolean reverse) {
         List<String> lines = FileReader.readFileLines(filepath);
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
             line = parseString(line);
+            if (reverse) {
+                line = mirrorLine(line);
+            }
             console.print(line, x, y + i);
         }
     }
@@ -78,6 +78,27 @@ public class ConsoleRenderer {
         animationThread.setDaemon(true);
         animationThread.start();
         return animationThread;
+    }
+
+    private String mirrorLine(String line) {
+        StringBuilder reversed = new StringBuilder(line).reverse();
+        for (int i = 0; i < reversed.length(); i++) {
+            char c = reversed.charAt(i);
+
+            switch (c) {
+                case '/': reversed.setCharAt(i, '\\'); break;
+                case '\\': reversed.setCharAt(i, '/'); break;
+                case '(': reversed.setCharAt(i, ')'); break;
+                case ')': reversed.setCharAt(i, '('); break;
+                case '<': reversed.setCharAt(i, '>'); break;
+                case '>': reversed.setCharAt(i, '<'); break;
+                case '[': reversed.setCharAt(i, ']'); break;
+                case ']': reversed.setCharAt(i, '['); break;
+                case '{': reversed.setCharAt(i, '}'); break;
+                case '}': reversed.setCharAt(i, '{'); break;
+            }
+        }
+        return reversed.toString();
     }
 
     private void renderAnimation(List<List<String>> frames, int frameTimeMs, int x, int y) {
@@ -103,6 +124,7 @@ public class ConsoleRenderer {
         List<String> current = new ArrayList<>();
 
         for (String line : lines) {
+            line = parseString(line);
             if (line != null && line.trim().equals("FRAME")) {
                 if (!current.isEmpty()) {
                     frames.add(current);

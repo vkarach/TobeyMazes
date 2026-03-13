@@ -1,11 +1,8 @@
 package sk.tuke.gamestudio.service.impl;
 
-import sk.tuke.gamestudio.entity.Comment;
-import sk.tuke.gamestudio.entity.Rating;
 import sk.tuke.gamestudio.entity.Review;
 import sk.tuke.gamestudio.service.ReviewService;
 import sk.tuke.gamestudio.service.exception.BestResultException;
-import sk.tuke.gamestudio.service.exception.ReviewException;
 
 import java.sql.*;
 
@@ -30,9 +27,9 @@ public class ReviewServiceJDBC implements ReviewService {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(INSERT_REVIEW)
         ) {
-            statement.setInt(1, review.getUserId());
-            statement.setInt(2, review.getRating());
-            statement.setString(3, review.getComment());
+            statement.setInt(1, review.userId());
+            statement.setInt(2, review.rating());
+            statement.setString(3, review.comment());
             statement.executeUpdate();
         }
         catch (SQLException e) {

@@ -95,7 +95,7 @@ public class GameMenu {
     public MenuOption launch() {
         console.clear();
 
-        consoleRenderer.renderFromFile("uiTexts/game_name.txt");
+        consoleRenderer.renderFromFile("uiTexts/game_title.txt");
 
         MenuOption[] actions = new MenuOption[]{
                 MenuOption.START,
@@ -106,7 +106,7 @@ public class GameMenu {
                 MenuOption.EXIT,
         };
 
-        MenuOption result = selectHorizontal(actions);
+        MenuOption result = select(actions);
 
         return result == null ? MenuOption.EXIT : result;
     }
@@ -117,7 +117,7 @@ public class GameMenu {
             return options;
         }
 
-        Map<Integer, Integer> bestTimesByLevel = bestResultService.getBestTimesByUser(currentUser.getId());
+        Map<Integer, Integer> bestTimesByLevel = bestResultService.getBestTimesByUser(currentUser.id());
 
         for (LevelOption option : options) {
             if (option.getLevel() == null) continue;
@@ -148,7 +148,7 @@ public class GameMenu {
         if (currentUser == null) {
             console.print("Login/Register to save your best time", selectUIX + 2, 20);
         }
-        LevelOption selected = selectHorizontal(options, selectUIX, 22);
+        LevelOption selected = select(options, selectUIX, 22);
 
         if (selected == null || selected == LevelOption.BACK) {
             return null;
@@ -179,12 +179,12 @@ public class GameMenu {
             return;
         }
 
-        Review review = reviewService.getReview(currentUser.getId());
+        Review review = reviewService.getReview(currentUser.id());
         if (review != null) {
-            String reviewText = String.format("%d★ '%s'", review.getRating(), review.getComment() !=null ? review.getComment() : "without comment");
+            String reviewText = String.format("%d★ '%s'", review.rating(), review.comment() !=null ? review.comment() : "without comment");
             console.print("You already rated the game:", selectUIX, y);
             console.print(reviewText, selectUIX, y + 1);
-            String selected = selectHorizontal(new String[] { "Edit", "Back" }, selectUIX, y + 3);
+            String selected = select(new String[] { "Edit", "Back" }, selectUIX, y + 3);
             if (selected == null || selected.equals("Back")) return;
         }
         console.print("Rate the game ←→", selectUIX, y - 1);
@@ -200,7 +200,7 @@ public class GameMenu {
         String commentText;
         while (true) {
             commentText = inputHelper.getUserInput("Comment (optional): ", selectUIX, y + 1);
-            String error = inputHelper.validateInput(commentText, "", 6, 100);
+            String error = inputHelper.validateInput(commentText, "", 6, 100); // todo: check if input null or '' and handle separately
             if (error != null) {
                 notifier.showError(error, selectUIX, y + 2);
                 continue;
@@ -208,7 +208,7 @@ public class GameMenu {
             break;
         }
 
-        reviewService.addOrUpdateReview(new Review(currentUser.getId(), ratingValue, commentText));
+        reviewService.addOrUpdateReview(new Review(currentUser.id(), ratingValue, commentText));
 
         console.print(commentText, selectUIX, y + 1);
         console.print("Thank you for your feedback!", selectUIX, y + 3); // update overall rating ?
@@ -235,7 +235,7 @@ public class GameMenu {
             ProfileOption.BACK,
         };
 
-        return selectHorizontal(options);
+        return select(options);
     }
 
     public ProfileOption profilePage(User user) {
@@ -243,10 +243,10 @@ public class GameMenu {
 
         consoleRenderer.renderFromFile("uiTexts/your_profile.txt");
 
-        Integer bestScore = bestResultService.getBestOverallScore(user.getId());
+        Integer bestScore = bestResultService.getBestOverallScore(user.id());
 
         String horzBound = "+" + "-".repeat(22) + "+";
-        String name = String.format("Name: %s", user.getName());
+        String name = String.format("Name: %s", user.name());
         String score = String.format("Your score: %d", bestScore);
 
         consoleRenderer.renderFromFile("uiTexts/konek_tobey_big.txt", 80, 0);
@@ -261,11 +261,11 @@ public class GameMenu {
                 ProfileOption.BACK
         };
 
-        return selectHorizontal(options, selectUIX, 25);
+        return select(options, selectUIX, 25);
     }
 
-    public void winPage(long playedTime, int points, boolean isTimeRecord, boolean isScoreRecord) {
-        Duration duration = Duration.ofNanos(playedTime);
+    public void winPage(long playedTimeNs, int points, boolean isTimeRecord, boolean isScoreRecord) {
+        Duration duration = Duration.ofNanos(playedTimeNs);
 
         long minutes = duration.toMinutes();
         long seconds = duration.minusMinutes(minutes).toSeconds();
@@ -276,23 +276,42 @@ public class GameMenu {
 
         console.clear();
 
-        console.print(String.format("you win in %02d:%02d:%02d and got %d points :)\n",  minutes, seconds, millis, points));
+        consoleRenderer.renderFromFile("uiTexts/level_complete.txt");
+        int x = 10;
+        int y = 20;
+
+        consoleRenderer.renderFromFile("uiTexts/megamind.txt", 60, y);
+
+        console.print("+---------------------------+", x, y);
+        console.print("|        MEGA   MIND        |", x, y + 1);
+        console.print("+---------------------------+", x, y + 2);
+
+        AttributedStringBuilder sb = new AttributedStringBuilder();
+
+        sb.append("| Time: ");
+        if (minutes > 0) {
+            sb.append((char) minutes).append(":");
+        }
+        sb.append(String.format("%02d:%02d", seconds, millis));
+        console.print(sb, x, y + 4);
+
+        console.print(String.format("| Points: %d", points), x, y + 5);
 
         if (isTimeRecord) {
-            console.print("Its a new time record record!!!", 0, 1);
+            console.print("| NEW TIME RECORD!", x, y + 7);
         }
+
         if (isScoreRecord) {
-            console.print("Its a new score record record!!!", 0, 2);
+            console.print("| NEW SCORE RECORD!", x, y + 8);
         }
-//      Thread anim = consoleRenderer.renderAnimation("animations/dansing.txt", 35, 55, 0);
 
-        fakeChoose(30, 30);
+        console.print("+---------------------------+", x, y + 10);
 
-//        if (anim != null) anim.interrupt();
+        fakeChoose(x, y + 11);
     }
 
     public void leaderboardPage(User user) {
-        Integer curUserId = user != null ? user.getId() : null;
+        Integer curUserId = user != null ? user.id() : null;
 
         console.clear();
         final String[] scrollStart = new String[] {
@@ -311,7 +330,7 @@ public class GameMenu {
 
         ConsoleRenderer.RenderSize size = consoleRenderer.getRenderFromFileSize("uiTexts/trophy.txt");
 //        consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, 10);
-        consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, console.getHeight() - size.height);
+        consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, console.getHeight() - size.height());
 
         List<UserScore> topUserScores = bestResultService.getTopByScore();
         if (topUserScores.isEmpty()) {
@@ -319,7 +338,7 @@ public class GameMenu {
             fakeChoose();
             return;
         }
-        String bestUserName = topUserScores.getFirst().getUserName();
+        String bestUserName = topUserScores.getFirst().userName();
 
 
         int leftPadding = (24 - bestUserName.length()) / 2;
@@ -358,16 +377,16 @@ public class GameMenu {
                 style = AttributedStyle.DEFAULT;
             }
 
-            if (curUserId != null && score.getUserId() == curUserId) {
+            if (curUserId != null && score.userId() == curUserId) {
                 style = style.italic().bold();
             }
 
             sb.style(style);
-            sb.append(String.format("%02d: %-16s", idx + 1, score.getUserName()));
+            sb.append(String.format("%02d: %-16s", idx + 1, score.userName()));
 
             sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.WHITE));
 
-            sb.append(String.format(" %7d |", score.getTotalScore()));
+            sb.append(String.format(" %7d |", score.totalScore()));
 
             console.print(sb, x, y);
 
@@ -403,11 +422,11 @@ public class GameMenu {
         }
     }
 
-    private <T> T selectHorizontal(T[] items) {
-        return selectHorizontal(items, selectUIX, 20);
+    private <T> T select(T[] items) {
+        return select(items, selectUIX, 20);
     }
 
-    private <T> T selectHorizontal(T[] items, int x, int y) {
+    private <T> T select(T[] items, int x, int y) {
         int longest = getLongest(items);
 
         int choose = 0;
@@ -459,7 +478,7 @@ public class GameMenu {
             }
 
             for (int i = 0; i < 5; i++) {
-                console.print(rateEmoji[rating], x + 11, y); // todo: probably y and stars y+1
+                console.print(rateEmoji[rating], x + 11, y);
                 if (i < rating) {
                     console.print(fullStar, x + i * 2, y);
                 }

@@ -91,7 +91,7 @@ public class BestResultServiceTest {
 
         List<UserScore> actualBestUsers = bestResultService.getTopByScore();
 
-        expectedBestUsers.sort((a, b) -> Integer.compare(b.getTotalScore(), a.getTotalScore()));
+        expectedBestUsers.sort((a, b) -> Integer.compare(b.totalScore(), a.totalScore()));
 
         assertEquals(expectedBestUsers.size(), actualBestUsers.size());
 
@@ -99,19 +99,19 @@ public class BestResultServiceTest {
             UserScore expected = expectedBestUsers.get(i);
             UserScore actual = actualBestUsers.get(i);
 
-            assertEquals(expected.getUserId(), actual.getUserId());
-            assertEquals(expected.getUserName(), actual.getUserName());
-            assertEquals(expected.getTotalScore(), actual.getTotalScore());
+            assertEquals(expected.userId(), actual.userId());
+            assertEquals(expected.userName(), actual.userName());
+            assertEquals(expected.totalScore(), actual.totalScore());
         }
 
         for (int i = 0; i < actualBestUsers.size() - 1; i++) {
             assertTrue(
-                    actualBestUsers.get(i).getTotalScore() >= actualBestUsers.get(i + 1).getTotalScore()
+                    actualBestUsers.get(i).totalScore() >= actualBestUsers.get(i + 1).totalScore()
             );
         }
 
         for (int i = 0; i < 10; i++) {
-            userService.deleteUserByName(expectedBestUsers.get(i).getUserName());
+            userService.deleteUserByName(expectedBestUsers.get(i).userName());
         }
     }
 }

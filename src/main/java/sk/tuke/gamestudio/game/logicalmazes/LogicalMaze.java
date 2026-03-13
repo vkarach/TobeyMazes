@@ -1,7 +1,7 @@
 package sk.tuke.gamestudio.game.logicalmazes;
 
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
-import sk.tuke.gamestudio.game.logicalmazes.core.*;
+import sk.tuke.gamestudio.game.logicalmazes.core.Game;
 
 public class LogicalMaze {
     public static void main(String[] args) {

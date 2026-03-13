@@ -92,10 +92,11 @@ public class Console {
         }
     }
 
-    public InputType readAction() {
+    public InputType readAction() { // todo: upper case
         int ch = readInput(50);
 
         if (ch == 'q' || ch == -1 || ch == 4) return InputType.QUIT;
+        else if (ch == 'r') return InputType.RELOAD;
         else if (ch == '\r' || ch == '\n') return InputType.ENTER;
         if (ch != 27) return InputType.NONE; // not ESC
 
