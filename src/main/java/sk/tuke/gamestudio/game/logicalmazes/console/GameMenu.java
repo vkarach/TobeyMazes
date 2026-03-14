@@ -157,6 +157,14 @@ public class GameMenu {
         return selected.getLevel();
     }
 
+    private void printRating(ReviewService reviewService, int x, int y) {
+        float overallRating = reviewService.getOverallRating();
+        String ratingText = String.format("Overall rating: %s",
+                overallRating > 0 ? String.format("%.2f", overallRating) : "no one rated yet"
+        );
+        console.print(ratingText, x, y);
+    }
+
     public void reviewPage(User currentUser, ReviewService reviewService) {
         console.clear();
 
@@ -164,14 +172,9 @@ public class GameMenu {
         consoleRenderer.renderFromFile("uiTexts/stars.txt", 120, 0);
         consoleRenderer.renderFromFile("uiTexts/stars.txt", 120, 15);
 
-        float overallRating = reviewService.getOverallRating();
-
         int y = 21;
 
-        String ratingText = String.format("Overall rating: %s",
-                overallRating > 0 ? String.format("%.2f", overallRating) : "no one rated yet"
-        );
-            console.print(ratingText, 65, y - 1);
+        printRating(reviewService, 65, y - 1);
 
         if (currentUser == null) {
             console.print("Login to rate the game", selectUIX, y);
@@ -181,7 +184,7 @@ public class GameMenu {
 
         Review review = reviewService.getReview(currentUser.id());
         if (review != null) {
-            String reviewText = String.format("%d★ '%s'", review.rating(), review.comment() !=null ? review.comment() : "without comment");
+            String reviewText = String.format("%d★ %s", review.rating(), !review.comment().isEmpty() ? review.comment() : "without comment");
             console.print("You already rated the game:", selectUIX, y);
             console.print(reviewText, selectUIX, y + 1);
             String selected = select(new String[] { "Edit", "Back" }, selectUIX, y + 3);
@@ -200,6 +203,12 @@ public class GameMenu {
         String commentText;
         while (true) {
             commentText = inputHelper.getUserInput("Comment (optional): ", selectUIX, y + 1);
+            if (commentText == null) {
+                commentText = "";
+            }
+            if (commentText.isEmpty()) {
+                break;
+            }
             String error = inputHelper.validateInput(commentText, "", 6, 100); // todo: check if input null or '' and handle separately
             if (error != null) {
                 notifier.showError(error, selectUIX, y + 2);
@@ -211,6 +220,9 @@ public class GameMenu {
         reviewService.addOrUpdateReview(new Review(currentUser.id(), ratingValue, commentText));
 
         console.print(commentText, selectUIX, y + 1);
+
+        printRating(reviewService, 65, y - 1);
+
         console.print("Thank you for your feedback!", selectUIX, y + 3); // update overall rating ?
         fakeChoose(selectUIX, y + 5);
     }
@@ -298,11 +310,11 @@ public class GameMenu {
         console.print(String.format("| Points: %d", points), x, y + 5);
 
         if (isTimeRecord) {
-            console.print("| NEW TIME RECORD!", x, y + 7);
+            console.print("| BEAT YOUR BEST TIME!", x, y + 7);
         }
 
         if (isScoreRecord) {
-            console.print("| NEW SCORE RECORD!", x, y + 8);
+            console.print("| NEW SCORE RECORD!", x, y + 8); // todo: better than only text
         }
 
         console.print("+---------------------------+", x, y + 10);

@@ -5,10 +5,8 @@ import sk.tuke.gamestudio.game.logicalmazes.console.AuthConsole;
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
 import sk.tuke.gamestudio.service.ReviewService;
-import sk.tuke.gamestudio.service.impl.BestResultServiceJDBC;
-import sk.tuke.gamestudio.service.impl.LevelServiceJDBC;
-import sk.tuke.gamestudio.service.impl.ReviewServiceJDBC;
-import sk.tuke.gamestudio.service.impl.UserServiceJDBC;
+import sk.tuke.gamestudio.service.impl.*;
+import sk.tuke.gamestudio.service.AuthService;
 
 public class Game {
     private final Console console;
@@ -24,9 +22,9 @@ public class Game {
         this.console = console;
         this.levelManager = new LevelManager(console, new BestResultServiceJDBC());
         this.gameMenu = new GameMenu(console, new BestResultServiceJDBC());
-        this.authService = new AuthService(new UserServiceJDBC());
+        this.authService = new AuthServiceImpl(new UserServiceJDBC());
         this.authConsole = new AuthConsole(console, authService);
-        this.currentUser = authService.loadUserSession();
+        this.currentUser = authService.getUserBySessionToken();
         this.reviewService = new ReviewServiceJDBC();
         new LevelServiceJDBC().syncLevelsFromEnum(Level.class);
 

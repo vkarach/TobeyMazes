@@ -1,7 +1,8 @@
-package sk.tuke.gamestudio.game.logicalmazes.core;
+package sk.tuke.gamestudio.service.impl;
 
 import org.mindrot.jbcrypt.BCrypt;
 import sk.tuke.gamestudio.entity.User;
+import sk.tuke.gamestudio.service.AuthService;
 import sk.tuke.gamestudio.service.UserService;
 
 import java.io.IOException;
@@ -10,14 +11,14 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class AuthService {
+public class AuthServiceImpl implements AuthService {
     private final UserService userService;
 
-    public AuthService(UserService userService) {
+    public AuthServiceImpl(UserService userService) {
         this.userService = userService;
     }
 
-    private void saveSession(String sessionToken) {
+    public void saveSession(String sessionToken) {
         String baseDir = System.getProperty("user.home");
         Path sessionDir = Paths.get(baseDir, ".logicalmaze");
         try {
@@ -30,7 +31,7 @@ public class AuthService {
         }
     }
 
-    public User loadUserSession() {
+    public User getUserBySessionToken() {
         String baseDir = System.getProperty("user.home");
         Path sessionDir = Paths.get(baseDir, ".logicalmaze");
 
@@ -58,8 +59,8 @@ public class AuthService {
         }
     }
 
-    private void updateSession(int userId) {
-        String sessionToken = userService.getSessionTokenByUserId(userId); // todo into sep function
+    public void updateSession(int userId) {
+        String sessionToken = userService.getSessionTokenByUserId(userId);
         if (sessionToken == null) {
             sessionToken = userService.generateSession(userId);
         }

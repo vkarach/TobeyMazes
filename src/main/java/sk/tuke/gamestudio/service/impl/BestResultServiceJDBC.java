@@ -94,15 +94,18 @@ public class BestResultServiceJDBC implements BestResultService {
         }
     }
 
+    @Override
     public Integer getBestScore(int userId, int levelId) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(GET_BEST_SCORE)
         ) {
             statement.setInt(1, userId);
             statement.setInt(2, levelId);
+
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("best_score");
+                    int bestScore = rs.getInt("best_score");
+                    return rs.wasNull() ? null : bestScore;
                 }
                 return null;
             }

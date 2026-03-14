@@ -114,4 +114,34 @@ public class BestResultServiceTest {
             userService.deleteUserByName(expectedBestUsers.get(i).userName());
         }
     }
+
+    @Test
+    public void getBestScoreWithoutScoreTest() {
+        String userName = UUID.randomUUID().toString();
+        String password = UUID.randomUUID().toString();
+
+        int userId = userService.createUser(userName, password);
+
+        assertTrue(userService.userExists(userName));
+
+        Integer bestScore = bestResultService.getBestScore(userId, 1);
+        assertNull(bestScore);
+
+        userService.deleteUserByName(userName);
+    }
+
+    @Test
+    public void getBestTimeWithoutTimeTest() {
+        String userName = UUID.randomUUID().toString();
+        String password = UUID.randomUUID().toString();
+
+        int userId = userService.createUser(userName, password);
+
+        assertTrue(userService.userExists(userName));
+
+        Integer bestTime = bestResultService.getBestTime(userId, 1);
+        assertNull(bestTime);
+
+        userService.deleteUserByName(userName);
+    }
 }

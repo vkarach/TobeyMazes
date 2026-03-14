@@ -3,7 +3,7 @@ package sk.tuke.gamestudio.game.logicalmazes.console;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import sk.tuke.gamestudio.entity.User;
-import sk.tuke.gamestudio.game.logicalmazes.core.AuthService;
+import sk.tuke.gamestudio.service.AuthService;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 
 public class AuthConsole {
