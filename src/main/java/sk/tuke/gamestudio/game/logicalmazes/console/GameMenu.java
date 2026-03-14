@@ -114,6 +114,10 @@ public class GameMenu {
     private LevelOption[] buildLevelOption(User currentUser) {
         LevelOption[] options = LevelOption.values();
         if (currentUser == null) {
+            for (LevelOption option : options) {
+                if (option.getLevel() == null) continue;
+                option.setTitle(option.getLevel().toString());
+            }
             return options;
         }
 
@@ -143,7 +147,6 @@ public class GameMenu {
         consoleRenderer.renderFromFile("uiTexts/select_level.txt");
 
         LevelOption[] options = buildLevelOption(currentUser);
-
 
         if (currentUser == null) {
             console.print("Login/Register to save your best time", selectUIX + 2, 20);
@@ -292,34 +295,48 @@ public class GameMenu {
         int x = 10;
         int y = 20;
 
-        consoleRenderer.renderFromFile("uiTexts/megamind.txt", 60, y);
+//        consoleRenderer.renderFromFile("uiTexts/megamind.txt", 50, y);
+        consoleRenderer.renderFromFile("uiTexts/brain.txt", 50, y);
 
-        console.print("+---------------------------+", x, y);
-        console.print("|        MEGA   MIND        |", x, y + 1);
-        console.print("+---------------------------+", x, y + 2);
-
+        console.print("+---------------------------+", x, y++);
+        console.print("|        MEGA   MIND        |", x, y++);
+        console.print("+---------------------------+", x, y++);
+        y++;
         AttributedStringBuilder sb = new AttributedStringBuilder();
+
+        AttributedStyle numbersStyle = AttributedStyle.DEFAULT.foreground(141);
+        AttributedStyle recordStyle = AttributedStyle.DEFAULT.foreground(220);
 
         sb.append("| Time: ");
         if (minutes > 0) {
-            sb.append((char) minutes).append(":");
+            sb.style(numbersStyle).append(String.valueOf(minutes)).append(":");
         }
-        sb.append(String.format("%02d:%02d", seconds, millis));
-        console.print(sb, x, y + 4);
+        sb.style(numbersStyle).append(String.format("%02d:%02d", seconds, millis));
+        console.print(sb, x, y++);
 
-        console.print(String.format("| Points: %d", points), x, y + 5);
-
-        if (isTimeRecord) {
-            console.print("| BEAT YOUR BEST TIME!", x, y + 7);
-        }
+        sb = new AttributedStringBuilder();
+        sb.append("| Points: ");
+        sb.style(numbersStyle).append(String.valueOf(points));
+        console.print(sb, x, y++);
+        y++;
 
         if (isScoreRecord) {
-            console.print("| NEW SCORE RECORD!", x, y + 8); // todo: better than only text
+            sb = new AttributedStringBuilder();
+            sb.append("| ");
+            sb.style(recordStyle).append("NEW SCORE RECORD!");
+            console.print(sb, x, y++);
         }
 
-        console.print("+---------------------------+", x, y + 10);
+        if (isTimeRecord) {
+            sb = new AttributedStringBuilder();
+            sb.append("| ");
+            sb.style(recordStyle).append("BEAT YOUR BEST TIME!");
+            console.print(sb, x, y++);
+        }
+        y++;
+        console.print("+---------------------------+", x, y++);
 
-        fakeChoose(x, y + 11);
+        fakeChoose(x, y);
     }
 
     public void leaderboardPage(User user) {
