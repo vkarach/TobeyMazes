@@ -2,8 +2,7 @@ package sk.tuke.gamestudio.service.impl;
 
 import org.mindrot.jbcrypt.BCrypt;
 import sk.tuke.gamestudio.entity.User;
-import sk.tuke.gamestudio.service.AuthService;
-import sk.tuke.gamestudio.service.UserService;
+import sk.tuke.gamestudio.service.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,11 +10,19 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import java.security.SecureRandom;
+
 public class AuthServiceImpl implements AuthService {
     private final UserService userService;
+    private final EmailSendService emailSendService;
+    private final EmailVerificationService emailVerificationService;
+    private final SessionService sessionService;
 
-    public AuthServiceImpl(UserService userService) {
+    public AuthServiceImpl (UserService userService, SessionService sessionService, EmailSendService emailSendService, EmailVerificationService emailVerificationService) {
         this.userService = userService;
+        this.emailSendService = emailSendService;
+        this.emailVerificationService = emailVerificationService;
+        this.sessionService = sessionService;
     }
 
     public void saveSession(String sessionToken) {
@@ -40,13 +47,13 @@ public class AuthServiceImpl implements AuthService {
             Path sessionFile = sessionDir.resolve("session.token");
             String token = Files.readString(sessionFile);
 
-            if (userService.sessionTokenExpired(token)) {
+            if (sessionService.sessionTokenExpired(token)) {
                 return null;
             }
 
-            userService.updateSessionTokenExpireDate(token);
+            sessionService.updateSessionTokenExpireDate(token);
 
-            int userId = userService.getUserIdBySessionToken(token);
+            int userId = sessionService.getUserIdBySessionToken(token);
             String userName = userService.getUserNameByUserId(userId);
 
             return new User(userId, userName);
@@ -60,11 +67,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public void updateSession(int userId) {
-        String sessionToken = userService.getSessionTokenByUserId(userId);
+        String sessionToken = sessionService.getSessionTokenByUserId(userId);
         if (sessionToken == null) {
-            sessionToken = userService.generateSession(userId);
+            sessionToken = sessionService.createSession(userId);
         }
-        userService.updateSessionTokenExpireDate(sessionToken);
+        sessionService.updateSessionTokenExpireDate(sessionToken);
         saveSession(sessionToken);
     }
 
@@ -101,6 +108,22 @@ public class AuthServiceImpl implements AuthService {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public int getCode(int userId) {
+        Integer code;
+        code = emailVerificationService.getEmailCodeByUserId(userId);
+        if (code == null) {
+            SecureRandom random = new SecureRandom();
+            code = 100000 + random.nextInt(900000);
+            emailSendService.sendCode("val200700@gmail.com", code);
+            emailVerificationService.saveEmailVerificationCode(userId, code);
+        }
+        return code;
+    }
+
+    public void changePassword(int userId, String newPassword) {
+        userService.changePassword(userId, stringToHash(newPassword));
     }
 
     private String stringToHash(String password) {

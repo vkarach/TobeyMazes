@@ -42,32 +42,6 @@ public class Console {
         terminal.flush();
     }
 
-    public void warnIfTerminalTooSmall(int expectedHeight) {
-        int x = terminal.getWidth() - 40;
-        int y = 0;
-        AttributedStyle style = AttributedStyle.DEFAULT.inverse();
-        while (true) {
-            int h = terminal.getHeight();
-
-            synchronized (consoleLock) {
-                if (h < expectedHeight) {
-                    moveCursorToStart();
-                    print("Increase your terminal size (Ctrl -)", x, y, style);
-                    print(String.format("your height: %d expected: >%d", h, expectedHeight), x, y + 1, style);
-                } else {
-                    print(" ".repeat(50), x, y);
-                    print(" ".repeat(50), x, y + 1);
-                }
-            }
-
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                return;
-            }
-        }
-    }
-
     public void enterRawMode() {
         originalAttributes = terminal.enterRawMode();
         terminal.flush();
@@ -140,6 +114,14 @@ public class Console {
         synchronized (consoleLock) {
             terminal.puts(InfoCmp.Capability.clear_screen);
         }
+    }
+
+    public void clearLine(int x, int y) {
+        clearLine(50, x, y);
+    }
+
+    public void clearLine(int clearLen, int x, int y) {
+        print(" ".repeat(clearLen), x, y);
     }
 
     public void moveCursorToStart() {

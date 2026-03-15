@@ -5,8 +5,12 @@ import sk.tuke.gamestudio.entity.User;
 public interface AuthService {
     User register(String name, String password);
     User login(String name, String password);
+
     void saveSession(String sessionToken);
     User getUserBySessionToken();
     void updateSession(int userId);
     void deleteSession();
+
+    int getCode(int userId);
+    void changePassword(int userId, String newPassword);
 }

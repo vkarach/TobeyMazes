@@ -50,3 +50,17 @@ CREATE TABLE IF NOT EXISTS reviews (
         REFERENCES users(user_id)
         ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS verification_emails (
+    email_id    INTEGER GENERATED ALWAYS AS IDENTITY,
+    user_id     INTEGER   NOT NULL ,
+    email_code  INTEGER   NOT NULL,
+    send_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expire_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP + INTERVAL '10 minutes',
+
+    PRIMARY KEY (email_id, user_id),
+
+    FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
+)

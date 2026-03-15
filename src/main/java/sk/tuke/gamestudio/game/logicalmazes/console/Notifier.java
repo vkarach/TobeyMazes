@@ -33,8 +33,7 @@ public class Notifier {
             throw new RuntimeException(e);
         }
 
-        console.setCursorPosition(x, y);
-        console.print(" ".repeat(clearLen));
+        console.clearLine(x, y);
     }
 }
 //    public void warnIfTerminalTooSmall(int expectedHeight) {

@@ -84,9 +84,9 @@ public class BestResultServiceTest {
             assertTrue(userService.userExists(userName));
 
             int levelId = 1;
-            bestResultService.updateBestScore(userId, levelId, 100000 + i);
+            bestResultService.updateBestScore(userId, levelId, 100_000_000 + i);
 
-            expectedBestUsers.add(new UserScore(userId, userName, 100000 + i));
+            expectedBestUsers.add(new UserScore(userId, userName, 100_000_000 + i));
         }
 
         List<UserScore> actualBestUsers = bestResultService.getTopByScore();

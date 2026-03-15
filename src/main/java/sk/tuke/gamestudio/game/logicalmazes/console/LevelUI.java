@@ -99,7 +99,7 @@ public class LevelUI {
 
     }
 
-    public void renderTips(int x, int y) { // todo: do this
+    public void renderTips(int x, int y) {
         AttributedStringBuilder sb = new AttributedStringBuilder();
         sb.style(crossWallStyle).append("←↓↑→");
         sb.style(textStyle).append(" move · ");

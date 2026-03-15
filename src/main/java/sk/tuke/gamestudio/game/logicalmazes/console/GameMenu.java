@@ -78,6 +78,7 @@ public class GameMenu {
         REGISTER("Register"),
         LOGIN("Login"),
         LOGOUT("Logout"),
+        CHANGE_PASSWORD("Change password"),
         BACK("Back");
 
         private final String title;
@@ -195,7 +196,7 @@ public class GameMenu {
         }
         console.print("Rate the game ←→", selectUIX, y - 1);
         for (int i = 0; i < 5; i++) {
-            console.print(" ".repeat(50), selectUIX, y + i);
+            console.clearLine(selectUIX, y + i);
         }
 
         Integer ratingValue = selectRating(selectUIX, y);
@@ -212,7 +213,7 @@ public class GameMenu {
             if (commentText.isEmpty()) {
                 break;
             }
-            String error = inputHelper.validateInput(commentText, "", 6, 100); // todo: check if input null or '' and handle separately
+            String error = inputHelper.validateInput(commentText, "", 6, 100);
             if (error != null) {
                 notifier.showError(error, selectUIX, y + 2);
                 continue;
@@ -273,6 +274,7 @@ public class GameMenu {
 
         ProfileOption[] options = new ProfileOption[] {
                 ProfileOption.LOGOUT,
+                ProfileOption.CHANGE_PASSWORD,
                 ProfileOption.BACK
         };
 
@@ -295,8 +297,7 @@ public class GameMenu {
         int x = 10;
         int y = 20;
 
-//        consoleRenderer.renderFromFile("uiTexts/megamind.txt", 50, y);
-        consoleRenderer.renderFromFile("uiTexts/brain.txt", 50, y);
+        consoleRenderer.renderFromFile("uiTexts/megamind.txt", 50, y);
 
         console.print("+---------------------------+", x, y++);
         console.print("|        MEGA   MIND        |", x, y++);

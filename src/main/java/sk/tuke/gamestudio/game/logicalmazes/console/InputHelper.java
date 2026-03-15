@@ -12,12 +12,12 @@ public class InputHelper {
     }
 
     public String getUserInput(String prompt, int x, int y, int clearLen) {
-        console.print(" ".repeat(50), x + prompt.length(), y);
+//        console.print(" ".repeat(50), x + prompt.length(), y);
         console.setCursorPosition(x, y);
 
         console.exitRawMode();
 
-        console.print(" ".repeat(clearLen), x, y);
+        console.clearLine(clearLen, x, y);
         console.setCursorPosition(x, y);
 
         String input = console.readLine(prompt);
@@ -26,13 +26,13 @@ public class InputHelper {
             return null;
         }
 
-        console.print(" ".repeat(clearLen), x, y);
         console.setCursorPosition(x, y);
 
         console.enterRawMode();
 
         return input;
     }
+
     public String validateInput(String input, int minLength, int maxLength) {
         String blocked = "'\";:\\/|<>,.?*&%$#!@()[]{}=+~`^";
 

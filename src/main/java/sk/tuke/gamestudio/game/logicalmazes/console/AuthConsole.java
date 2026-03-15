@@ -21,37 +21,37 @@ public class AuthConsole {
         this.inputHelper = new InputHelper(console);
     }
 
+    private String readValidInput(String prompt, int x, int y) {
+        String input = inputHelper.getUserInput(prompt, x, y);
+        if (input == null) {
+            return null;
+        }
+        String inputError = inputHelper.validateInput(input, 3, 16);
+        if (inputError != null) {
+            notifier.showError(inputError, x, y + 2);
+            return readValidInput(prompt, x, y);
+        }
+        return input;
+    }
+
     private String[] getNamePassword() {
         int x = 30, y = 20;
         while (true) {
-            console.print(" ".repeat(50), x, y + 2);
+            console.clearLine(x, y + 2);
 
-            String name = inputHelper.getUserInput("your name (Ctrl+D exit): ", x, y, 0);
-            if (name == null) { // interrupted by a user
-                console.enterRawMode();
+            String name = readValidInput("your name (Ctrl+D exit): ", x, y);
+            if (name == null) {
                 return null;
             }
-            String nameErrorMsg = inputHelper.validateInput(name, 3, 16);
-            if (nameErrorMsg != null) {
-                notifier.showError(nameErrorMsg, x, y + 2);
+
+            String password = readValidInput("password  (Ctrl+D back): ", x, y + 2);
+            if (password == null) {
                 continue;
             }
-
-            while (true) {
-                String password = inputHelper.getUserInput("password  (Ctrl+D back): ", x, y + 2, 0);
-                if (password == null) {
-                    break; // back to name input
-                }
-                String passwordErrorMsg = inputHelper.validateInput(password, 3, 16);
-                if (passwordErrorMsg != null) {
-                    notifier.showError(passwordErrorMsg, x, y + 4);
-                    continue;
-                }
-                for (int i = 0; i < 5; i++) {
-                    console.print(" ".repeat(50), x, y + i);
-                }
-                return new String[] { name, password };
+            for (int i = 0; i < 5; i++) {
+                console.clearLine(x, y + i);
             }
+            return new String[] { name, password };
         }
     }
 
@@ -86,7 +86,7 @@ public class AuthConsole {
         sb.style(AttributedStyle.DEFAULT).append(" now you registered!");
         console.print(sb, x, y);
 
-        waitForRefresh(x, y + 2);
+        waitForInput("Refresh", x, y + 2);
 
         return user;
     }
@@ -103,7 +103,7 @@ public class AuthConsole {
         String name = namePassword[0];
         String password = namePassword[1];
 
-        int x = 20, y = 20;
+        int x = 30, y = 20;
         Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 50, x, y);
 
         User user = authService.login(name, password);
@@ -120,13 +120,60 @@ public class AuthConsole {
         sb.style(AttributedStyle.DEFAULT).append(", love to see ya again :)");
         console.print(sb, x, y);
 
-        waitForRefresh(x, y + 2);
+        waitForInput("Refresh", x, y + 2);
 
         return user;
     }
 
-    private void waitForRefresh(int x, int y) {
-        console.print("▶ Refresh",
+    public void changePassword(int userId) {
+        console.clear();
+
+        consoleRenderer.renderFromFile("uiTexts/change_password.txt");
+
+        int x = 20, y = 20;
+
+        console.print("We've sent a code to your email ()", x, y++); // todo: email here
+        console.print("Print code below to change password", x, y++);
+
+        verifyEmail(userId, x, y++);
+
+
+        String newPassword = readValidInput("New password: ", x, y++);
+
+        authService.changePassword(userId, newPassword);
+
+        console.print("Password successfully changed", x, y++);
+
+        waitForInput("Back", x, y + 1);
+    }
+
+    private void verifyEmail(int userId, int x, int y) {
+        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 50, x, y);
+
+        int code = authService.getCode(userId);
+
+        loadAnim.interrupt();
+        while (true) {
+            String input = inputHelper.getUserInput("Code: ", x, y);
+            if (input == null) {
+                return;
+            }
+
+            if (!input.matches("\\d{6}")) {
+                notifier.showError("Code must contain exactly 6 digits", x, y + 2);
+                continue;
+            }
+
+            if (code != Integer.parseInt(input)) {
+                notifier.showError("Wrong code", x, y + 2);
+                continue;
+            }
+            break;
+        }
+    }
+
+    private void waitForInput(String text, int x, int y) {
+        console.print("▶ " + text,
                 x, y,
                 AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)
         );

@@ -1,6 +1,8 @@
 package sk.tuke.gamestudio.game.logicalmazes.service;
 
+import sk.tuke.gamestudio.service.SessionService;
 import sk.tuke.gamestudio.service.UserService;
+import sk.tuke.gamestudio.service.impl.SessionServiceJDBC;
 import sk.tuke.gamestudio.service.impl.UserServiceJDBC;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
@@ -10,9 +12,11 @@ import java.util.UUID;
 
 public class UserServiceTest {
     private final UserService userService;
+    private final SessionService sessionService;
 
     public UserServiceTest() {
         this.userService = new UserServiceJDBC();
+        this.sessionService = new SessionServiceJDBC();
     }
 
     @Test
@@ -105,7 +109,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void generateSessionTest() {
+    public void createSessionTest() {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
@@ -113,8 +117,8 @@ public class UserServiceTest {
 
         assertTrue(userService.userExists(userName));
 
-        String sessionToken = userService.generateSession(userId);
-        int id = userService.getUserIdBySessionToken(sessionToken);
+        String sessionToken = sessionService.createSession(userId);
+        int id = sessionService.getUserIdBySessionToken(sessionToken);
 
         assertEquals(userId, id);
 

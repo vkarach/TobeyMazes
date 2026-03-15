@@ -15,17 +15,25 @@ public class Game {
     private final AuthService authService;
     private final AuthConsole authConsole;
     private final ReviewService reviewService;
-
     private User currentUser;
 
     public Game(Console console) {
         this.console = console;
-        this.levelManager = new LevelManager(console, new BestResultServiceJDBC());
         this.gameMenu = new GameMenu(console, new BestResultServiceJDBC());
-        this.authService = new AuthServiceImpl(new UserServiceJDBC());
-        this.authConsole = new AuthConsole(console, authService);
-        this.currentUser = authService.getUserBySessionToken();
+        this.levelManager = new LevelManager(console, new BestResultServiceJDBC());
+
         this.reviewService = new ReviewServiceJDBC();
+        this.authService = new AuthServiceImpl(
+                new UserServiceJDBC(),
+                new SessionServiceJDBC(),
+                new EmailSendServiceJakarta(),
+                new EmailVerificationServiceJDBC()
+        );
+
+        this.authConsole = new AuthConsole(console, authService);
+
+        this.currentUser = authService.getUserBySessionToken();
+
         new LevelServiceJDBC().syncLevelsFromEnum(Level.class);
 
 //        levelManager.playLevel(Level.LEVEL3);
@@ -104,9 +112,13 @@ public class Game {
             while (currentUser == null && selected != GameMenu.ProfileOption.BACK);
         }
         if (currentUser != null) {
-            if (gameMenu.profilePage(currentUser) == GameMenu.ProfileOption.LOGOUT) {
+            GameMenu.ProfileOption selected = gameMenu.profilePage(currentUser);
+            if (selected == GameMenu.ProfileOption.LOGOUT) {
                 authService.deleteSession();
                 currentUser = null;
+            }
+            else if (selected == GameMenu.ProfileOption.CHANGE_PASSWORD) {
+                authConsole.changePassword(currentUser.id());
             }
         }
     }
