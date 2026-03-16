@@ -11,7 +11,7 @@ public class ConsoleRenderer {
     private final Console console;
     private final Map<String, String> replacers = new HashMap<>();
 
-    public ConsoleRenderer(Console console) { // todo reverse
+    public ConsoleRenderer(Console console) {
         this.console = console;
         replacers.put("\\033", "\033");
         replacers.put("YELLOW", "\033[33m");

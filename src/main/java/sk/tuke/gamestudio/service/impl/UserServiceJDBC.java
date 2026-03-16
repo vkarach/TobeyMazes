@@ -13,17 +13,23 @@ public class UserServiceJDBC implements UserService {
     public static final String SELECT_USER_ID_BY_USER_NAME =
             "SELECT user_id FROM users WHERE LOWER(user_name) = LOWER(?)";
 
+    public static final String SELECT_USER_ID_BY_EMAIL =
+            "SELECT user_id FROM users WHERE email = ?";
+
     public static final String SELECT_USER_NAME_BY_USER_ID =
             "SELECT user_name FROM users WHERE user_id = ?";
 
     public static final String SELECT_PASSWORD_BY_USER_ID =
-            "SELECT password FROM users WHERE user_id = ?";
+            "SELECT password_hash FROM users WHERE user_id = ?";
+
+    public static final String SELECT_EMAIL_BY_USER_ID =
+            "SELECT email FROM users WHERE user_id = ?";
 
     public static final String CHANGE_PASSWORD_BY_USER_ID =
-            "UPDATE users SET password = ? WHERE user_id = ?";
+            "UPDATE users SET password_hash = ? WHERE user_id = ?";
 
     public static final String INSERT_USER =
-            "INSERT INTO users (user_name, password) VALUES (?, ?) RETURNING user_id";
+            "INSERT INTO users (user_name, password_hash, email) VALUES (?, ?, ?) RETURNING user_id";
 
     public static final String DELETE_USER = "DELETE FROM users WHERE user_name = ?";
 
@@ -40,6 +46,22 @@ public class UserServiceJDBC implements UserService {
         }
         catch (SQLException e) {
             throw new UserException("Problem finding user", e);
+        }
+    }
+
+    @Override
+    public boolean emailExists(String email) {
+        try (
+            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            PreparedStatement statement = connection.prepareStatement(SELECT_USER_ID_BY_EMAIL)
+        ) {
+            statement.setString(1, email);
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next();
+            }
+        }
+        catch (SQLException e) {
+            throw new UserException("Problem finding email", e);
         }
     }
 
@@ -91,13 +113,32 @@ public class UserServiceJDBC implements UserService {
             statement.setInt(1, userId);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getString("password");
+                    return rs.getString("password_hash");
                 }
             }
             return null;
         }
         catch (SQLException e) {
             throw new UserException("Problem finding user with id" + userId, e);
+        }
+    }
+
+    @Override
+    public String getEmailByUserId(int userId) {
+        try (
+            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            PreparedStatement statement = connection.prepareStatement(SELECT_EMAIL_BY_USER_ID)
+        ) {
+            statement.setInt(1, userId);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("email");
+                }
+            }
+            throw new UserException("Password did not returned for user with id" + userId);
+        }
+        catch (SQLException e) {
+            throw new UserException("Problem getting password", e);
         }
     }
 
@@ -117,7 +158,7 @@ public class UserServiceJDBC implements UserService {
     }
 
     @Override
-    public int createUser(String userName, String password) {
+    public int createUser(String userName, String password, String email) {
         if (userExists(userName)) {
             throw new UserException("User with this name already exist");
         }
@@ -127,6 +168,7 @@ public class UserServiceJDBC implements UserService {
         ) {
             statement.setString(1, userName);
             statement.setString(2, password);
+            statement.setString(3, email);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt("user_id");

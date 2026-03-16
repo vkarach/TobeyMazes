@@ -22,20 +22,24 @@ public class AuthConsole {
     }
 
     private String readValidInput(String prompt, int x, int y) {
+        String regex = "^[A-Za-z0-9_-]+$";
+        return readValidInput(prompt, regex, 3, 16, x, y);
+    }
+
+    private String readValidInput(String prompt, String regex, int minLen, int maxLen, int x, int y) {
         String input = inputHelper.getUserInput(prompt, x, y);
         if (input == null) {
             return null;
         }
-        String inputError = inputHelper.validateInput(input, 3, 16);
+        String inputError = inputHelper.validateInput(input, regex,minLen, maxLen);
         if (inputError != null) {
             notifier.showError(inputError, x, y + 2);
-            return readValidInput(prompt, x, y);
+            return readValidInput(prompt, regex, minLen, maxLen, x, y);
         }
         return input;
     }
 
-    private String[] getNamePassword() {
-        int x = 30, y = 20;
+    private String[] getNamePassword(int x, int y) {
         while (true) {
             console.clearLine(x, y + 2);
 
@@ -48,9 +52,6 @@ public class AuthConsole {
             if (password == null) {
                 continue;
             }
-            for (int i = 0; i < 5; i++) {
-                console.clearLine(x, y + i);
-            }
             return new String[] { name, password };
         }
     }
@@ -60,26 +61,63 @@ public class AuthConsole {
 
         consoleRenderer.renderFromFile("uiTexts/register.txt");
 
-        String[] namePassword = getNamePassword();
+        int x = 30, y = 20;
+
+        String[] namePassword = getNamePassword(x, y);
+        y += 4;
+
         if (namePassword == null) { // interrupted by a user
             return null;
         }
-
         String name = namePassword[0];
         String password = namePassword[1];
 
-        int x = 20, y = 20;
-        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 50, x, y); // can overwrite user input need to check
+        if (authService.userNameTaken(name)) {
+            notifier.showError("﹂ User name already in use", x, y);
+            return register();
+        }
 
-        User user = authService.register(name, password);
+        String regex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        String email = readValidInput("email: ", regex, 5, 60, x, y);
+        if (email == null) return register(); // ???
+
+        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 75, x, ++y);
+
+        if (authService.emailTaken(email)) {
+            loadAnim.interrupt();
+            notifier.showError("﹂ Email already in use", x, y);
+            return register();
+        }
+
+        int code = authService.sendOrGetVerificationCodeByEmail(email);
 
         loadAnim.interrupt();
-        if (user == null) {
-            notifier.showError("User with this name already exists", x, y);
-            register();
-            console.enterRawMode();
-            return null;
+        console.clearLine(10, x, y);
+
+        console.print("We've sent a verification code to your email.", x, ++y);
+
+        console.print("Enter the code below to confirm password change.", x, ++y);
+
+        y+=2;
+        if (!verifyCode(code, x, y)) return register(); // ???
+
+        for (int i = 0; i < 10; i++) {
+            console.clearLine(100, x, y + i);
         }
+
+        loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 75, x, y);
+
+        User user = authService.register(name, password, email);
+
+        loadAnim.interrupt();
+//        if (user == null) {
+//            notifier.showError("User with this name already exists", x, y);
+//            register();
+//            console.enterRawMode();
+//            return null;
+//        }
+
+        authService.expireEmail(email);
 
         AttributedStringBuilder sb = new AttributedStringBuilder();
         sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.name());
@@ -96,23 +134,26 @@ public class AuthConsole {
 
         consoleRenderer.renderFromFile("uiTexts/login.txt");
 
-        String[] namePassword = getNamePassword();
+        int x = 30, y = 20;
+
+        String[] namePassword = getNamePassword(x, y);
+        for (int i = 0; i < 5; i++) {
+            console.clearLine(x, y + i);
+        }
         if (namePassword == null) { // interrupted by a user
             return null;
         }
         String name = namePassword[0];
         String password = namePassword[1];
 
-        int x = 30, y = 20;
-        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 50, x, y);
+        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 75, x, y);
 
         User user = authService.login(name, password);
 
         loadAnim.interrupt();
         if (user == null) {
             notifier.showError("Wrong name or password", x, y);
-            login();
-            return null;
+            return login();
         }
 
         AttributedStringBuilder sb = new AttributedStringBuilder();
@@ -132,31 +173,39 @@ public class AuthConsole {
 
         int x = 20, y = 20;
 
-        console.print("We've sent a code to your email ()", x, y++); // todo: email here
-        console.print("Print code below to change password", x, y++);
+        console.print("We've sent a verification code to your email.", x, y++);
 
-        verifyEmail(userId, x, y++);
+        console.print("Enter the code below to confirm password change.", x, y);
+        y+=2;
 
+        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 75, x, y);
+        int code = authService.getOrCreateEmailVerificationCode(userId);
+        loadAnim.interrupt();
 
-        String newPassword = readValidInput("New password: ", x, y++);
+        if (!verifyCode(code, x, y++)) return;
+
+        String newPassword = readValidInput("New password: ", x, y);
+        if (newPassword == null) return;
+        y+=2;
 
         authService.changePassword(userId, newPassword);
 
-        console.print("Password successfully changed", x, y++);
+        AttributedStringBuilder sb = new AttributedStringBuilder();
+        sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN)).append("✓");
+        sb.style(AttributedStyle.DEFAULT).append(" Password successfully changed");
+        console.print(sb, x, y);
+        y+=2;
+
+        authService.expireEmailByUserId(userId);
 
         waitForInput("Back", x, y + 1);
     }
 
-    private void verifyEmail(int userId, int x, int y) {
-        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 50, x, y);
-
-        int code = authService.getCode(userId);
-
-        loadAnim.interrupt();
+    private boolean verifyCode(int code, int x, int y) {
         while (true) {
             String input = inputHelper.getUserInput("Code: ", x, y);
             if (input == null) {
-                return;
+                return false;
             }
 
             if (!input.matches("\\d{6}")) {
@@ -170,6 +219,7 @@ public class AuthConsole {
             }
             break;
         }
+        return true;
     }
 
     private void waitForInput(String text, int x, int y) {

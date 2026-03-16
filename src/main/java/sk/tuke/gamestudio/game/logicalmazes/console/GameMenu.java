@@ -213,7 +213,7 @@ public class GameMenu {
             if (commentText.isEmpty()) {
                 break;
             }
-            String error = inputHelper.validateInput(commentText, "", 6, 100);
+            String error = inputHelper.validateInput(commentText, null, 6, 100);
             if (error != null) {
                 notifier.showError(error, selectUIX, y + 2);
                 continue;
@@ -240,10 +240,12 @@ public class GameMenu {
         fakeChoose();
     }
 
-    public ProfileOption profilePage() {
+    public ProfileOption guestProfilePage() {
         console.clear();
 
         consoleRenderer.renderFromFile("uiTexts/login_or_register.txt");
+        ConsoleRenderer.RenderSize size = consoleRenderer.getRenderFromFileSize("uiTexts/who_are_you.txt");
+        consoleRenderer.renderFromFile("uiTexts/who_are_you.txt", console.getWidth() - size.width() - 20, console.getHeight() - size.height());
 
         ProfileOption[] options = new ProfileOption[] {
             ProfileOption.REGISTER,
@@ -254,23 +256,25 @@ public class GameMenu {
         return select(options);
     }
 
-    public ProfileOption profilePage(User user) {
+    public ProfileOption authorizedProfilePage(User user) {
         console.clear();
 
         consoleRenderer.renderFromFile("uiTexts/your_profile.txt");
 
         Integer bestScore = bestResultService.getBestOverallScore(user.id());
 
-        String horzBound = "+" + "-".repeat(22) + "+";
+        String horzBound = "+" + "-".repeat(25) + "+";
         String name = String.format("Name: %s", user.name());
         String score = String.format("Your score: %d", bestScore);
 
-        consoleRenderer.renderFromFile("uiTexts/konek_tobey_big.txt", 80, 0);
+        consoleRenderer.renderFromFile("uiTexts/konek_tobey_big.txt", 75, 0);
+        consoleRenderer.renderFromFile("uiTexts/hello_there_cloude.txt", 127, 8);
+
         int x = 20, y = 20;
         console.print(horzBound, x, y++);
-        console.print(String.format("| %-20s |", name),  x,  y++);
-        console.print(String.format("| %-20s |", score), x, y++);
-        console.print(horzBound, x, y++);
+        console.print(String.format("| %-23s |", name),  x,  y++);
+        console.print(String.format("| %-23s |", score), x, y++);
+        console.print(horzBound, x, y);
 
         ProfileOption[] options = new ProfileOption[] {
                 ProfileOption.LOGOUT,
@@ -278,7 +282,7 @@ public class GameMenu {
                 ProfileOption.BACK
         };
 
-        return select(options, selectUIX, 25);
+        return select(options, x, 25);
     }
 
     public void winPage(long playedTimeNs, int points, boolean isTimeRecord, boolean isScoreRecord) {

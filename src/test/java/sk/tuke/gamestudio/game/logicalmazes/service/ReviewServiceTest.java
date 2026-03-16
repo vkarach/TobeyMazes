@@ -24,7 +24,7 @@ public class ReviewServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        int userId = userService.createUser(userName, password);
+        int userId = userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName));
 
@@ -50,7 +50,7 @@ public class ReviewServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        int userId = userService.createUser(userName, password);
+        int userId = userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName));
 

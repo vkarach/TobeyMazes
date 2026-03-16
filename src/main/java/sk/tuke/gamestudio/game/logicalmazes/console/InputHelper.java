@@ -30,19 +30,20 @@ public class InputHelper {
 
         console.enterRawMode();
 
-        return input;
+        return input.trim();
     }
 
     public String validateInput(String input, int minLength, int maxLength) {
-        String blocked = "'\";:\\/|<>,.?*&%$#!@()[]{}=+~`^";
+        String regex = "^[A-Za-z0-9_-]+$";
 
-        return validateInput(input, blocked, minLength, maxLength);
+        return validateInput(input, regex, minLength, maxLength);
     }
 
-    public String validateInput(String input, String blocked, int minLength, int maxLength) {
+    public String validateInput(String input, String regex, int minLength, int maxLength) {
         if (input == null) {
             return null;
         }
+
         input = input.trim();
         if (input.length() < minLength) {
             return String.format("input '%s' is too short (min %d)", input, minLength);
@@ -51,10 +52,8 @@ public class InputHelper {
             return String.format("input '%s' is too long (max %d)", input, maxLength);
         }
 
-        for (char c : input.toCharArray()) {
-            if (blocked.indexOf(c) >= 0) {
-                return String.format("input '%s' can't contain '%c'", input, c);
-            }
+        if (regex != null && !input.matches(regex)) {
+            return String.format("input '%s' is invalid", input);
         }
         return null;
     }

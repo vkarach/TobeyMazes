@@ -36,6 +36,7 @@ public class Game {
 
         new LevelServiceJDBC().syncLevelsFromEnum(Level.class);
 
+//        handleProfile();
 //        levelManager.playLevel(Level.LEVEL3);
 //        gameMenu.winPage( 2_500_000_000L, 369, true, true);
     }
@@ -100,25 +101,45 @@ public class Game {
 
     private void handleProfile() {
         if (currentUser == null) {
-            GameMenu.ProfileOption selected;
-            do {
-                selected = gameMenu.profilePage();
-                if (selected == null) return;
-                switch (selected) {
-                    case REGISTER -> currentUser = authConsole.register();
-                    case LOGIN -> currentUser = authConsole.login();
-                }
-            }
-            while (currentUser == null && selected != GameMenu.ProfileOption.BACK);
+            handleGuestProfile();
         }
+
         if (currentUser != null) {
-            GameMenu.ProfileOption selected = gameMenu.profilePage(currentUser);
-            if (selected == GameMenu.ProfileOption.LOGOUT) {
-                authService.deleteSession();
-                currentUser = null;
+            handleAuthorizedProfile();
+        }
+    }
+
+    private void handleGuestProfile() {
+        GameMenu.ProfileOption selected;
+
+        do {
+            selected = gameMenu.guestProfilePage();
+            if (selected == null || selected == GameMenu.ProfileOption.BACK) {
+                return;
             }
-            else if (selected == GameMenu.ProfileOption.CHANGE_PASSWORD) {
-                authConsole.changePassword(currentUser.id());
+
+            switch (selected) {
+                case REGISTER -> currentUser = authConsole.register();
+                case LOGIN -> currentUser = authConsole.login();
+            }
+        }
+        while (currentUser == null);
+    }
+
+    private void handleAuthorizedProfile() {
+        while (currentUser != null) {
+            GameMenu.ProfileOption selected = gameMenu.authorizedProfilePage(currentUser);
+            if (selected == null || selected == GameMenu.ProfileOption.BACK) {
+                return;
+            }
+
+            switch (selected) {
+                case LOGOUT -> {
+                    authService.deleteSession();
+                    currentUser = null;
+                    handleGuestProfile();
+                }
+                case CHANGE_PASSWORD -> authConsole.changePassword(currentUser.id());
             }
         }
     }

@@ -27,7 +27,7 @@ public class AuthServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        User user = authService.register(userName, password);
+        User user = authService.register(userName, password, UUID.randomUUID() + "@gmail.com");
 
         assertTrue(userService.userExists(userName));
 
@@ -48,7 +48,7 @@ public class AuthServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        User registeredUser = authService.register(userName, password);
+        User registeredUser = authService.register(userName, password, UUID.randomUUID() + "@gmail.com");
 
         assertTrue(userService.userExists(userName));
 
@@ -69,8 +69,8 @@ public class AuthServiceTest {
     public void updateSessionTest() {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
-
-        int userId = userService.createUser(userName, password);
+        
+        int userId = userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         String sessionToken = sessionService.createSession(userId);
 
@@ -96,7 +96,7 @@ public class AuthServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        int userId = userService.createUser(userName, password);
+        int userId = userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName));
 
@@ -116,7 +116,7 @@ public class AuthServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        int userId = userService.createUser(userName, password);
+        int userId = userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName));
 
@@ -140,7 +140,7 @@ public class AuthServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        int userId = userService.createUser(userName, password);
+        int userId = userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName));
 

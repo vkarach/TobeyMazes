@@ -14,9 +14,9 @@ import java.security.SecureRandom;
 
 public class AuthServiceImpl implements AuthService {
     private final UserService userService;
+    private final SessionService sessionService;
     private final EmailSendService emailSendService;
     private final EmailVerificationService emailVerificationService;
-    private final SessionService sessionService;
 
     public AuthServiceImpl (UserService userService, SessionService sessionService, EmailSendService emailSendService, EmailVerificationService emailVerificationService) {
         this.userService = userService;
@@ -75,12 +75,12 @@ public class AuthServiceImpl implements AuthService {
         saveSession(sessionToken);
     }
 
-    public User register(String name, String password) {
+    public User register(String name, String password, String email) {
         if (userService.userExists(name)) {
             return null;
         }
 
-        int userId = userService.createUser(name, stringToHash(password));
+        int userId = userService.createUser(name, stringToHash(password), email);
         updateSession(userId);
 
         return new User(userId, name);
@@ -109,17 +109,49 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException(e);
         }
     }
+    private int generateCode() {
+        SecureRandom random = new SecureRandom();
+        return 100000 + random.nextInt(900000);
+    }
 
-    public int getCode(int userId) {
-        Integer code;
-        code = emailVerificationService.getEmailCodeByUserId(userId);
-        if (code == null) {
-            SecureRandom random = new SecureRandom();
-            code = 100000 + random.nextInt(900000);
-            emailSendService.sendCode("val200700@gmail.com", code);
-            emailVerificationService.saveEmailVerificationCode(userId, code);
+    private int getOrCreateVerificationCodeByEmail(String email) {
+        Integer code = emailVerificationService.getCodeByEmail(email);
+
+        if (code != null) {
+            return code;
         }
+
+        code = generateCode();
+        emailVerificationService.saveEmailVerificationCode(email, code);
+        emailSendService.sendCode(email, code);
+
         return code;
+    }
+
+    public int getOrCreateEmailVerificationCode(int userId) {
+        String email = userService.getEmailByUserId(userId);
+        return getOrCreateVerificationCodeByEmail(email);
+    }
+
+    public int sendOrGetVerificationCodeByEmail(String email) {
+        return getOrCreateVerificationCodeByEmail(email);
+    }
+
+    public void expireEmail(String email) {
+        emailVerificationService.expireEmail(email);
+    }
+
+    public void expireEmailByUserId(int userId) {
+        String email = userService.getEmailByUserId(userId);
+        emailVerificationService.expireEmail(email);
+    }
+
+    public boolean emailTaken(String email) {
+        return userService.emailExists(email);
+    }
+
+    public boolean userNameTaken(String userName) {
+        return userService.userExists(userName);
     }
 
     public void changePassword(int userId, String newPassword) {

@@ -18,7 +18,7 @@ public class Notifier {
 //    }
 
     public void showError(String msg, int x, int y) {
-        int clearLen = 80;
+        int clearLen = msg.length();
 
         console.print(
                 msg,
@@ -33,7 +33,7 @@ public class Notifier {
             throw new RuntimeException(e);
         }
 
-        console.clearLine(x, y);
+        console.clearLine(clearLen, x, y);
     }
 }
 //    public void warnIfTerminalTooSmall(int expectedHeight) {

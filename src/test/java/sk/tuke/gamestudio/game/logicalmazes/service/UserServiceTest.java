@@ -24,7 +24,7 @@ public class UserServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        userService.createUser(userName, password);
+        userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName));
 
@@ -41,7 +41,7 @@ public class UserServiceTest {
 
         assertFalse(userService.userExists(userName));
 
-        userService.createUser(userName, password);
+        userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName));
 
@@ -53,7 +53,7 @@ public class UserServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        int userId = userService.createUser(userName, password);
+        int userId = userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName));
 
@@ -69,7 +69,7 @@ public class UserServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        int userId = userService.createUser(userName, password);
+        int userId = userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName));
 
@@ -85,7 +85,7 @@ public class UserServiceTest {
         String userName = "UserWIthSomeLowerAnDUpperCase";
         String password = UUID.randomUUID().toString();
 
-        userService.createUser(userName, password);
+        userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName.toLowerCase()));
 
@@ -97,7 +97,7 @@ public class UserServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        int userId = userService.createUser(userName, password);
+        int userId = userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName));
 
@@ -113,7 +113,7 @@ public class UserServiceTest {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
 
-        int userId = userService.createUser(userName, password);
+        int userId = userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         assertTrue(userService.userExists(userName));
 
