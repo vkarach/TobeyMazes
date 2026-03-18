@@ -80,7 +80,7 @@ public class ConsoleRenderer {
         return animationThread;
     }
 
-    private String mirrorLine(String line) {
+    public String mirrorLine(String line) {
         StringBuilder reversed = new StringBuilder(line).reverse();
         for (int i = 0; i < reversed.length(); i++) {
             char c = reversed.charAt(i);

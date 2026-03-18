@@ -44,8 +44,8 @@ public class Console {
 
     public void enterRawMode() {
         originalAttributes = terminal.enterRawMode();
-        terminal.flush();
         terminal.puts(InfoCmp.Capability.cursor_invisible);
+        terminal.flush();
     }
 
     public void exitRawMode() {
@@ -66,11 +66,11 @@ public class Console {
         }
     }
 
-    public InputType readAction() { // todo: upper case
+    public InputType readAction() {
         int ch = readInput(50);
 
-        if (ch == 'q' || ch == -1 || ch == 4) return InputType.QUIT;
-        else if (ch == 'r') return InputType.RELOAD;
+        if (ch == 'q' || ch == 'Q' || ch == -1 || ch == 4) return InputType.QUIT;
+        else if (ch == 'r' || ch == 'R') return InputType.RELOAD;
         else if (ch == '\r' || ch == '\n') return InputType.ENTER;
         if (ch != 27) return InputType.NONE; // not ESC
 
@@ -113,6 +113,7 @@ public class Console {
     public void clear() {
         synchronized (consoleLock) {
             terminal.puts(InfoCmp.Capability.clear_screen);
+            terminal.flush();
         }
     }
 
@@ -134,18 +135,21 @@ public class Console {
     public void setCursorPosition(int x, int y) {
         synchronized (consoleLock) {
             terminal.puts(InfoCmp.Capability.cursor_address, y, x);
+            terminal.flush();
         }
     }
 
     public void print(String text) {
         synchronized (consoleLock) {
             out.print(text);
+            terminal.flush();
         }
     }
 
     public void print(char ch) {
         synchronized (consoleLock) {
             out.print(ch);
+            terminal.flush();
         }
     }
 

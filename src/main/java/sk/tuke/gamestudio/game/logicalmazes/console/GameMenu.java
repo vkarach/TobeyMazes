@@ -97,6 +97,7 @@ public class GameMenu {
         console.clear();
 
         consoleRenderer.renderFromFile("uiTexts/game_title.txt");
+        Thread anim = new KonekTobeyAnimation(console, consoleRenderer).startKonekTobeyAnimation(80, 20);
 
         MenuOption[] actions = new MenuOption[]{
                 MenuOption.START,
@@ -108,6 +109,8 @@ public class GameMenu {
         };
 
         MenuOption result = select(actions);
+
+        anim.interrupt();
 
         return result == null ? MenuOption.EXIT : result;
     }
@@ -363,7 +366,6 @@ public class GameMenu {
         consoleRenderer.renderFromFile("uiTexts/leaderboard.txt");
 
         ConsoleRenderer.RenderSize size = consoleRenderer.getRenderFromFileSize("uiTexts/trophy.txt");
-//        consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, 10);
         consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, console.getHeight() - size.height());
 
         List<UserScore> topUserScores = bestResultService.getTopByScore();
