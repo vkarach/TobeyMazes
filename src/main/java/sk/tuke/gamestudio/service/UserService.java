@@ -9,8 +9,8 @@ public interface UserService {
     int createUser(String userName, String password, String email) throws UserException;
     void deleteUserByName(String userName) throws UserException;
 
-    Integer getUserIdByUserName(String userName) throws UserException;
-    String getUserNameByUserId(int useId) throws UserException;
+    Integer getUserIdByName(String userName) throws UserException;
+    String getUserNameById(int userId) throws UserException;
     String getPasswordByUserId(int userId) throws UserException;
     String getEmailByUserId(int userId) throws UserException;
 

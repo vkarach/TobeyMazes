@@ -1,3 +1,3 @@
 package sk.tuke.gamestudio.entity;
 
-public record UserScore(int userId, String userName, int totalScore) {}
+public record UserScore(Integer userId, String userName, Integer totalScore) {}

@@ -1,4 +1,4 @@
-package sk.tuke.gamestudio.service.impl;
+package sk.tuke.gamestudio.service.impl.JDBC;
 
 import sk.tuke.gamestudio.game.logicalmazes.core.Level;
 import sk.tuke.gamestudio.service.LevelService;

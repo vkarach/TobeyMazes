@@ -1,5 +1,6 @@
-package sk.tuke.gamestudio.service.impl;
+package sk.tuke.gamestudio.service.impl.JDBC;
 
+import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.service.UserService;
 import sk.tuke.gamestudio.service.exception.UserException;
 
@@ -66,7 +67,7 @@ public class UserServiceJDBC implements UserService {
     }
 
     @Override
-    public Integer getUserIdByUserName(String userName) {
+    public Integer getUserIdByName(String userName) {
         try (
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
             PreparedStatement statement = connection.prepareStatement(SELECT_USER_ID_BY_USER_NAME)
@@ -85,7 +86,7 @@ public class UserServiceJDBC implements UserService {
     }
 
     @Override
-    public String getUserNameByUserId(int userId) {
+    public String getUserNameById(int userId) {
         try (
             Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
             PreparedStatement statement = connection.prepareStatement(SELECT_USER_NAME_BY_USER_ID)
@@ -178,8 +179,7 @@ public class UserServiceJDBC implements UserService {
         catch (SQLException e) {
             throw new UserException("Problem adding user", e);
         }
-
-        throw new UserException("Failed to insert user");
+        throw new UserException("Can not add user");
     }
 
     @Override

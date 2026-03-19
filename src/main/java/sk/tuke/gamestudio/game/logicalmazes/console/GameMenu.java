@@ -2,6 +2,7 @@ package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
+import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.*;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import sk.tuke.gamestudio.game.logicalmazes.core.Level;
@@ -13,6 +14,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class GameMenu {
     private final Console console;
     private final ConsoleRenderer consoleRenderer;
@@ -112,6 +114,12 @@ public class GameMenu {
         MenuOption result = select(actions);
 
         anim.interrupt();
+        try {
+            anim.join();
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
         return result == null ? MenuOption.EXIT : result;
     }
@@ -126,13 +134,13 @@ public class GameMenu {
             return options;
         }
 
-        Map<Integer, Integer> bestTimesByLevel = bestResultService.getBestTimesByUser(currentUser.id());
+        Map<Integer, Long> bestTimesByLevel = bestResultService.getBestTimesByUserId(currentUser.getId());
 
         for (LevelOption option : options) {
             if (option.getLevel() == null) continue;
 
             String str;
-            Integer bestTimeMs = bestTimesByLevel.get(option.getLevel().getId());
+            Long bestTimeMs = bestTimesByLevel.get(option.getLevel().getId());
 
             if (bestTimeMs != null) {
                 str = String.format("%d:%02d", bestTimeMs / 1000, (bestTimeMs % 1000) / 10);
@@ -190,7 +198,7 @@ public class GameMenu {
             return;
         }
 
-        Review review = reviewService.getReview(currentUser.id());
+        Review review = reviewService.getReview(currentUser.getId());
         if (review != null) {
             String reviewText = String.format("%d★ %s", review.rating(), !review.comment().isEmpty() ? review.comment() : "without comment");
             console.print("You already rated the game:", selectUIX, y);
@@ -225,8 +233,9 @@ public class GameMenu {
             break;
         }
 
-        reviewService.addOrUpdateReview(new Review(currentUser.id(), ratingValue, commentText));
+        reviewService.addOrUpdateReview(new Review(currentUser.getId(), ratingValue, commentText));
 
+        console.clearLine(selectUIX, y + 1);
         console.print(commentText, selectUIX, y + 1);
 
         printRating(reviewService, 65, y - 1);
@@ -265,11 +274,11 @@ public class GameMenu {
 
         consoleRenderer.renderFromFile("uiTexts/your_profile.txt");
 
-        Integer bestScore = bestResultService.getBestOverallScore(user.id());
+        Integer bestScore = bestResultService.getBestOverallScore(user.getId());
 
         String horzBound = "+" + "-".repeat(25) + "+";
-        String name = String.format("Name: %s", user.name());
-        String score = String.format("Your score: %d", bestScore);
+        String name = String.format("Name: %s", user.getName());
+        String score = String.format("Your score: %d", bestScore != null ? bestScore : 0);
 
         consoleRenderer.renderFromFile("uiTexts/konek_tobey_big.txt", 75, 0);
         consoleRenderer.renderFromFile("uiTexts/hello_there_cloude.txt", 127, 8);
@@ -349,7 +358,7 @@ public class GameMenu {
     }
 
     public void leaderboardPage(User user) {
-        Integer curUserId = user != null ? user.id() : null;
+        Integer curUserId = user != null ? user.getId() : null;
 
         console.clear();
         final String[] scrollStart = new String[] {

@@ -2,6 +2,7 @@ package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.UserInterruptException;
+import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.reader.LineReaderBuilder;
@@ -12,6 +13,7 @@ import org.jline.utils.*;
 
 import java.io.PrintWriter;
 
+@Component
 public class Console {
     private final Terminal terminal;
     private final NonBlockingReader reader;

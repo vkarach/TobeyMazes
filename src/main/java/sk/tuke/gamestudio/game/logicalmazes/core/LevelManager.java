@@ -1,11 +1,13 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
 
+import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.ConsoleRenderer;
 import sk.tuke.gamestudio.game.logicalmazes.console.LevelUI;
 import sk.tuke.gamestudio.service.BestResultService;
 
+@Component
 public class LevelManager {
     private final Console console;
     private final LevelUI levelUI;
@@ -154,7 +156,7 @@ public class LevelManager {
     }
 
     public boolean checkAndUpdateBestTime(int userId, int levelId, int playedTimeMs) {
-        Integer bestTimeMs = bestResultService.getBestTime(userId, levelId);
+        Long bestTimeMs = bestResultService.getBestTime(userId, levelId);
 
         if (bestTimeMs == null || bestTimeMs > playedTimeMs) {
             bestResultService.updateBestTime(userId, levelId, playedTimeMs);

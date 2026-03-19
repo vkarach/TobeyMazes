@@ -2,11 +2,11 @@ package sk.tuke.gamestudio.game.logicalmazes.service;
 
 import sk.tuke.gamestudio.entity.Review;
 import sk.tuke.gamestudio.service.UserService;
-import sk.tuke.gamestudio.service.impl.ReviewServiceJDBC;
+import sk.tuke.gamestudio.service.impl.JDBC.ReviewServiceJDBC;
 import sk.tuke.gamestudio.service.ReviewService;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-import sk.tuke.gamestudio.service.impl.UserServiceJDBC;
+import sk.tuke.gamestudio.service.impl.JDBC.UserServiceJDBC;
 
 import java.util.UUID;
 

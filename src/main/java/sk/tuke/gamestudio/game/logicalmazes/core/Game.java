@@ -1,13 +1,18 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
+import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.console.AuthConsole;
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
 import sk.tuke.gamestudio.service.ReviewService;
+import sk.tuke.gamestudio.service.SessionService;
+import sk.tuke.gamestudio.service.UserService;
 import sk.tuke.gamestudio.service.impl.*;
 import sk.tuke.gamestudio.service.AuthService;
+import sk.tuke.gamestudio.service.impl.JDBC.*;
 
+@Component
 public class Game {
     private final Console console;
     private final LevelManager levelManager;
@@ -17,24 +22,25 @@ public class Game {
     private final ReviewService reviewService;
     private User currentUser;
 
-    public Game(Console console) {
+    public Game(
+            Console console,
+            GameMenu gameMenu,
+            LevelManager levelManager,
+            AuthService authService,
+            AuthConsole authConsole
+        ) {
         this.console = console;
-        this.gameMenu = new GameMenu(console, new BestResultServiceJDBC());
-        this.levelManager = new LevelManager(console, new BestResultServiceJDBC());
 
-        this.reviewService = new ReviewServiceJDBC();
-        this.authService = new AuthServiceImpl(
-                new UserServiceJDBC(),
-                new SessionServiceJDBC(),
-                new EmailSendServiceJakarta(),
-                new EmailVerificationServiceJDBC()
-        );
+        ReviewService reviewService = new ReviewServiceJDBC();  // todo: JPA
+        new LevelServiceJDBC().syncLevelsFromEnum(Level.class); // todo: JPA
 
-        this.authConsole = new AuthConsole(console, authService);
+        this.gameMenu = gameMenu;
+        this.levelManager = levelManager;
+        this.reviewService = reviewService;
+        this.authService = authService;
+        this.authConsole = authConsole;
 
         this.currentUser = authService.getUserBySessionToken();
-
-        new LevelServiceJDBC().syncLevelsFromEnum(Level.class);
 
 //        handleProfile();
 //        levelManager.playLevel(Level.LEVEL3);
@@ -58,6 +64,7 @@ public class Game {
 
     public void exit() {
         console.clear();
+        console.setCursorPosition(0, 0);
         console.print("exiting...\n");
         console.close();
     }
@@ -81,7 +88,7 @@ public class Game {
                 boolean isTimeRecord = false;
                 if (currentUser != null) {
                  isTimeRecord = levelManager.checkAndUpdateBestTime(
-                            currentUser.id(),
+                            currentUser.getId(),
                             level.getId(),
                             (int) (playedResult.playedTimeNs() / 1_000_000)
                     );
@@ -89,7 +96,7 @@ public class Game {
                 boolean isScoreRecord = false;
                 if (currentUser != null) {
                     isScoreRecord = levelManager.checkAndUpdateBestScore(
-                            currentUser.id(),
+                            currentUser.getId(),
                             level.getId(),
                             score
                     );
@@ -139,7 +146,7 @@ public class Game {
                     currentUser = null;
                     handleGuestProfile();
                 }
-                case CHANGE_PASSWORD -> authConsole.changePassword(currentUser.id());
+                case CHANGE_PASSWORD -> authConsole.changePassword(currentUser.getId());
             }
         }
     }

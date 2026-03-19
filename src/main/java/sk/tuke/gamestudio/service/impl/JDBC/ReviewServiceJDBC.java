@@ -1,4 +1,4 @@
-package sk.tuke.gamestudio.service.impl;
+package sk.tuke.gamestudio.service.impl.JDBC;
 
 import sk.tuke.gamestudio.entity.Review;
 import sk.tuke.gamestudio.service.ReviewService;

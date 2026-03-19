@@ -3,6 +3,8 @@ package sk.tuke.gamestudio.game.logicalmazes.service;
 import org.junit.jupiter.api.Test;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.service.AuthService;
+import sk.tuke.gamestudio.service.impl.JDBC.SessionServiceJDBC;
+import sk.tuke.gamestudio.service.impl.JDBC.UserServiceJDBC;
 import sk.tuke.gamestudio.service.SessionService;
 import sk.tuke.gamestudio.service.UserService;
 import sk.tuke.gamestudio.service.impl.*;
@@ -31,13 +33,13 @@ public class AuthServiceTest {
 
         assertTrue(userService.userExists(userName));
 
-        Integer userId = userService.getUserIdByUserName(userName);
+        Integer userId = userService.getUserIdByName(userName);
 
-        assertEquals(user.id(), userId);
+        assertEquals(user.getId(), userId);
 
-        String name = userService.getUserNameByUserId(userId);
+        String name = userService.getUserNameById(userId);
 
-        assertEquals(user.name(), name);
+        assertEquals(user.getName(), name);
 
         authService.deleteSession();
         userService.deleteUserByName(userName);
@@ -54,8 +56,8 @@ public class AuthServiceTest {
 
         User loggedInUser = authService.login(userName, password);
 
-        assertEquals(registeredUser.id(), loggedInUser.id());
-        assertEquals(registeredUser.name(), loggedInUser.name());
+        assertEquals(registeredUser.getId(), loggedInUser.getId());
+        assertEquals(registeredUser.getName(), loggedInUser.getName());
 
         User loggedInWithWrongPassword = authService.login(userName, "wrongPassword");
 
@@ -69,7 +71,7 @@ public class AuthServiceTest {
     public void updateSessionTest() {
         String userName = UUID.randomUUID().toString();
         String password = UUID.randomUUID().toString();
-        
+
         int userId = userService.createUser(userName, password, UUID.randomUUID() + "@gmail.com ");
 
         String sessionToken = sessionService.createSession(userId);
@@ -84,8 +86,8 @@ public class AuthServiceTest {
 
         user = authService.getUserBySessionToken();
 
-        assertEquals(userId, user.id());
-        assertEquals(userName, user.name());
+        assertEquals(userId, user.getId());
+        assertEquals(userName, user.getName());
 
         authService.deleteSession();
         userService.deleteUserByName(userName);
@@ -104,8 +106,8 @@ public class AuthServiceTest {
 
         User user = authService.getUserBySessionToken();
 
-        assertEquals(user.id(), userId);
-        assertEquals(user.name(), userName);
+        assertEquals(user.getId(), userId);
+        assertEquals(user.getName(), userName);
 
         authService.deleteSession();
         userService.deleteUserByName(userName);
@@ -156,8 +158,8 @@ public class AuthServiceTest {
 
         User userFromSession = authService.getUserBySessionToken();
 
-        assertEquals(userId, userFromSession.id());
-        assertEquals(userName, userFromSession.name());
+        assertEquals(userId, userFromSession.getId());
+        assertEquals(userName, userFromSession.getName());
 
         authService.deleteSession();
         userService.deleteUserByName(userName);

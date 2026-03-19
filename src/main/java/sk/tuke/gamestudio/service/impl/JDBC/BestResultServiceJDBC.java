@@ -1,4 +1,4 @@
-package sk.tuke.gamestudio.service.impl;
+package sk.tuke.gamestudio.service.impl.JDBC;
 
 import sk.tuke.gamestudio.service.BestResultService;
 import sk.tuke.gamestudio.service.exception.BestResultException;
@@ -27,9 +27,11 @@ public class BestResultServiceJDBC implements BestResultService {
                     "ON CONFLICT (user_id, level_id) " +
                     "DO UPDATE SET best_score = EXCLUDED.best_score";
 
-    public static final String GET_BEST_TIME = "SELECT best_time_ms FROM best_level_results WHERE user_id = ? AND level_id = ?";
+    public static final String GET_BEST_TIME =
+            "SELECT best_time_ms FROM best_level_results WHERE user_id = ? AND level_id = ?";
 
-    public static final String GET_BEST_SCORE = "SELECT best_score FROM best_level_results WHERE user_id = ? AND level_id = ?";
+    public static final String GET_BEST_SCORE =
+            "SELECT best_score FROM best_level_results WHERE user_id = ? AND level_id = ?";
 
     public static final String GET_TOP_TEN_BY_SCORE =
             "SELECT u.user_id, u.user_name, SUM(br.best_score) AS total_score " +
@@ -46,13 +48,13 @@ public class BestResultServiceJDBC implements BestResultService {
             "SELECT level_id, best_time_ms FROM best_level_results WHERE user_id = ?";
 
     @Override
-    public void updateBestTime(int userId, int levelId, int timeMs) {
+    public void updateBestTime(int userId, int levelId, long timeMs) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(UPDATE_BEST_TIME)
         ) {
            statement.setInt(1, userId);
            statement.setInt(2, levelId);
-           statement.setInt(3, timeMs);
+           statement.setLong(3, timeMs);
            statement.executeUpdate();
         }
         catch (SQLException e) {
@@ -76,7 +78,7 @@ public class BestResultServiceJDBC implements BestResultService {
     }
 
     @Override
-    public Integer getBestTime(int userId, int levelId) {
+    public Long getBestTime(int userId, int levelId) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(GET_BEST_TIME)
         ) {
@@ -84,7 +86,7 @@ public class BestResultServiceJDBC implements BestResultService {
             statement.setInt(2, levelId);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("best_time_ms");
+                    return rs.getLong("best_time_ms");
                 }
                 return null;
             }
@@ -155,8 +157,8 @@ public class BestResultServiceJDBC implements BestResultService {
     }
 
     @Override
-    public Map<Integer, Integer> getBestTimesByUser(int userId) {
-        Map<Integer, Integer> bestTimes = new HashMap<>();
+    public Map<Integer, Long> getBestTimesByUserId(int userId) {
+        Map<Integer, Long> bestTimes = new HashMap<>();
 
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(GET_ALL_BEST_TIMES)
@@ -166,7 +168,7 @@ public class BestResultServiceJDBC implements BestResultService {
                 while (rs.next()) {
                     bestTimes.put(
                             rs.getInt("level_id"),
-                            rs.getInt("best_time_ms")
+                            rs.getLong("best_time_ms")
                     );
                 }
                 return bestTimes;

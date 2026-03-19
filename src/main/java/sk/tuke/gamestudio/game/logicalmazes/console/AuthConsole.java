@@ -2,10 +2,12 @@ package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
+import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.service.AuthService;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 
+@Component
 public class AuthConsole {
     private final Console console;
     private final AuthService authService;
@@ -85,7 +87,7 @@ public class AuthConsole {
 
         if (authService.emailTaken(email)) {
             loadAnim.interrupt();
-            notifier.showError("﹂ Email already in use", x, y);
+            notifier.showError("﹂ EmailVerification already in use", x, y);
             return register();
         }
 
@@ -120,7 +122,7 @@ public class AuthConsole {
         authService.expireEmail(email);
 
         AttributedStringBuilder sb = new AttributedStringBuilder();
-        sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.name());
+        sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.getName());
         sb.style(AttributedStyle.DEFAULT).append(" now you registered!");
         console.print(sb, x, y);
 
@@ -157,7 +159,7 @@ public class AuthConsole {
         }
 
         AttributedStringBuilder sb = new AttributedStringBuilder();
-        sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.name());
+        sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.getName());
         sb.style(AttributedStyle.DEFAULT).append(", love to see ya again :)");
         console.print(sb, x, y);
 

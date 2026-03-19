@@ -1,6 +1,7 @@
 package sk.tuke.gamestudio.service;
 
 
+import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.service.exception.SessionException;
 
 public interface SessionService {

@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.service.impl;
 
+import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.service.EmailSendService;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
@@ -8,6 +9,7 @@ import sk.tuke.gamestudio.service.exception.EmailException;
 
 import java.util.Properties;
 
+@Component
 public class EmailSendServiceJakarta implements EmailSendService {
     final String fromEmail = "noreplay.tobeymazes@gmail.com";
     final String appPassword = "REDACTED";

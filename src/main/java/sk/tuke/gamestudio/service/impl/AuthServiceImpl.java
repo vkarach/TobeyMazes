@@ -1,6 +1,7 @@
 package sk.tuke.gamestudio.service.impl;
 
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.service.*;
 
@@ -12,6 +13,7 @@ import java.nio.file.Paths;
 
 import java.security.SecureRandom;
 
+@Component
 public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final SessionService sessionService;
@@ -54,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
             sessionService.updateSessionTokenExpireDate(token);
 
             int userId = sessionService.getUserIdBySessionToken(token);
-            String userName = userService.getUserNameByUserId(userId);
+            String userName = userService.getUserNameById(userId);
 
             return new User(userId, userName);
         }
@@ -87,12 +89,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public User login(String name, String password) {
-        Integer userId = userService.getUserIdByUserName(name);
+        Integer userId = userService.getUserIdByName(name);
         if (userId == null || !checkPassword(password, userService.getPasswordByUserId(userId))) {
             return null;
         }
 
-        name = userService.getUserNameByUserId(userId);
+        name = userService.getUserNameById(userId);
         updateSession(userId);
 
         return new User(userId, name);

@@ -1,4 +1,4 @@
-package sk.tuke.gamestudio.service.impl;
+package sk.tuke.gamestudio.service.impl.JDBC;
 
 import sk.tuke.gamestudio.service.EmailVerificationService;
 import sk.tuke.gamestudio.service.exception.EmailException;
@@ -18,7 +18,7 @@ public class EmailVerificationServiceJDBC implements EmailVerificationService {
             "INSERT INTO verification_emails (email, email_code) VALUES (?, ?)";
 
     public static final String EXPIRE_EMAIL_BY_USER_ID =
-            "UPDATE public.verification_emails SET expire_at = CURRENT_TIMESTAMP WHERE email = ?";
+            "UPDATE verification_emails SET expire_at = CURRENT_TIMESTAMP WHERE email = ?";
 
 
     @Override
