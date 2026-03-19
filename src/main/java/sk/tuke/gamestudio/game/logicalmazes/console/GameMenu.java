@@ -5,6 +5,7 @@ import org.jline.utils.AttributedStyle;
 import sk.tuke.gamestudio.entity.*;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import sk.tuke.gamestudio.game.logicalmazes.core.Level;
+import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 import sk.tuke.gamestudio.service.BestResultService;
 import sk.tuke.gamestudio.service.ReviewService;
 
@@ -474,7 +475,7 @@ public class GameMenu {
             switch (input) {
                 case DOWN  -> choose = (choose + 1) % items.length;
                 case UP    -> choose = (choose - 1 + items.length) % items.length;
-                case ENTER -> { return items[choose]; }
+                case ENTER -> { new SoundUtil("sounds/menu.wav").play(); return items[choose]; }
                 case QUIT  -> { break selectLoop; }
             }
 
