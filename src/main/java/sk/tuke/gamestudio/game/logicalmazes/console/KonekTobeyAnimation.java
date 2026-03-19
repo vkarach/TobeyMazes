@@ -39,6 +39,14 @@ public class KonekTobeyAnimation {
         }
     }
 
+    public boolean handleInterrupt() {
+        if (Thread.currentThread().isInterrupted()) {
+            console.setCursorPosition(0, 0);
+            return true;
+        }
+        return false;
+    }
+
     public Thread startKonekTobeyAnimation(int x, int y) {
         int move = 30;
         int frameTime = 70;
@@ -48,47 +56,58 @@ public class KonekTobeyAnimation {
 
         Thread thread = new Thread(() -> {
             int previousX = x;
+            try {
+                while (true) {
+                    if (handleInterrupt()) {
+                        return;
+                    }
+                    for (int i = 0; i <= move; i++) {
+                        if (handleInterrupt()) {
+                            clearSprite(previousX, y);
+                            return;
+                        }
+                        long frameStart = System.currentTimeMillis();
 
-            while (!Thread.currentThread().isInterrupted()) {
-                if (Thread.currentThread().isInterrupted()) {
-                    return;
-                }
-                for (int i = 0; i <= move; i++) {
-                    if (Thread.currentThread().isInterrupted()) {
+                        int currentX = x + i;
+                        clearSprite(previousX, y);
+                        render(currentX, y, false);
+
+                        previousX = currentX;
+                        sleepExact(frameStart, frameTime);
+                    }
+
+                    sleep(turnPause);
+                    if (handleInterrupt()) {
                         clearSprite(previousX, y);
                         return;
                     }
-                    long frameStart = System.currentTimeMillis();
 
-                    int currentX = x + i;
-                    clearSprite(previousX, y);
-                    render(currentX, y, false);
+                    for (int i = move; i >= 0; i--) {
+                        if (handleInterrupt()) {
+                            clearSprite(previousX, y);
+                            return;
+                        }
+                        long frameStart = System.currentTimeMillis();
 
-                    previousX = currentX;
-                    sleepExact(frameStart, frameTime);
-                }
+                        int currentX = x + i;
+                        clearSprite(previousX, y);
+                        render(currentX, y, true);
 
-                sleep(turnPause);
+                        previousX = currentX;
+                        sleepExact(frameStart, frameTime);
+                    }
 
-                for (int i = move; i >= 0; i--) {
-                    if (Thread.currentThread().isInterrupted()) {
+                    sleep(turnPause);
+                    if (handleInterrupt()) {
                         clearSprite(previousX, y);
                         return;
                     }
-                    long frameStart = System.currentTimeMillis();
-
-                    int currentX = x + i;
-                    clearSprite(previousX, y);
-                    render(currentX, y, true);
-
-                    previousX = currentX;
-                    sleepExact(frameStart, frameTime);
                 }
-
-                sleep(turnPause);
             }
-
-            clearSprite(previousX, y);
+            finally {
+                clearSprite(previousX, y);
+                console.setCursorPosition(0, 0);
+            }
         });
 
         thread.setDaemon(true);
