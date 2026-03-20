@@ -16,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> getUserByName(String name);
     Optional<User> getUserById(Integer id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE User u SET u.passwordHash = :password WHERE u.id = :id")
     void updatePassword(@Param("id") int id, @Param("password") String password);

@@ -1,4 +1,4 @@
-package sk.tuke.gamestudio.game.logicalmazes.service;
+package sk.tuke.gamestudio.game.logicalmazes.service.JDBC;
 
 import sk.tuke.gamestudio.entity.UserScore;
 import sk.tuke.gamestudio.service.BestResultService;
@@ -12,11 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class BestResultServiceTest {
+public class BestResultServiceJDBCTest {
     private final BestResultService bestResultService;
     private final UserService userService;
 
-    public BestResultServiceTest() {
+    public BestResultServiceJDBCTest() {
         this.bestResultService = new BestResultServiceJDBC();
         userService = new UserServiceJDBC();
     }

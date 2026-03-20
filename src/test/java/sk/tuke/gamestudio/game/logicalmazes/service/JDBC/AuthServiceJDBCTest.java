@@ -1,4 +1,4 @@
-package sk.tuke.gamestudio.game.logicalmazes.service;
+package sk.tuke.gamestudio.game.logicalmazes.service.JDBC;
 
 import org.junit.jupiter.api.Test;
 import sk.tuke.gamestudio.entity.User;
@@ -13,12 +13,12 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AuthServiceTest {
+public class AuthServiceJDBCTest {
     private final AuthService authService;
     private final UserService userService;
     private final SessionService sessionService;
 
-    public AuthServiceTest() {
+    public AuthServiceJDBCTest() {
         this.userService = new UserServiceJDBC();
         this.sessionService = new SessionServiceJDBC();
         this.authService = new AuthServiceImpl(userService,sessionService, null, null);

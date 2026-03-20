@@ -1,7 +1,5 @@
-package sk.tuke.gamestudio.game.logicalmazes.service;
+package sk.tuke.gamestudio.game.logicalmazes.service.JDBC;
 
-import jakarta.transaction.Transactional;
-import org.springframework.boot.test.context.SpringBootTest;
 import sk.tuke.gamestudio.entity.Review;
 import sk.tuke.gamestudio.service.UserService;
 import sk.tuke.gamestudio.service.impl.JDBC.ReviewServiceJDBC;
@@ -14,11 +12,11 @@ import java.util.UUID;
 
 //@SpringBootTest
 //@Transactional
-public class ReviewServiceTest {
+public class ReviewServiceJDBCTest {
     ReviewService reviewService;
     private final UserService userService;
 
-    public ReviewServiceTest () {
+    public ReviewServiceJDBCTest() {
         this.reviewService = new ReviewServiceJDBC();
         this.userService = new UserServiceJDBC();
     }

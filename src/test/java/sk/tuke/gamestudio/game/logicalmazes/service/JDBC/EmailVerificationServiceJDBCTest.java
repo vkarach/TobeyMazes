@@ -1,14 +1,14 @@
-package sk.tuke.gamestudio.game.logicalmazes.service;
+package sk.tuke.gamestudio.game.logicalmazes.service.JDBC;
 
 import org.junit.jupiter.api.Test;
 import sk.tuke.gamestudio.service.EmailVerificationService;
 import sk.tuke.gamestudio.service.impl.JDBC.EmailVerificationServiceJDBC;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EmailVerificationServiceTest {
+public class EmailVerificationServiceJDBCTest {
     EmailVerificationService emailVerificationService;
 
-    public EmailVerificationServiceTest() {
+    public EmailVerificationServiceJDBCTest() {
         this.emailVerificationService = new EmailVerificationServiceJDBC();
     }
 

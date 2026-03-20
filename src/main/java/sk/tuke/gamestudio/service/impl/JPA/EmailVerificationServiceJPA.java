@@ -19,7 +19,7 @@ public class EmailVerificationServiceJPA implements EmailVerificationService {
     @Override
     public Integer getCodeByEmail(String email) {
         Optional<EmailVerification> emailEntity =
-                emailVerificationRepository.findByEmailAndExpireAtAfter(email, LocalDateTime.now());
+                emailVerificationRepository.findFirstByEmailAndExpireAtAfter(email, LocalDateTime.now());
         return  emailEntity.map(EmailVerification::getCode).orElse(null);
     }
 

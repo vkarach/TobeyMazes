@@ -12,7 +12,7 @@ import java.util.Optional;
 
 
 public interface EmailVerificationRepository extends JpaRepository<EmailVerification, Integer> {
-    Optional<EmailVerification> findByEmailAndExpireAtAfter(String email, LocalDateTime now);
+    Optional<EmailVerification> findFirstByEmailAndExpireAtAfter(String email, LocalDateTime now);
 
     @Modifying
     @Transactional

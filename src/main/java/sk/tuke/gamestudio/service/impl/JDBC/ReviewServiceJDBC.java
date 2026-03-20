@@ -47,8 +47,8 @@ public class ReviewServiceJDBC implements ReviewService {
                 if (rs.next()) {
                     return new Review(
                             userId,
-                            rs.getInt("getRating"),
-                            rs.getString("getComment")
+                            rs.getInt("rating"),
+                            rs.getString("comment")
                     );
                 }
                 return null;
