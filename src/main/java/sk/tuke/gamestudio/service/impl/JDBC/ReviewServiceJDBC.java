@@ -27,9 +27,9 @@ public class ReviewServiceJDBC implements ReviewService {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(INSERT_REVIEW)
         ) {
-            statement.setInt(1, review.userId());
-            statement.setInt(2, review.rating());
-            statement.setString(3, review.comment());
+            statement.setInt(1, review.getUserId());
+            statement.setInt(2, review.getRating());
+            statement.setString(3, review.getComment());
             statement.executeUpdate();
         }
         catch (SQLException e) {
@@ -47,8 +47,8 @@ public class ReviewServiceJDBC implements ReviewService {
                 if (rs.next()) {
                     return new Review(
                             userId,
-                            rs.getInt("rating"),
-                            rs.getString("comment")
+                            rs.getInt("getRating"),
+                            rs.getString("getComment")
                     );
                 }
                 return null;

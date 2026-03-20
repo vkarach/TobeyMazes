@@ -1,5 +1,7 @@
 package sk.tuke.gamestudio.game.logicalmazes.service;
 
+import jakarta.transaction.Transactional;
+import org.springframework.boot.test.context.SpringBootTest;
 import sk.tuke.gamestudio.entity.Review;
 import sk.tuke.gamestudio.service.UserService;
 import sk.tuke.gamestudio.service.impl.JDBC.ReviewServiceJDBC;
@@ -10,6 +12,8 @@ import sk.tuke.gamestudio.service.impl.JDBC.UserServiceJDBC;
 
 import java.util.UUID;
 
+//@SpringBootTest
+//@Transactional
 public class ReviewServiceTest {
     ReviewService reviewService;
     private final UserService userService;
@@ -65,8 +69,8 @@ public class ReviewServiceTest {
     }
 
     private void checkReviewsIdentically(Review review1, Review review2) {
-        assertEquals(review1.userId(), review2.userId());
-        assertEquals(review1.rating(), review2.rating());
-        assertEquals(review1.comment(), review2.comment());
+        assertEquals(review1.getUserId(), review2.getUserId());
+        assertEquals(review1.getRating(), review2.getRating());
+        assertEquals(review1.getComment(), review2.getComment());
     }
 }

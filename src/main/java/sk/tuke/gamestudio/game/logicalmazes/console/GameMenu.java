@@ -175,7 +175,7 @@ public class GameMenu {
 
     private void printRating(ReviewService reviewService, int x, int y) {
         float overallRating = reviewService.getOverallRating();
-        String ratingText = String.format("Overall rating: %s",
+        String ratingText = String.format("Overall getRating: %s",
                 overallRating > 0 ? String.format("%.2f", overallRating) : "no one rated yet"
         );
         console.print(ratingText, x, y);
@@ -200,7 +200,7 @@ public class GameMenu {
 
         Review review = reviewService.getReview(currentUser.getId());
         if (review != null) {
-            String reviewText = String.format("%d★ %s", review.rating(), !review.comment().isEmpty() ? review.comment() : "without comment");
+            String reviewText = String.format("%d★ %s", review.getRating(), !review.getComment().isEmpty() ? review.getComment() : "without getComment");
             console.print("You already rated the game:", selectUIX, y);
             console.print(reviewText, selectUIX, y + 1);
             String selected = select(new String[] { "Edit", "Back" }, selectUIX, y + 3);
@@ -240,7 +240,7 @@ public class GameMenu {
 
         printRating(reviewService, 65, y - 1);
 
-        console.print("Thank you for your feedback!", selectUIX, y + 3); // update overall rating ?
+        console.print("Thank you for your feedback!", selectUIX, y + 3); // update overall getRating ?
         fakeChoose(selectUIX, y + 5);
     }
 
@@ -298,8 +298,8 @@ public class GameMenu {
         return select(options, x, 25);
     }
 
-    public void winPage(long playedTimeNs, int points, boolean isTimeRecord, boolean isScoreRecord) {
-        Duration duration = Duration.ofNanos(playedTimeNs);
+    public void winPage(long playedTimeMs, int points, boolean isTimeRecord, boolean isScoreRecord) {
+        Duration duration = Duration.ofMillis(playedTimeMs);
 
         long minutes = duration.toMinutes();
         long seconds = duration.minusMinutes(minutes).toSeconds();

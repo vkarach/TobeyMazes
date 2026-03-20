@@ -1,25 +1,21 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
 import org.springframework.stereotype.Component;
-import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.console.AuthConsole;
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
-import sk.tuke.gamestudio.service.ReviewService;
-import sk.tuke.gamestudio.service.SessionService;
-import sk.tuke.gamestudio.service.UserService;
-import sk.tuke.gamestudio.service.impl.*;
-import sk.tuke.gamestudio.service.AuthService;
-import sk.tuke.gamestudio.service.impl.JDBC.*;
+import sk.tuke.gamestudio.entity.User;
+import sk.tuke.gamestudio.service.*;
 
 @Component
 public class Game {
     private final Console console;
-    private final LevelManager levelManager;
     private final GameMenu gameMenu;
+    private final LevelManager levelManager;
     private final AuthService authService;
     private final AuthConsole authConsole;
     private final ReviewService reviewService;
+
     private User currentUser;
 
     public Game(
@@ -27,24 +23,20 @@ public class Game {
             GameMenu gameMenu,
             LevelManager levelManager,
             AuthService authService,
-            AuthConsole authConsole
+            AuthConsole authConsole,
+            ReviewService reviewService,
+            LevelService levelService
         ) {
         this.console = console;
-
-        ReviewService reviewService = new ReviewServiceJDBC();  // todo: JPA
-        new LevelServiceJDBC().syncLevelsFromEnum(Level.class); // todo: JPA
-
         this.gameMenu = gameMenu;
         this.levelManager = levelManager;
         this.reviewService = reviewService;
         this.authService = authService;
         this.authConsole = authConsole;
 
-        this.currentUser = authService.getUserBySessionToken();
+        levelService.syncLevelsFromEnum(Level.class);
 
-//        handleProfile();
-//        levelManager.playLevel(Level.LEVEL3);
-//        gameMenu.winPage( 2_500_000_000L, 369, true, true);
+        this.currentUser = authService.getUserBySessionToken();
     }
 
     public void launch() {
@@ -86,22 +78,28 @@ public class Game {
                 );
 
                 boolean isTimeRecord = false;
-                if (currentUser != null) {
-                 isTimeRecord = levelManager.checkAndUpdateBestTime(
-                            currentUser.getId(),
-                            level.getId(),
-                            (int) (playedResult.playedTimeNs() / 1_000_000)
-                    );
-                }
                 boolean isScoreRecord = false;
+                long playedTimeMs = playedResult.playedTimeNs() / 1_000_000;
+
                 if (currentUser != null) {
-                    isScoreRecord = levelManager.checkAndUpdateBestScore(
+                     isTimeRecord = levelManager.checkAndUpdateBestTime(
+                                currentUser.getId(),
+                                level.getId(),
+                                (int) playedTimeMs
+                     );
+
+                     isScoreRecord = levelManager.checkAndUpdateBestScore(
                             currentUser.getId(),
                             level.getId(),
                             score
                     );
                 }
-                gameMenu.winPage(playedResult.playedTimeNs(), score, isTimeRecord, isScoreRecord);
+                gameMenu.winPage(
+                        playedTimeMs,
+                        score,
+                        isTimeRecord,
+                        isScoreRecord
+                );
             }
         }
     }

@@ -17,7 +17,7 @@ public class LevelServiceJDBC implements LevelService {
             "ON CONFLICT (level_id) DO UPDATE SET level_name = EXCLUDED.level_name";
 
     @Override
-    public void addAndUpdateLevel(int levelId, String levelName) {
+    public void addOrUpdateLevel(int levelId, String levelName) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(ADD_OR_UPDATE_LEVEL)
         ) {
@@ -32,7 +32,7 @@ public class LevelServiceJDBC implements LevelService {
     @Override
     public void syncLevelsFromEnum(Class<Level> levelEnum) {
         for (Level level : levelEnum.getEnumConstants()) {
-            addAndUpdateLevel(level.getId(), level.getTitle());
+            addOrUpdateLevel(level.getId(), level.getTitle());
         }
     }
 }
