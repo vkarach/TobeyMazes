@@ -34,6 +34,7 @@ public class Game {
         this.authService = authService;
         this.authConsole = authConsole;
 
+
         levelService.syncLevelsFromEnum(Level.class);
 
         this.currentUser = authService.getUserBySessionToken();

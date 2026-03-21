@@ -5,33 +5,57 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 public class SoundUtil {
-    private Clip clip;
+    private static final int POOL_SIZE = 4;
+    private final Clip[] clips;
+    private int poolIndex = 0;
+
     private static float volumeCoef = 1f;
     private float localVolume = 1f;
-    private static final java.util.List<SoundUtil> ALLSOUNDS = new java.util.ArrayList<>();
+    private static final java.util.List<SoundUtil> ALL_SOUNDS = new java.util.ArrayList<>();
+
+    public SoundUtil(String path, float volumeCoef) {
+        this(path);
+        setVolumeCoef(volumeCoef);
+    }
+
     public SoundUtil(String path) {
+        clips = new Clip[POOL_SIZE];
         try {
             InputStream raw = SoundUtil.class.getClassLoader().getResourceAsStream(path);
             if (raw == null) {
                 throw new RuntimeException("File not found: " + path);
             }
 
-            BufferedInputStream buf = new BufferedInputStream(raw);
-            AudioInputStream in = AudioSystem.getAudioInputStream(buf);
+            // read audio data into memory so it can be reused for each clip in the pool
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            raw.transferTo(buffer);
+            byte[] audioData = buffer.toByteArray();
 
-            clip = AudioSystem.getClip();
-            clip.open(in);
+            for (int i = 0; i < POOL_SIZE; i++) {
+                AudioInputStream in = AudioSystem.getAudioInputStream(
+                        new BufferedInputStream(new ByteArrayInputStream(audioData))
+                );
+                clips[i] = AudioSystem.getClip();
+                clips[i].open(in);
+            }
 
-            ALLSOUNDS.add(this);
+            ALL_SOUNDS.add(this);
         }
         catch (Exception e) {
-            clip = null;
+            for (int i = 0; i < POOL_SIZE; i++) clips[i] = null;
         }
     }
-    private void setVolume(float volume) {
+
+    private Clip currentClip() {
+        return clips[0];
+    }
+
+    private void setVolume(Clip clip, float volume) {
         try {
             FloatControl gain = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 
@@ -49,71 +73,70 @@ public class SoundUtil {
         catch (Exception ignored) {
         }
     }
-    public static void setVolumeCoef(float coef) {
-        if (coef < 0f) {
-            coef = 0f;
-        }
-        if (coef > 1f) {
-            coef = 1f;
-        }
-        volumeCoef = coef;
 
+    public static void setVolumeCoef(float coef) {
+        if (coef < 0f) coef = 0f;
+        if (coef > 1f) coef = 1f;
+        volumeCoef = coef;
         updateAllVolumes();
     }
+
     public void updateVolume() {
-        setVolume(localVolume * volumeCoef);
+        for (Clip clip : clips) {
+            if (clip == null) continue;
+            setVolume(clip, localVolume * volumeCoef);
 
-        if (clip.isActive()) {
-            int pos = clip.getFramePosition();
-            clip.stop();
-            clip.setFramePosition(pos);
-            clip.start();
+            if (clip.isActive()) {
+                int pos = clip.getFramePosition();
+                clip.stop();
+                clip.setFramePosition(pos);
+                clip.start();
+            }
         }
-
     }
+
     public static void updateAllVolumes() {
-        for (SoundUtil sound : ALLSOUNDS) {
+        for (SoundUtil sound : ALL_SOUNDS) {
             sound.updateVolume();
         }
-//        System.out.println("updated all volumes at " + System.nanoTime());
     }
+
     public void play(float volume) {
-        if (clip == null) {
-            return;
-        }
+        if (clips[0] == null) return;
         localVolume = volume;
-        setVolume(localVolume * volumeCoef);
+
+        Clip clip = clips[poolIndex];
+        poolIndex = (poolIndex + 1) % POOL_SIZE;
+
+        setVolume(clip, localVolume * volumeCoef);
         clip.stop();
         clip.setFramePosition(0);
         clip.start();
     }
+
     public void play() {
-        if (clip == null) {
-            return;
-        }
         play(1f);
     }
+
     public void loop() {
-        if (clip == null) {
-            return;
-        }
-        setVolume(localVolume  * volumeCoef);
-        clip.loop(Clip.LOOP_CONTINUOUSLY);
-        clip.start();
+        if (clips[0] == null) return;
+        setVolume(currentClip(), localVolume * volumeCoef);
+        currentClip().loop(Clip.LOOP_CONTINUOUSLY);
+        currentClip().start();
     }
+
     public void loop(float volume) {
-        if (clip == null) {
-            return;
-        }
+        if (clips[0] == null) return;
         localVolume = volume;
-        setVolume(localVolume * volumeCoef);
-        clip.loop(Clip.LOOP_CONTINUOUSLY);
-        clip.start();
+        setVolume(currentClip(), localVolume * volumeCoef);
+        currentClip().loop(Clip.LOOP_CONTINUOUSLY);
+        currentClip().start();
     }
+
     public void stop() {
-        if (clip == null) {
-            return;
+        if (clips[0] == null) return;
+        for (Clip clip : clips) {
+            if (clip != null) clip.stop();
         }
-        clip.stop();
     }
 }

@@ -1,9 +1,14 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import org.jline.utils.AttributedStyle;
+import org.springframework.stereotype.Component;
+import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 
+@Component
 public class Notifier {
     private final Console console;
+
+    private final SoundUtil errorSound = new SoundUtil("sounds/error.wav");
 
     public Notifier(Console console) {
         this.console = console;
@@ -20,6 +25,7 @@ public class Notifier {
     public void showError(String msg, int x, int y) {
         int clearLen = msg.length();
 
+        errorSound.play();
         console.print(
                 msg,
                 x, y,
@@ -32,6 +38,8 @@ public class Notifier {
         catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        console.drainInput();
 
         console.clearLine(clearLen, x, y);
     }

@@ -19,13 +19,26 @@ public class GameMenu {
     private final Console console;
     private final ConsoleRenderer consoleRenderer;
     private final BestResultService bestResultService;
+    private final InputHelper inputHelper;
+    private final Notifier notifier;
+
+    private final SoundUtil enterSound = new SoundUtil("sounds/enter.wav");
+    private final SoundUtil navigationSound = new SoundUtil("sounds/navigate.wav");
 
     private final int selectUIX = 30;
 
-    public GameMenu(Console console, BestResultService bestResultService) {
+    public GameMenu(
+            Console console,
+            BestResultService bestResultService,
+            ConsoleRenderer consoleRenderer,
+            InputHelper inputHelper,
+            Notifier notifier
+    ) {
         this.console = console;
-        this.consoleRenderer = new ConsoleRenderer(console);
+        this.consoleRenderer = consoleRenderer;
         this.bestResultService = bestResultService;
+        this.inputHelper = inputHelper;
+        this.notifier = notifier;
     }
 
     public enum MenuOption {
@@ -214,8 +227,6 @@ public class GameMenu {
         Integer ratingValue = selectRating(selectUIX, y);
         if (ratingValue == null) return;
 
-        InputHelper inputHelper = new InputHelper(console);
-        Notifier notifier = new Notifier(console);
         String commentText;
         while (true) {
             commentText = inputHelper.getUserInput("Comment (optional): ", selectUIX, y + 1);
@@ -455,17 +466,7 @@ public class GameMenu {
     }
 
     private void fakeChoose(int x, int y, String text) {
-        console.print("▶ " + text,
-                x, y,
-                AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)
-        );
-
-        while (true) {
-            InputType input = console.readAction();
-            if (input == InputType.ENTER || input == InputType.QUIT) {
-                break;
-            }
-        }
+        inputHelper.waitForConfirm(text, x, y);
     }
 
     private <T> T select(T[] items) {
@@ -482,10 +483,21 @@ public class GameMenu {
             InputType input = console.readAction();
 
             switch (input) {
-                case DOWN  -> choose = (choose + 1) % items.length;
-                case UP    -> choose = (choose - 1 + items.length) % items.length;
-                case ENTER -> { new SoundUtil("sounds/menu.wav").play(); return items[choose]; }
-                case QUIT  -> { break selectLoop; }
+                case DOWN  -> {
+                    navigationSound.play();
+                    choose = (choose + 1) % items.length;
+                }
+                case UP    -> {
+                    navigationSound.play();
+                    choose = (choose - 1 + items.length) % items.length;
+                }
+                case ENTER -> {
+                    enterSound.play();
+                    return items[choose];
+                }
+                case QUIT  -> {
+                    break selectLoop;
+                }
             }
 
             for (int i = 0; i < items.length; i++) {
@@ -495,7 +507,8 @@ public class GameMenu {
                             x, y + i,
                             AttributedStyle.DEFAULT.inverse() // .blink()
                     );
-                } else {
+                }
+                else {
                     console.print("  " + str, x, y + i);
                 }
             }

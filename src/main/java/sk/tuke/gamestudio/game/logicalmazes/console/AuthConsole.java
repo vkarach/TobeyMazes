@@ -5,7 +5,6 @@ import org.jline.utils.AttributedStyle;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.service.AuthService;
-import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 
 @Component
 public class AuthConsole {
@@ -15,12 +14,12 @@ public class AuthConsole {
     private final Notifier notifier;
     private final InputHelper inputHelper;
 
-    public AuthConsole(Console console, AuthService authService) {
+    public AuthConsole(Console console, AuthService authService, ConsoleRenderer consoleRenderer, InputHelper inputHelper, Notifier notifier) {
         this.console = console;
         this.authService = authService;
-        this.consoleRenderer = new ConsoleRenderer(console);
-        this.notifier = new Notifier(console);
-        this.inputHelper = new InputHelper(console);
+        this.consoleRenderer = consoleRenderer;
+        this.notifier = notifier;
+        this.inputHelper = inputHelper;
     }
 
     private String readValidInput(String prompt, int x, int y) {
@@ -126,7 +125,7 @@ public class AuthConsole {
         sb.style(AttributedStyle.DEFAULT).append(" now you registered!");
         console.print(sb, x, y);
 
-        waitForInput("Refresh", x, y + 2);
+        inputHelper.waitForConfirm("Refresh", x, y + 2);
 
         return user;
     }
@@ -163,7 +162,7 @@ public class AuthConsole {
         sb.style(AttributedStyle.DEFAULT).append(", love to see ya again :)");
         console.print(sb, x, y);
 
-        waitForInput("Refresh", x, y + 2);
+        inputHelper.waitForConfirm("Refresh", x, y + 2);
 
         return user;
     }
@@ -200,7 +199,7 @@ public class AuthConsole {
 
         authService.expireEmailByUserId(userId);
 
-        waitForInput("Back", x, y + 1);
+        inputHelper.waitForConfirm("Back", x, y + 1);
     }
 
     private boolean verifyCode(int code, int x, int y) {
@@ -224,17 +223,4 @@ public class AuthConsole {
         return true;
     }
 
-    private void waitForInput(String text, int x, int y) {
-        console.print("▶ " + text,
-                x, y,
-                AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)
-        );
-
-        while (true) {
-            InputType input = console.readAction();
-            if (input == InputType.ENTER || input == InputType.QUIT) {
-                return;
-            }
-        }
-    }
 }

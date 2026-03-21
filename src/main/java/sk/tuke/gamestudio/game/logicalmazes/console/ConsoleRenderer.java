@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
+import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.core.FileReader;
 
 import java.util.ArrayList;
@@ -7,7 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ConsoleRenderer {
+@Component
+public class  ConsoleRenderer {
     private final Console console;
     private final Map<String, String> replacers = new HashMap<>();
 

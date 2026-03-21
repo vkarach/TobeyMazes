@@ -1,7 +1,15 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
+import org.jline.utils.AttributedStyle;
+import org.springframework.stereotype.Component;
+import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
+import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
+
+@Component
 public class InputHelper {
     private final Console console;
+
+    private final SoundUtil clickSound = new SoundUtil("sounds/enter.wav");
 
     public InputHelper(Console console) {
         this.console = console;
@@ -31,6 +39,19 @@ public class InputHelper {
         console.enterRawMode();
 
         return input.trim();
+    }
+
+    public void waitForConfirm(String text, int x, int y) {
+        console.print("▶ " + text, x, y,
+                AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)
+        );
+        while (true) {
+            InputType input = console.readAction();
+            if (input == InputType.ENTER || input == InputType.QUIT) {
+                clickSound.play();
+                return;
+            }
+        }
     }
 
     public String validateInput(String input, int minLength, int maxLength) {

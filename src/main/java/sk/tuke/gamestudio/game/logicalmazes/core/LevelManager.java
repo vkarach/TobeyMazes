@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.ConsoleRenderer;
 import sk.tuke.gamestudio.game.logicalmazes.console.LevelUI;
+import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 import sk.tuke.gamestudio.service.BestResultService;
 
 @Component
@@ -15,17 +16,19 @@ public class LevelManager {
     private final BestResultService bestResultService;
     private final ConsoleRenderer consoleRenderer;
 
+    private final SoundUtil pickupSound = new SoundUtil("sounds/pickup.wav");
+
     private Level currentLevel;
     private Field gameField;
     private Player player;
     private int targetCount;
 
-    public LevelManager(Console console, BestResultService bestResultService) {
+    public LevelManager(Console console, BestResultService bestResultService, ConsoleRenderer consoleRenderer) {
         this.console = console;
         this.levelUI = new LevelUI(console);
         this.mapParser = new MapParser();
         this.bestResultService = bestResultService;
-        this.consoleRenderer = new ConsoleRenderer(console);
+        this.consoleRenderer = consoleRenderer;
     }
 
     public record LevelResult(LevelState levelState, int stepCount, long playedTimeNs) {}
@@ -136,6 +139,7 @@ public class LevelManager {
             }
 
             if (gameField.takeTarget(player)) {
+                pickupSound.play();
                 if (--targetCount == 0) {
                     levelState = LevelState.SOLVED;
                 }

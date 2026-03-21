@@ -2,6 +2,7 @@ package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
+import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.core.*;
 
 public class LevelUI {

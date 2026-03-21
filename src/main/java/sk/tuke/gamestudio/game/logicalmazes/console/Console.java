@@ -1,15 +1,13 @@
 package sk.tuke.gamestudio.game.logicalmazes.console;
 
-import org.jline.reader.EndOfFileException;
-import org.jline.reader.UserInterruptException;
+import org.jline.reader.*;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import org.jline.terminal.TerminalBuilder;
-import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Attributes;
-import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
 import org.jline.utils.*;
+import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 
 import java.io.PrintWriter;
 
@@ -20,9 +18,15 @@ public class Console {
     private final LineReader lineReader;
     private final PrintWriter out;
 
-    private Attributes originalAttributes;
-
     public final Object consoleLock = new Object();
+
+    private final SoundUtil clickSound =
+            new SoundUtil("sounds/click.wav", 0.2f);
+
+    private final SoundUtil submitSound =
+            new SoundUtil("sounds/select.wav", 0.2f);
+
+    private Attributes originalAttributes;
 
     public Console() {
         try {
@@ -34,14 +38,28 @@ public class Console {
         catch (Exception e) {
             throw new RuntimeException("can not launch console");
         }
-        enterRawMode();
+
         reader = terminal.reader();
+
         lineReader = LineReaderBuilder.builder()
                 .terminal(terminal)
                 .build();
 
         this.out = terminal.writer();
-        terminal.flush();
+
+        wrapWidgetWithSound(LineReader.SELF_INSERT,          clickSound);
+        wrapWidgetWithSound(LineReader.BACKWARD_DELETE_CHAR, clickSound);
+        wrapWidgetWithSound(LineReader.ACCEPT_LINE,          submitSound);
+
+        enterRawMode();
+    }
+
+    private void wrapWidgetWithSound(String widgetName, SoundUtil sound) {
+        Widget original = lineReader.getBuiltinWidgets().get(widgetName);
+        lineReader.getWidgets().put(widgetName, () -> {
+            sound.play();
+            return original.apply();
+        });
     }
 
     public void enterRawMode() {
@@ -57,6 +75,15 @@ public class Console {
             return;
         }
         terminal.setAttributes(originalAttributes);
+    }
+
+    public String readLine(String prompt) {
+        try {
+            return lineReader.readLine(prompt);
+        }
+        catch (UserInterruptException | EndOfFileException e) {
+            return null;
+        }
     }
 
     private int readInput(long timeout) {
@@ -101,15 +128,6 @@ public class Console {
 
     public int getHeight() {
         return terminal.getHeight();
-    }
-
-    public String readLine(String prompt) {
-        try {
-            return lineReader.readLine(prompt);
-        }
-        catch (UserInterruptException | EndOfFileException e) {
-            return null;
-        }
     }
 
     public void clear() {
@@ -183,6 +201,13 @@ public class Console {
             asb.toAttributedString().print(terminal);
             terminal.flush();
         }
+    }
+
+    public void drainInput() {
+        try {
+            while (reader.read(1) != NonBlockingReader.READ_EXPIRED) {continue;}
+        }
+        catch (Exception ignored) {}
     }
 
     public void close() {
