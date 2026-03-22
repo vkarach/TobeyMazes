@@ -4,10 +4,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 public enum Level {
-    LEVEL1(1,"Level 1", Difficulty.EASY,   "levels/level_1.txt"),
-    LEVEL2(2,"Level 2", Difficulty.NORMAL, "levels/level_2.txt"),
-    LEVEL3(3,"Level 3", Difficulty.NORMAL, "levels/level_3.txt"),
-    LEVEL4(4,"Level 4", Difficulty.NORMAL, "levels/level_4.txt");
+    LEVEL_1(1,"Level 1", Difficulty.EASY,   "levels/level_1.txt"),
+    LEVEL_2(2,"Level 2", Difficulty.NORMAL, "levels/level_2.txt"),
+    LEVEL_3(3,"Level 3", Difficulty.NORMAL, "levels/level_3.txt"),
+    LEVEL_4(4,"Level 4", Difficulty.MEDIUM, "levels/level_4.txt"), // NORMAL ?
+    LEVEL_5(5,"Level 5", Difficulty.MEDIUM,   "levels/level_5.txt"),
+    LEVEL_6(6,"Level 6", Difficulty.HARD,   "levels/level_6.txt"),
+    LEVEL_7(7,"Level 7", Difficulty.NORMAL,   "levels/level_7.txt"),
+    LEVEL_8(8,"Level 8", Difficulty.MEDIUM,   "levels/level_8.txt"),
+    LEVEL_9(9,"Level 9", Difficulty.NORMAL,   "levels/level_9.txt"),
+    LEVEL_10(10,"Level 10", Difficulty.MEDIUM,   "levels/level_10.txt"),
+    LEVEL_11(11,"Level 11", Difficulty.HARD,   "levels/level_11.txt");
 
     public enum Difficulty {
         EASY, NORMAL, MEDIUM, HARD
@@ -65,8 +72,8 @@ public enum Level {
         return title;
     }
 
-    @Override
-    public String toString() {
-        return String.format("%-15s %-8s", title, difficulty);
-    }
+//    @Override
+//    public String toString() {
+//        return String.format("%-15s %-8s", title, difficulty);
+//    }
 }

@@ -62,10 +62,17 @@ public class GameMenu {
     }
 
     public enum LevelOption {
-        LEVEL1(Level.LEVEL1,   Level.LEVEL1.toString()),
-        LEVEL2(Level.LEVEL2,   Level.LEVEL2.toString()),
-        LEVEL3(Level.LEVEL3,   Level.LEVEL3.toString()),
-        LEVEL4(Level.LEVEL4,   Level.LEVEL4.toString()),
+        LEVEL_1(Level.LEVEL_1, null),
+        LEVEL_2(Level.LEVEL_2, null),
+        LEVEL_3(Level.LEVEL_3, null),
+        LEVEL_4(Level.LEVEL_4, null),
+        LEVEL_5(Level.LEVEL_5, null),
+        LEVEL_6(Level.LEVEL_6, null),
+        LEVEL_7(Level.LEVEL_7, null),
+        LEVEL_8(Level.LEVEL_8, null),
+        LEVEL_9(Level.LEVEL_9, null),
+        LEVEL_10(Level.LEVEL_10, null),
+        LEVEL_11(Level.LEVEL_11, null),
         BACK(null, "Back");
 
         private final Level level;
@@ -137,32 +144,48 @@ public class GameMenu {
         return result == null ? MenuOption.EXIT : result;
     }
 
+    private String coloredDifficulty(Level.Difficulty difficulty) {
+        String escColor = switch (difficulty) {
+            case EASY   -> "\033[32m";
+            case NORMAL -> "\033[38;5;33m";
+            case MEDIUM -> "\033[33m";
+            case HARD   -> "\033[31m";
+        };
+        return escColor + difficulty + "\033[39m";
+    }
+
+    private String formatBestTime(Long bestTimeMs) {
+        if (bestTimeMs == null) return "N/A";
+        return String.format("%d:%02d", bestTimeMs / 1000, (bestTimeMs % 1000) / 10);
+    }
+
     private LevelOption[] buildLevelOption(User currentUser) {
+        Map<Integer, Long> bestTimesByLevel = currentUser != null
+                ? bestResultService.getBestTimesByUserId(currentUser.getId())
+                : null;
+
+        // logged-in visible width: 12 + 1 + 8 + 1 + 6 + 2 = 30
+        final int titleWidth = 30;
+
         LevelOption[] options = LevelOption.values();
-        if (currentUser == null) {
-            for (LevelOption option : options) {
-                if (option.getLevel() == null) continue;
-                option.setTitle(option.getLevel().toString());
-            }
-            return options;
-        }
-
-        Map<Integer, Long> bestTimesByLevel = bestResultService.getBestTimesByUserId(currentUser.getId());
-
         for (LevelOption option : options) {
-            if (option.getLevel() == null) continue;
+            if (option.getLevel() == null) {
+                option.setTitle(String.format("%-" + (titleWidth - 1) + "s|", "Back"));
+                continue;
+            }
 
-            String str;
-            Long bestTimeMs = bestTimesByLevel.get(option.getLevel().getId());
+            String levelTitle = option.getLevel().getTitle();
+            String dif = coloredDifficulty(option.getLevel().getDifficulty());
+            int escLen = dif.length() - option.getLevel().getDifficulty().toString().length();
 
-            if (bestTimeMs != null) {
-                str = String.format("%d:%02d", bestTimeMs / 1000, (bestTimeMs % 1000) / 10);
+            if (currentUser != null) {
+                String timeStr = formatBestTime(bestTimesByLevel.get(option.getLevel().getId()));
+                option.setTitle(String.format("%-12s %-" + (8 + escLen) + "s %-6s |", levelTitle, dif, timeStr));
             }
             else {
-                str = "N/A";
+                // 12 + 1 + 16 + "|" = 30, same total visible width as logged-in
+                option.setTitle(String.format("%-16s %-" + (12 + escLen) + "s|", levelTitle, dif));
             }
-
-            option.setTitle(option.getLevel() + str);
         }
         return options;
     }
@@ -170,14 +193,34 @@ public class GameMenu {
     public Level selectLevel(User currentUser) {
         console.clear();
 
+        final String[] scrollStart = new String[] {
+                "  ________________________________  ",
+                "=(__    ___    ___   __    ___   _)=",
+                "  |                              |  "
+
+        };
+        final String[] scrollEnd = new String[] {
+                "  |                              |",
+                "  |__  __   ___     __    __  ___|",
+                "=(________________________________)="
+        };
+
         consoleRenderer.renderFromFile("uiTexts/select_level.txt");
 
         LevelOption[] options = buildLevelOption(currentUser);
 
+        int y = 24;
         if (currentUser == null) {
-            console.print("Login/Register to save your best time", selectUIX + 2, 20);
+            console.print("Login/Register to save your time/score", selectUIX - 2, y - scrollStart.length - 1);
         }
-        LevelOption selected = select(options, selectUIX, 22);
+
+        for (int i = 0; i < options.length; i++) {
+            console.print("|", selectUIX - 2, y + i);
+        }
+        consoleRenderer.renderStringList(scrollStart, selectUIX - 4, y - scrollStart.length);
+        consoleRenderer.renderStringList(scrollEnd,   selectUIX - 4, y + options.length);
+
+        LevelOption selected = select(options, "", selectUIX, y);
 
         if (selected == null || selected == LevelOption.BACK) {
             return null;
@@ -470,10 +513,14 @@ public class GameMenu {
     }
 
     private <T> T select(T[] items) {
-        return select(items, selectUIX, 20);
+        return select(items, "▶ ", selectUIX, 20);
     }
 
     private <T> T select(T[] items, int x, int y) {
+        return select(items, "▶ ", x, y);
+    }
+
+    private <T> T select(T[] items, String pointer, int x, int y) {
         int longest = getLongest(items);
 
         int choose = 0;
@@ -501,15 +548,18 @@ public class GameMenu {
             }
 
             for (int i = 0; i < items.length; i++) {
-                String str = String.format("%-" + longest + "s", items[i].toString());
+                String itemStr = items[i].toString();
+                String stripped = itemStr.replaceAll("\033\\[[\\d;]*m", "");
+                int escLen = itemStr.length() - stripped.length();
+                String str = String.format("%-" + (longest + escLen) + "s", itemStr);
                 if (i == choose) {
-                    console.print("▶ " + str,
+                    console.print(pointer + str,
                             x, y + i,
                             AttributedStyle.DEFAULT.inverse() // .blink()
                     );
                 }
                 else {
-                    console.print("  " + str, x, y + i);
+                    console.print(" ".repeat(pointer.length()) + str, x, y + i);
                 }
             }
         }
@@ -551,7 +601,8 @@ public class GameMenu {
     private <T> int getLongest(T[] items) {
         int longest = 0;
         for (T item: items) {
-            longest = Math.max(longest, item.toString().length());
+            String stripped = item.toString().replaceAll("\033\\[[\\d;]*m", "");
+            longest = Math.max(longest, stripped.length());
         }
         return longest;
     }

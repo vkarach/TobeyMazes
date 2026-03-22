@@ -1,8 +1,8 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
 public class Player {
-    private int x;
-    private int y;
+    private volatile int x;
+    private volatile int y;
 
     public Player(int x, int y) {
         setPosition(x, y);

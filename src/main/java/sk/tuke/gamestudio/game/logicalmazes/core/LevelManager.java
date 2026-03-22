@@ -8,6 +8,9 @@ import sk.tuke.gamestudio.game.logicalmazes.console.LevelUI;
 import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 import sk.tuke.gamestudio.service.BestResultService;
 
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Component
 public class LevelManager {
     private final Console console;
@@ -21,7 +24,7 @@ public class LevelManager {
     private Level currentLevel;
     private Field gameField;
     private Player player;
-    private int targetCount;
+    private volatile int targetCount;
 
     public LevelManager(Console console, BestResultService bestResultService, ConsoleRenderer consoleRenderer) {
         this.console = console;
@@ -74,7 +77,7 @@ public class LevelManager {
             }
             case HARD   -> {
                 maxPoints = 5000;
-                kTime = 250;
+                kTime = 150;
                 kStep = 50;
             }
             default -> {
@@ -98,65 +101,71 @@ public class LevelManager {
 
     private LevelResult startLevel() {
         long startTime = System.nanoTime();
-        long elapsedNs = 0;
         int x = (console.getWidth() / 2) - (gameField.getRowCount() * 3);
         int y = 20;
         int lowerBoundPad = gameField.getRowCount() * 2;
-        int hudPadX = gameField.getRowCount() * 3 + 5;
+        int hudX = x + gameField.getRowCount() * 3 + 5;
         int konekTobeyPadY = lowerBoundPad - consoleRenderer.getRenderFromFileSize("uiTexts/konek_tobey.txt").height() + 1;
 
         console.clear();
         consoleRenderer.renderFromFile("uiTexts/game_title.txt");
-        consoleRenderer.renderFromFile(
-                "uiTexts/konek_tobey.txt",
-                x + hudPadX,
-                y + konekTobeyPadY,
-                true
-        );
+        consoleRenderer.renderFromFile("uiTexts/konek_tobey.txt", hudX, y + konekTobeyPadY, true);
 
-        int stepCont = 0;
-
+        AtomicInteger stepCont = new AtomicInteger(0);
         GameController controller = new GameController(gameField, player);
-
-
         LevelState levelState = LevelState.PLAYING;
-        while (levelState == LevelState.PLAYING) {
-            elapsedNs = System.nanoTime() - startTime;
 
+        // render every 100 ms regardless of input
+        ScheduledExecutorService renderScheduler = Executors.newSingleThreadScheduledExecutor();
+        renderScheduler.scheduleAtFixedRate(() -> {
+            long elapsed = System.nanoTime() - startTime;
+            levelUI.renderHud(startTime, targetCount, computePoints(elapsed, stepCont.get(), currentLevel.getDifficulty()), hudX, y);
+            levelUI.renderGameField(gameField, player, x, y);
+            levelUI.renderTips(x, y + lowerBoundPad + 2);
+        }, 0, 75, TimeUnit.MILLISECONDS);
+
+        while (levelState == LevelState.PLAYING) {
             InputType inputType = console.readAction();
 
-            if (inputType == InputType.QUIT) {
-                levelState = LevelState.EXITED;
-            }
-            if (inputType == InputType.RELOAD) {
-                loadLevel(currentLevel.getFilepath());
-                return startLevel();
-            }
-            else if (inputType != InputType.NONE) {
-                if (controller.onInput(Direction.InputToDirection(inputType))) {
-                    stepCont++;
+            switch (inputType) {
+                case QUIT -> levelState = LevelState.EXITED;
+                case RELOAD -> {
+                    stopScheduler(renderScheduler);
+                    controller.shutdown();
+                    loadLevel(currentLevel.getFilepath());
+                    return startLevel();
                 }
+                case UP, DOWN, LEFT, RIGHT -> {
+                    if (controller.onInput(Direction.InputToDirection(inputType))) {
+                        stepCont.incrementAndGet();
+                    }
+                }
+                case NONE -> {}
             }
 
             if (gameField.takeTarget(player)) {
                 pickupSound.play();
-                if (--targetCount == 0) {
+                if (targetCount-- == 1) {
                     levelState = LevelState.SOLVED;
                 }
             }
-
-            levelUI.renderHud(
-                    startTime,
-                    targetCount,
-                    computePoints(elapsedNs, stepCont, currentLevel.getDifficulty()),
-                    x + hudPadX, y
-            );
-            levelUI.renderGameField(gameField, player, x, y);
-            levelUI.renderTips(x, y + lowerBoundPad + 2);
         }
+
+        stopScheduler(renderScheduler);
         controller.shutdown();
 
-        return new LevelResult(levelState, stepCont, elapsedNs);
+        return new LevelResult(levelState, stepCont.get(), System.nanoTime() - startTime);
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void stopScheduler(ScheduledExecutorService scheduler) {
+        scheduler.shutdownNow();
+        try {
+            scheduler.awaitTermination(200, TimeUnit.MILLISECONDS);
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public boolean checkAndUpdateBestTime(int userId, int levelId, int playedTimeMs) {
