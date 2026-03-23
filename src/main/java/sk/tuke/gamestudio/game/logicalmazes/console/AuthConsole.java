@@ -4,6 +4,7 @@ import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.User;
+import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 import sk.tuke.gamestudio.service.AuthService;
 
 @Component
@@ -13,6 +14,8 @@ public class AuthConsole {
     private final ConsoleRenderer consoleRenderer;
     private final Notifier notifier;
     private final InputHelper inputHelper;
+
+    private final SoundUtil confirmSound = new SoundUtil("sounds/confirm.wav");
 
     public AuthConsole(Console console, AuthService authService, ConsoleRenderer consoleRenderer, InputHelper inputHelper, Notifier notifier) {
         this.console = console;
@@ -100,7 +103,7 @@ public class AuthConsole {
         console.print("Enter the code below to confirm password change.", x, ++y);
 
         y+=2;
-        if (!verifyCode(code, x, y)) return register(); // ???
+        if (!verifyCode(code, x, y)) return register();
 
         for (int i = 0; i < 10; i++) {
             console.clearLine(100, x, y + i);
@@ -111,14 +114,10 @@ public class AuthConsole {
         User user = authService.register(name, password, email);
 
         loadAnim.interrupt();
-//        if (user == null) {
-//            notifier.showError("User with this name already exists", x, y);
-//            register();
-//            console.enterRawMode();
-//            return null;
-//        }
 
         authService.expireEmail(email);
+
+        confirmSound.play();
 
         AttributedStringBuilder sb = new AttributedStringBuilder();
         sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.getName());
@@ -157,6 +156,8 @@ public class AuthConsole {
             return login();
         }
 
+        confirmSound.play();
+
         AttributedStringBuilder sb = new AttributedStringBuilder();
         sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW)).append(user.getName());
         sb.style(AttributedStyle.DEFAULT).append(", love to see ya again :)");
@@ -174,14 +175,14 @@ public class AuthConsole {
 
         int x = 20, y = 20;
 
+        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 75, x, y);
+        int code = authService.getOrCreateEmailVerificationCode(userId);
+        loadAnim.interrupt();
+
         console.print("We've sent a verification code to your email.", x, y++);
 
         console.print("Enter the code below to confirm password change.", x, y);
         y+=2;
-
-        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 75, x, y);
-        int code = authService.getOrCreateEmailVerificationCode(userId);
-        loadAnim.interrupt();
 
         if (!verifyCode(code, x, y++)) return;
 
@@ -190,6 +191,8 @@ public class AuthConsole {
         y+=2;
 
         authService.changePassword(userId, newPassword);
+
+        confirmSound.play();
 
         AttributedStringBuilder sb = new AttributedStringBuilder();
         sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN)).append("✓");

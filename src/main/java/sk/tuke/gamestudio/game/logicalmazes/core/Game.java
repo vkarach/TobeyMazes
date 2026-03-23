@@ -5,16 +5,25 @@ import sk.tuke.gamestudio.game.logicalmazes.console.AuthConsole;
 import sk.tuke.gamestudio.game.logicalmazes.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
 import sk.tuke.gamestudio.entity.User;
+import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 import sk.tuke.gamestudio.service.*;
 
 @Component
 public class Game {
+    public static final String version = "0.7.40";
+    public static final String author = "Valentyn";
+
     private final Console console;
     private final GameMenu gameMenu;
     private final LevelManager levelManager;
     private final AuthService authService;
     private final AuthConsole authConsole;
     private final ReviewService reviewService;
+
+    private final SoundUtil backgroundLoop =
+            new SoundUtil("sounds/jazz_loop.wav", 0.1f);
+    private final SoundUtil playLoop = new SoundUtil("sounds/energizing_music_loop.wav", 0.05f);
+    private final SoundUtil winSound = new SoundUtil("sounds/level_win.wav", 0.1f);
 
     private User currentUser;
 
@@ -38,6 +47,9 @@ public class Game {
         levelService.syncLevelsFromEnum(Level.class);
 
         this.currentUser = authService.getUserBySessionToken();
+        backgroundLoop.loop();
+
+        gameMenu.selectLevel(currentUser);
     }
 
     public void launch() {
@@ -56,6 +68,7 @@ public class Game {
     }
 
     public void exit() {
+        backgroundLoop.stop();
         console.clear();
         console.setCursorPosition(0, 0);
         console.print("exiting...\n");
@@ -68,10 +81,17 @@ public class Game {
             if (level == null) {
                 break;
             }
+            backgroundLoop.reset();
+            backgroundLoop.stop();
 
+            playLoop.loop();
             LevelManager.LevelResult playedResult = levelManager.playLevel(level);
+            playLoop.reset();
+            playLoop.stop();
 
+            backgroundLoop.loop();
             if (playedResult.levelState() == LevelState.SOLVED) {
+                winSound.play();
                 int score = levelManager.computePoints(
                         playedResult.playedTimeNs(),
                         playedResult.stepCount(),

@@ -1,4 +1,6 @@
-Game made by Valentyn.
-This is my fourth game.
-It is written in Java and runs in the terminal using the JLine library.
+TobeyMazes PURPLEv%sOFF
+
+A terminal-based maze game built with Java and JLine.
+Made by YELLOW%sOFF — this is my fourth game.
+
 Thanks for participating in beta testing :)

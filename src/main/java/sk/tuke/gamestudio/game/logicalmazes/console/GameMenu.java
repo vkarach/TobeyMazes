@@ -4,6 +4,7 @@ import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.*;
+import sk.tuke.gamestudio.game.logicalmazes.core.Game;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import sk.tuke.gamestudio.game.logicalmazes.core.Level;
 import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
@@ -13,6 +14,7 @@ import sk.tuke.gamestudio.service.ReviewService;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 @Component
 public class GameMenu {
@@ -24,6 +26,8 @@ public class GameMenu {
 
     private final SoundUtil enterSound = new SoundUtil("sounds/enter.wav");
     private final SoundUtil navigationSound = new SoundUtil("sounds/navigate.wav");
+    private final SoundUtil bell = new SoundUtil("sounds/bell.wav");
+
 
     private final int selectUIX = 30;
 
@@ -119,6 +123,9 @@ public class GameMenu {
     public MenuOption launch() {
         console.clear();
 
+        String versionText = String.format("Beta v%s", Game.version);
+        console.print(versionText, console.getWidth() - versionText.length(), console.getHeight() - 1);
+
         consoleRenderer.renderFromFile("uiTexts/game_title.txt");
         Thread anim = new KonekTobeyAnimation(console, consoleRenderer).startKonekTobeyAnimation(80, 20);
 
@@ -193,6 +200,25 @@ public class GameMenu {
     public Level selectLevel(User currentUser) {
         console.clear();
 
+        consoleRenderer.renderFromFile("uiTexts/konek_tobey_big.txt", 75, 0);
+
+        String[] files = new String[] {
+                "uiTexts/frames/hardcore_frame.txt",
+                "uiTexts/frames/ready_frame.txt",
+                "uiTexts/frames/u_got_this_frame.txt",
+                "uiTexts/frames/braining_frame.txt",
+        };
+        Random random = new Random();
+
+        Thread anim = null;
+        if (random.nextInt(25) == 0) { // 15-25 I think
+            anim = consoleRenderer.renderAnimation("uiTexts/frames/brosky_anim.txt", 50, 127, 8);
+        }
+        else {
+            String randomFile = files[random.nextInt(files.length)];
+            consoleRenderer.renderFromFile(randomFile, 127, 8);
+        }
+
         final String[] scrollStart = new String[] {
                 "  ________________________________  ",
                 "=(__    ___    ___   __    ___   _)=",
@@ -222,6 +248,9 @@ public class GameMenu {
 
         LevelOption selected = select(options, "", selectUIX, y);
 
+        if (anim != null) {
+            anim.interrupt();
+        }
         if (selected == null || selected == LevelOption.BACK) {
             return null;
         }
@@ -256,7 +285,7 @@ public class GameMenu {
 
         Review review = reviewService.getReview(currentUser.getId());
         if (review != null) {
-            String reviewText = String.format("%d★ %s", review.getRating(), !review.getComment().isEmpty() ? review.getComment() : "without getComment");
+            String reviewText = String.format("%d★ %s", review.getRating(), !review.getComment().isEmpty() ? review.getComment() : "(without comment)");
             console.print("You already rated the game:", selectUIX, y);
             console.print(reviewText, selectUIX, y + 1);
             String selected = select(new String[] { "Edit", "Back" }, selectUIX, y + 3);
@@ -294,7 +323,9 @@ public class GameMenu {
 
         printRating(reviewService, 65, y - 1);
 
-        console.print("Thank you for your feedback!", selectUIX, y + 3); // update overall getRating ?
+        // todo: confirmSound.play()
+
+        console.print("Thank you for your feedback!", selectUIX, y + 3);
         fakeChoose(selectUIX, y + 5);
     }
 
@@ -302,9 +333,11 @@ public class GameMenu {
         console.clear();
 
         consoleRenderer.renderFromFile("uiTexts/about_title.txt");
-        consoleRenderer.renderFromFile("uiTexts/about_text.txt", 0, 10);
 
-        fakeChoose();
+        int x = 10;
+        consoleRenderer.renderFromFile("uiTexts/about_text.txt", x, 12, false, Game.version, Game.author);
+
+        fakeChoose(x, 20);
     }
 
     public ProfileOption guestProfilePage() {
@@ -335,7 +368,7 @@ public class GameMenu {
         String score = String.format("Your score: %d", bestScore != null ? bestScore : 0);
 
         consoleRenderer.renderFromFile("uiTexts/konek_tobey_big.txt", 75, 0);
-        consoleRenderer.renderFromFile("uiTexts/hello_there_cloude.txt", 127, 8);
+        consoleRenderer.renderFromFile("uiTexts/frames/hello_there_frame.txt", 127, 8);
 
         int x = 20, y = 20;
         console.print(horzBound, x, y++);
@@ -435,7 +468,7 @@ public class GameMenu {
         List<UserScore> topUserScores = bestResultService.getTopByScore();
         if (topUserScores.isEmpty()) {
             console.print("No one here yet :(", 30, 13);
-            fakeChoose();
+            fakeChoose(selectUIX, 15);
             return;
         }
         String bestUserName = topUserScores.getFirst().userName();
@@ -498,10 +531,6 @@ public class GameMenu {
         y += scrollEnd.length;
 
         fakeChoose(x, y + 2);
-    }
-
-    private void fakeChoose() {
-        fakeChoose(selectUIX, 15, "Back");
     }
 
     private void fakeChoose(int x, int y) {
@@ -576,13 +605,28 @@ public class GameMenu {
             "", "😠", "😞", "😐", "🙂", "🤩"
         };
 
+        boolean plusRating = true;
+        int combo = 0;
         while (true) {
             InputType input = console.readAction();
 
             switch (input) {
-                case RIGHT -> rating = rating < 5 ? rating + 1 : rating;
-                case LEFT  -> rating = rating > 1 ? rating - 1 : rating;
-                case ENTER -> { return rating; }
+                case RIGHT -> {
+                    if (rating < 5) {
+                        rating = rating + 1;
+                        bell.play();
+                    }
+                }
+                case LEFT  -> {
+                    if (rating > 1) {
+                        rating = rating - 1;
+                        bell.play();
+                    }
+                }
+                case ENTER -> {
+                    enterSound.play();
+                    return rating;
+                }
                 case QUIT  -> { return null; }
             }
 

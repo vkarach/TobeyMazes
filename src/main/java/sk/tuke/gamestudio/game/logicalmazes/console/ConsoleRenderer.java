@@ -17,6 +17,7 @@ public class  ConsoleRenderer {
         this.console = console;
         replacers.put("\\033", "\033");
         replacers.put("YELLOW", "\033[33m");
+        replacers.put("PURPLE", "\033[38;5;141m");
         replacers.put("OFF", "\033[0m");
         replacers.put("END", "");
     }
@@ -48,18 +49,27 @@ public class  ConsoleRenderer {
     }
 
     public void renderFromFile(String filepath) {
-        renderFromFile(filepath, 0, 0, false);
+        renderFromFile(filepath, 0, 0, false, new Object[]{});
     }
 
     public void renderFromFile(String filepath, int x, int y) {
-        renderFromFile(filepath, x, y, false);
+        renderFromFile(filepath, x, y, false, new Object[]{});
     }
 
     public void renderFromFile(String filepath, int x, int y, boolean reverse) {
+        renderFromFile(filepath, x, y, reverse, new Object[]{});
+    }
+
+    public void renderFromFile(String filepath, int x, int y, boolean reverse, Object... params) {
         List<String> lines = FileReader.readFileLines(filepath);
-        for (int i = 0; i < lines.size(); i++) {
-            String line = lines.get(i);
-            line = parseString(line);
+        String full = String.join("\n", lines);
+        if (params.length > 0) {
+            full = String.format(full, params);
+        }
+        String[] formatted = full.split("\n", -1);
+
+        for (int i = 0; i < formatted.length; i++) {
+            String line = parseString(formatted[i]);
             if (reverse) {
                 line = mirrorLine(line);
             }

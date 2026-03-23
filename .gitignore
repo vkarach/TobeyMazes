@@ -1,5 +1,6 @@
 *.iml
 .idea
 target
-*.wav
+uiSounds
+interfaceSounds
 tools

@@ -1,9 +1,6 @@
 package sk.tuke.gamestudio.game.logicalmazes.utils;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -101,12 +98,22 @@ public class SoundUtil {
         }
     }
 
+    private Clip getClip() {
+        Clip clip = clips[poolIndex];
+        poolIndex = (poolIndex + 1) % POOL_SIZE;
+        return clip;
+    }
+
+    public void reset() {
+        Clip clip = getClip();
+        clip.setFramePosition(0);
+    }
+
     public void play(float volume) {
         if (clips[0] == null) return;
         localVolume = volume;
 
-        Clip clip = clips[poolIndex];
-        poolIndex = (poolIndex + 1) % POOL_SIZE;
+        Clip clip = getClip();
 
         setVolume(clip, localVolume * volumeCoef);
         clip.stop();
