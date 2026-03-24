@@ -43,7 +43,6 @@ public class MapParser {
     private Tile[][] parseMapTiles(List<String> lines, int width, int height) {
         int i = indexOfLineContains(lines, "TILES");
         int start = i + 1;
-//        int end = startLaunchLevel + height; // <-- todo: legal format check
         Tile[][] tiles = new Tile[height][width];
         for (int row = 0; row < height; row++) {
             String line = lines.get(start + row);
@@ -86,7 +85,6 @@ public class MapParser {
     private boolean[][] parseVertWalls(List<String> lines, int width, int height) {
         int i = indexOfLineContains(lines, "VERT");
         int start = i + 1;
-//        int end = startLaunchLevel + height; // <-- todo: legal format check
         boolean[][] vWalls = new boolean[height][width + 1];
         for (int row = 0; row < height; row++) {
             String line = lines.get(start + row);
@@ -109,7 +107,6 @@ public class MapParser {
     private boolean[][] parseHorzWalls(List<String> lines, int width, int height) {
         int i = indexOfLineContains(lines, "HORZ");
         int start = i + 1;
-//        int end = startLaunchLevel + height; // <-- todo: legal format check
         boolean[][] hWalls = new boolean[height + 1][width];
         for (int row = 0; row < height + 1; row++) {
             String line = lines.get(start + row);

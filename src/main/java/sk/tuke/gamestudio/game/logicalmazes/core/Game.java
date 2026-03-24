@@ -10,7 +10,7 @@ import sk.tuke.gamestudio.service.*;
 
 @Component
 public class Game {
-    public static final String version = "0.7.40";
+    public static final String version = "0.7.42";
     public static final String author = "Valentyn";
 
     private final Console console;
@@ -20,8 +20,7 @@ public class Game {
     private final AuthConsole authConsole;
     private final ReviewService reviewService;
 
-    private final SoundUtil backgroundLoop =
-            new SoundUtil("sounds/jazz_loop.wav", 0.1f);
+    private final SoundUtil backgroundLoop = new SoundUtil("sounds/jazz_loop.wav", 0.1f);
     private final SoundUtil playLoop = new SoundUtil("sounds/energizing_music_loop.wav", 0.05f);
     private final SoundUtil winSound = new SoundUtil("sounds/level_win.wav", 0.1f);
 

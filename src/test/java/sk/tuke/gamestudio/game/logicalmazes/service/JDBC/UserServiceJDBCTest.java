@@ -124,6 +124,4 @@ public class UserServiceJDBCTest {
 
         userService.deleteUserByName(userName); // cleanup
     }
-
-    // todo: test getUserIdBySessionToken, getSessionTokenByUserId, updateSessionTokenExpireDate
 }

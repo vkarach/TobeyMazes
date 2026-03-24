@@ -60,14 +60,7 @@ public class BestResultServiceJPA implements BestResultService {
         return bestLevelResultRepository.getTopTenUsers(PageRequest.of(0, 10));
     }
 
-    public Map<Integer, Long> getBestTimesByUserId(int userId) {
-        List<BestLevelResult> bestResults = bestLevelResultRepository.getBestResultsByUserId(userId);
-
-        Map<Integer, Long> bestTimes = new HashMap<>();
-        for (BestLevelResult br : bestResults) {
-            bestTimes.put(br.getId().getLevelId(), br.getBestTimeMs());
-        }
-
-        return bestTimes;
+    public List<BestLevelResult> getBestResultsByUserId(int userId) {
+        return bestLevelResultRepository.getBestResultsByUserId(userId);
     }
 }

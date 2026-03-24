@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.service;
 
+import sk.tuke.gamestudio.entity.BestLevelResult;
 import sk.tuke.gamestudio.entity.UserScore;
 import sk.tuke.gamestudio.service.exception.BestResultException;
 
@@ -13,5 +14,5 @@ public interface BestResultService {
     Integer getBestScore(int userId, int levelId) throws BestResultException;
     Integer getBestOverallScore(int userId) throws BestResultException;
     List<UserScore> getTopByScore() throws BestResultException;
-    Map<Integer, Long> getBestTimesByUserId(int userId) throws BestResultException; // levelId -> timeMs
+    List<BestLevelResult> getBestResultsByUserId(int userId) throws BestResultException; // levelId -> timeMs
 }

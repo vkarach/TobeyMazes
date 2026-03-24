@@ -1,5 +1,7 @@
 package sk.tuke.gamestudio.service.impl.JDBC;
 
+import sk.tuke.gamestudio.entity.BestLevelResult;
+import sk.tuke.gamestudio.game.logicalmazes.core.LevelManager;
 import sk.tuke.gamestudio.service.BestResultService;
 import sk.tuke.gamestudio.service.exception.BestResultException;
 import sk.tuke.gamestudio.entity.UserScore;
@@ -44,8 +46,8 @@ public class BestResultServiceJDBC implements BestResultService {
     public static final String GET_OVERALL_SCORE =
             "SELECT SUM(best_score) AS overall_score FROM best_level_results WHERE user_id = ?";
 
-    public static final String GET_ALL_BEST_TIMES =
-            "SELECT level_id, best_time_ms FROM best_level_results WHERE user_id = ?";
+    public static final String GET_ALL_BEST_SCORE_AND_TIME =
+            "SELECT level_id, best_score, best_time_ms FROM best_level_results WHERE user_id = ?";
 
     @Override
     public void updateBestTime(int userId, int levelId, long timeMs) {
@@ -157,21 +159,26 @@ public class BestResultServiceJDBC implements BestResultService {
     }
 
     @Override
-    public Map<Integer, Long> getBestTimesByUserId(int userId) {
-        Map<Integer, Long> bestTimes = new HashMap<>();
+    public List<BestLevelResult> getBestResultsByUserId(int userId) {
+        List<BestLevelResult> bestResults = new ArrayList<>();
 
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement statement = connection.prepareStatement(GET_ALL_BEST_TIMES)
+             PreparedStatement statement = connection.prepareStatement(GET_ALL_BEST_SCORE_AND_TIME)
         ) {
             statement.setInt(1, userId);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    bestTimes.put(
-                            rs.getInt("level_id"),
-                            rs.getLong("best_time_ms")
-                    );
+                    int levelId = rs.getInt("level_id");
+                    int bestScore = rs.getInt("best_score");
+                    long bestTime = rs.getLong("best_time_ms");
+
+                    BestLevelResult bestLevelResult = new BestLevelResult(userId, levelId);
+                    bestLevelResult.setBestScore(bestScore);
+                    bestLevelResult.setBestTimeMs(bestTime);
+
+                    bestResults.add(bestLevelResult);
                 }
-                return bestTimes;
+                return bestResults;
             }
         }
         catch (SQLException e) {

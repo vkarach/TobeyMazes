@@ -13,7 +13,6 @@ import sk.tuke.gamestudio.service.ReviewService;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 @Component
@@ -27,7 +26,7 @@ public class GameMenu {
     private final SoundUtil enterSound = new SoundUtil("sounds/enter.wav");
     private final SoundUtil navigationSound = new SoundUtil("sounds/navigate.wav");
     private final SoundUtil bell = new SoundUtil("sounds/bell.wav");
-
+    private final SoundUtil confirmSound = new SoundUtil("sounds/confirm.wav");
 
     private final int selectUIX = 30;
 
@@ -167,12 +166,12 @@ public class GameMenu {
     }
 
     private LevelOption[] buildLevelOption(User currentUser) {
-        Map<Integer, Long> bestTimesByLevel = currentUser != null
-                ? bestResultService.getBestTimesByUserId(currentUser.getId())
+        List<BestLevelResult> bestResultsByUser = currentUser != null
+                ? bestResultService.getBestResultsByUserId(currentUser.getId())
                 : null;
 
-        // logged-in visible width: 12 + 1 + 8 + 1 + 6 + 2 = 30
-        final int titleWidth = 30;
+        // logged-in visible width: 12 + 1 + 8 + 1 + 8 + 1 + 6 + 2 = 39
+        final int titleWidth = 39;
 
         LevelOption[] options = LevelOption.values();
         for (LevelOption option : options) {
@@ -186,12 +185,20 @@ public class GameMenu {
             int escLen = dif.length() - option.getLevel().getDifficulty().toString().length();
 
             if (currentUser != null) {
-                String timeStr = formatBestTime(bestTimesByLevel.get(option.getLevel().getId()));
-                option.setTitle(String.format("%-12s %-" + (8 + escLen) + "s %-6s |", levelTitle, dif, timeStr));
+                String scoreStr = "---";
+                String timeStr = "---";
+                for (BestLevelResult br : bestResultsByUser) {
+                    if (br.getId().getLevelId() == option.getLevel().getId()) {
+                        scoreStr = "" + br.getBestScore();
+                        timeStr = formatBestTime(br.getBestTimeMs());
+                        break;
+                    }
+                }
+                option.setTitle(String.format("%-12s %-" + (8 + escLen) + "s %-8s %-6s |", levelTitle, dif, scoreStr, timeStr));
             }
             else {
-                // 12 + 1 + 16 + "|" = 30, same total visible width as logged-in
-                option.setTitle(String.format("%-16s %-" + (12 + escLen) + "s|", levelTitle, dif));
+                option.setTitle(String.format("%-12s %-" + (8 + escLen) + "s %-8s %-6s |",
+                        levelTitle, dif, "---", "---"));
             }
         }
         return options;
@@ -211,7 +218,7 @@ public class GameMenu {
         Random random = new Random();
 
         Thread anim = null;
-        if (random.nextInt(25) == 0) { // 15-25 I think
+        if (random.nextInt(20) == 0) { // 15-25 I think
             anim = consoleRenderer.renderAnimation("uiTexts/frames/brosky_anim.txt", 50, 127, 8);
         }
         else {
@@ -220,15 +227,15 @@ public class GameMenu {
         }
 
         final String[] scrollStart = new String[] {
-                "  ________________________________  ",
-                "=(__    ___    ___   __    ___   _)=",
-                "  |                              |  "
+                "  _________________________________________  ",
+                "=(__    ___    ____   __     ___    ___   _)=",
+                "  |                                       |  "
 
         };
         final String[] scrollEnd = new String[] {
-                "  |                              |",
-                "  |__  __   ___     __    __  ___|",
-                "=(________________________________)="
+                "  |                                       |",
+                "  |__  __   ___     __    __     ___   ___|",
+                "=(_________________________________________)="
         };
 
         consoleRenderer.renderFromFile("uiTexts/select_level.txt");
@@ -245,6 +252,8 @@ public class GameMenu {
         }
         consoleRenderer.renderStringList(scrollStart, selectUIX - 4, y - scrollStart.length);
         consoleRenderer.renderStringList(scrollEnd,   selectUIX - 4, y + options.length);
+        console.print(String.format("%-12s %-8s %-8s %-6s", "Level", "Diff", "Score", "Time"),
+                selectUIX, y - 1, AttributedStyle.DEFAULT.foreground(245));
 
         LevelOption selected = select(options, "", selectUIX, y);
 
@@ -323,7 +332,7 @@ public class GameMenu {
 
         printRating(reviewService, 65, y - 1);
 
-        // todo: confirmSound.play()
+         confirmSound.play();
 
         console.print("Thank you for your feedback!", selectUIX, y + 3);
         fakeChoose(selectUIX, y + 5);
@@ -365,7 +374,7 @@ public class GameMenu {
 
         String horzBound = "+" + "-".repeat(25) + "+";
         String name = String.format("Name: %s", user.getName());
-        String score = String.format("Your score: %d", bestScore != null ? bestScore : 0);
+        String score = String.format("Overall score: %d", bestScore != null ? bestScore : 0);
 
         consoleRenderer.renderFromFile("uiTexts/konek_tobey_big.txt", 75, 0);
         consoleRenderer.renderFromFile("uiTexts/frames/hello_there_frame.txt", 127, 8);

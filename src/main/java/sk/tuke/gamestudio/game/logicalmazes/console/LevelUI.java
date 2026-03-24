@@ -31,17 +31,17 @@ public class LevelUI {
     }
 
     private void renderHorizontalWallLine(boolean[][] hWalls, int rowIndex, int colCount, int x, int y) {
-        console.setCursorPosition(x, y);
+        AttributedStringBuilder sb = new AttributedStringBuilder();
         for (int col = 0; col < colCount; col++) {
-            console.print("+", crossWallStyle);
+            sb.style(crossWallStyle).append('+');
             if (hWalls[rowIndex][col]) {
-                console.print("--", wallStyle);
+                sb.style(wallStyle).append("--");
             } else {
-                console.print("  ");
+                sb.style(AttributedStyle.DEFAULT).append("  ");
             }
         }
-        console.print("+", crossWallStyle);
-        console.print('\n');
+        sb.style(crossWallStyle).append('+');
+        console.print(sb, x, y);
     }
 
     private String formatTimerString(long startTime) {
@@ -134,16 +134,14 @@ public class LevelUI {
             renderHorizontalWallLine(hWalls, row, colCount, x, yHoriz);
 
             // vertical walls + tiles line
-            int cx = x;
+            AttributedStringBuilder sb = new AttributedStringBuilder();
 
             for (int col = 0; col < colCount; col++) {
-                // left vertical wall for this cell
                 if (vWalls[row][col]) {
-                    console.print("|", cx, yCells, wallStyle);
+                    sb.style(wallStyle).append('|');
                 } else {
-                    console.print(" ", cx, yCells);
+                    sb.style(AttributedStyle.DEFAULT).append(' ');
                 }
-                cx += 1;
 
                 Tile tile = tiles[row][col];
 
@@ -160,18 +158,18 @@ public class LevelUI {
                     style = textStyle;
                 }
 
-                // cell content width = 2 chars (same as "c + space")
-                console.print(String.valueOf(c), cx, yCells, style);
-                console.print(" ", cx + 1, yCells);
-                cx += 2;
+                sb.style(style).append(c);
+                sb.style(AttributedStyle.DEFAULT).append(' ');
             }
 
             // right outer wall
             if (vWalls[row][colCount]) {
-                console.print("|", cx, yCells, wallStyle);
+                sb.style(wallStyle).append('|');
             } else {
-                console.print(" ", cx, yCells);
+                sb.style(AttributedStyle.DEFAULT).append(' ');
             }
+
+            console.print(sb, x, yCells);
         }
 
         // bottom horizontal line

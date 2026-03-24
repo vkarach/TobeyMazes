@@ -2,6 +2,7 @@ package sk.tuke.gamestudio.game.logicalmazes.service.JPA;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import sk.tuke.gamestudio.entity.BestLevelResult;
 import sk.tuke.gamestudio.entity.UserScore;
 import sk.tuke.gamestudio.service.BestResultService;
 import sk.tuke.gamestudio.service.UserService;
@@ -63,16 +64,21 @@ public class BestResultServiceJPATest extends BaseJPATest {
     }
 
     @Test
-    public void getBestTimesByUserIdTest() {
+    public void getBestResultsByUserIdTest() {
         int userId = createUser();
 
         bestResultService.updateBestTime(userId, 1, 4000L);
         bestResultService.updateBestTime(userId, 2, 6000L);
 
-        Map<Integer, Long> times = bestResultService.getBestTimesByUserId(userId);
-        assertEquals(2, times.size());
-        assertEquals(4000L, times.get(1));
-        assertEquals(6000L, times.get(2));
+        List<BestLevelResult> bestResults = bestResultService.getBestResultsByUserId(userId);
+
+        assertEquals(2, bestResults.size());
+
+        long time1 = bestResults.stream().filter(r -> r.getId().getLevelId() == 1).findFirst().orElseThrow().getBestTimeMs();
+        long time2 = bestResults.stream().filter(r -> r.getId().getLevelId() == 2).findFirst().orElseThrow().getBestTimeMs();
+
+        assertEquals(4000L, time1);
+        assertEquals(6000L, time2);
     }
 
     @Test

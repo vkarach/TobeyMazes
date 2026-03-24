@@ -152,9 +152,13 @@ public class Console {
         }
     }
 
+    private void moveCursor(int x, int y) {
+        terminal.puts(InfoCmp.Capability.cursor_address, y, x);
+    }
+
     public void setCursorPosition(int x, int y) {
         synchronized (consoleLock) {
-            terminal.puts(InfoCmp.Capability.cursor_address, y, x);
+            moveCursor(x, y);
             terminal.flush();
         }
     }
@@ -175,8 +179,9 @@ public class Console {
 
     public void print(String text, int x, int y) {
         synchronized (consoleLock) {
-            setCursorPosition(x, y);
-            print(text);
+            moveCursor(x, y);
+            out.print(text);
+            terminal.flush();
         }
     }
 
@@ -189,15 +194,15 @@ public class Console {
 
     public void print(String text, int x, int y, AttributedStyle style) {
         synchronized (consoleLock) {
-            setCursorPosition(x, y);
-            print(text, style);
+            moveCursor(x, y);
+            new AttributedString(text, style).print(terminal);
+            terminal.flush();
         }
     }
 
     public void print(AttributedStringBuilder asb, int x, int y) {
         synchronized (consoleLock) {
-            setCursorPosition(x, y);
-
+            moveCursor(x, y);
             asb.toAttributedString().print(terminal);
             terminal.flush();
         }
