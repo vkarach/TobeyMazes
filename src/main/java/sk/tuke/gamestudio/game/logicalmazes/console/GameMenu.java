@@ -269,7 +269,7 @@ public class GameMenu {
 
     private void printRating(ReviewService reviewService, int x, int y) {
         float overallRating = reviewService.getOverallRating();
-        String ratingText = String.format("Overall getRating: %s",
+        String ratingText = String.format("Overall rating: %s",
                 overallRating > 0 ? String.format("%.2f", overallRating) : "no one rated yet"
         );
         console.print(ratingText, x, y);
@@ -284,7 +284,7 @@ public class GameMenu {
 
         int y = 21;
 
-        printRating(reviewService, 65, y - 1);
+        printRating(reviewService, 65, y);
 
         if (currentUser == null) {
             console.print("Login to rate the game", selectUIX, y);
@@ -330,7 +330,7 @@ public class GameMenu {
         console.clearLine(selectUIX, y + 1);
         console.print(commentText, selectUIX, y + 1);
 
-        printRating(reviewService, 65, y - 1);
+        printRating(reviewService, 65, y);
 
          confirmSound.play();
 

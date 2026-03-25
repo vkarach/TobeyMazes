@@ -6,10 +6,6 @@ import sk.tuke.gamestudio.service.exception.EmailException;
 import java.sql.*;
 
 public class EmailVerificationServiceJDBC implements EmailVerificationService {
-    public static final String URL = "jdbc:postgresql://localhost/gamestudio";
-    public static final String USER = "postgres";
-    public static final String PASSWORD = "as2368";
-
     public static final String SELECT_EMAIL_CODE_BY_USER_ID =
             "SELECT email_code FROM verification_emails WHERE email = ? " +
                     "AND expire_at > CURRENT_TIMESTAMP";
@@ -24,7 +20,7 @@ public class EmailVerificationServiceJDBC implements EmailVerificationService {
     @Override
     public Integer getCodeByEmail(String email) {
         try (
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = ConnectionManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(SELECT_EMAIL_CODE_BY_USER_ID)
         ) {
             statement.setString(1, email);
@@ -43,7 +39,7 @@ public class EmailVerificationServiceJDBC implements EmailVerificationService {
     @Override
     public void saveEmailVerificationCode(String email, int code) {
         try (
-                Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                Connection connection = ConnectionManager.getConnection();
                 PreparedStatement statement = connection.prepareStatement(INSERT_EMAIL_CODE_AND_EMAIL)
         ) {
             statement.setString(1, email);
@@ -58,7 +54,7 @@ public class EmailVerificationServiceJDBC implements EmailVerificationService {
     @Override
     public void expireEmail(String email) {
         try (
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = ConnectionManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(EXPIRE_EMAIL_BY_USER_ID)
         ) {
             statement.setString(1, email);

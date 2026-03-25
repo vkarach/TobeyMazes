@@ -7,10 +7,6 @@ import sk.tuke.gamestudio.service.exception.BestResultException;
 import java.sql.*;
 
 public class ReviewServiceJDBC implements ReviewService {
-    public static final String URL = "jdbc:postgresql://localhost/gamestudio";
-    public static final String USER = "postgres";
-    public static final String PASSWORD = "as2368";
-
     public static final String INSERT_REVIEW =
             "INSERT INTO reviews (user_id, rating, comment) VALUES (?, ?, ?)" +
             "ON CONFLICT (user_id) " +
@@ -24,7 +20,7 @@ public class ReviewServiceJDBC implements ReviewService {
 
     @Override
     public void addOrUpdateReview(Review review) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(INSERT_REVIEW)
         ) {
             statement.setInt(1, review.getUserId());
@@ -39,7 +35,7 @@ public class ReviewServiceJDBC implements ReviewService {
 
     @Override
     public Review getReview(int userId) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_REVIEW)
         ) {
             statement.setInt(1, userId);
@@ -61,7 +57,7 @@ public class ReviewServiceJDBC implements ReviewService {
 
     @Override
     public float getOverallRating() {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_OVERALL_RATING)
         ) {
             try (ResultSet rs = statement.executeQuery()) {

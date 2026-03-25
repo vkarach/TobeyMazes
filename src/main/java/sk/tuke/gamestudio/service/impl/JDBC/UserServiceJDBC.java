@@ -1,16 +1,11 @@
 package sk.tuke.gamestudio.service.impl.JDBC;
 
-import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.service.UserService;
 import sk.tuke.gamestudio.service.exception.UserException;
 
 import java.sql.*;
 
 public class UserServiceJDBC implements UserService {
-    public static final String URL = "jdbc:postgresql://localhost/gamestudio";
-    public static final String USER = "postgres";
-    public static final String PASSWORD = "as2368";
-
     public static final String SELECT_USER_ID_BY_USER_NAME =
             "SELECT user_id FROM users WHERE LOWER(user_name) = LOWER(?)";
 
@@ -37,7 +32,7 @@ public class UserServiceJDBC implements UserService {
     @Override
     public boolean userExists(String userName) {
         try (
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = ConnectionManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(SELECT_USER_ID_BY_USER_NAME)
         ) {
             statement.setString(1, userName);
@@ -53,7 +48,7 @@ public class UserServiceJDBC implements UserService {
     @Override
     public boolean emailExists(String email) {
         try (
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = ConnectionManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(SELECT_USER_ID_BY_EMAIL)
         ) {
             statement.setString(1, email);
@@ -69,7 +64,7 @@ public class UserServiceJDBC implements UserService {
     @Override
     public Integer getUserIdByName(String userName) {
         try (
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = ConnectionManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(SELECT_USER_ID_BY_USER_NAME)
         ) {
             statement.setString(1, userName);
@@ -88,7 +83,7 @@ public class UserServiceJDBC implements UserService {
     @Override
     public String getUserNameById(int userId) {
         try (
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = ConnectionManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(SELECT_USER_NAME_BY_USER_ID)
         ) {
             statement.setInt(1, userId);
@@ -108,7 +103,7 @@ public class UserServiceJDBC implements UserService {
     @Override
     public String getPasswordByUserId(int userId) {
         try (
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = ConnectionManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(SELECT_PASSWORD_BY_USER_ID)
         ) {
             statement.setInt(1, userId);
@@ -127,7 +122,7 @@ public class UserServiceJDBC implements UserService {
     @Override
     public String getEmailByUserId(int userId) {
         try (
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = ConnectionManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(SELECT_EMAIL_BY_USER_ID)
         ) {
             statement.setInt(1, userId);
@@ -146,7 +141,7 @@ public class UserServiceJDBC implements UserService {
     @Override
     public void changePassword(int userId, String newPassword) {
         try (
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = ConnectionManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(CHANGE_PASSWORD_BY_USER_ID)
         ) {
             statement.setString(1, newPassword);
@@ -164,7 +159,7 @@ public class UserServiceJDBC implements UserService {
             throw new UserException("User with this name already exist");
         }
         try (
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = ConnectionManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(INSERT_USER)
         ) {
             statement.setString(1, userName);
@@ -185,7 +180,7 @@ public class UserServiceJDBC implements UserService {
     @Override
     public void deleteUserByName(String userName) {
         try (
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = ConnectionManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(DELETE_USER)
         ) {
             statement.setString(1, userName);

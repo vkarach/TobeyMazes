@@ -1,22 +1,15 @@
 package sk.tuke.gamestudio.service.impl.JDBC;
 
 import sk.tuke.gamestudio.entity.BestLevelResult;
-import sk.tuke.gamestudio.game.logicalmazes.core.LevelManager;
 import sk.tuke.gamestudio.service.BestResultService;
 import sk.tuke.gamestudio.service.exception.BestResultException;
 import sk.tuke.gamestudio.entity.UserScore;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class BestResultServiceJDBC implements BestResultService {
-    public static final String URL = "jdbc:postgresql://localhost/gamestudio";
-    public static final String USER = "postgres";
-    public static final String PASSWORD = "as2368";
-
     public static final String UPDATE_BEST_TIME =
             "INSERT INTO best_level_results (user_id, level_id, best_time_ms) " +
             "VALUES (?, ?, ?) " +
@@ -51,7 +44,7 @@ public class BestResultServiceJDBC implements BestResultService {
 
     @Override
     public void updateBestTime(int userId, int levelId, long timeMs) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_BEST_TIME)
         ) {
            statement.setInt(1, userId);
@@ -66,7 +59,7 @@ public class BestResultServiceJDBC implements BestResultService {
 
     @Override
     public void updateBestScore(int userId, int levelId, int score) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_BEST_SCORE)
         ) {
             statement.setInt(1, userId);
@@ -81,7 +74,7 @@ public class BestResultServiceJDBC implements BestResultService {
 
     @Override
     public Long getBestTime(int userId, int levelId) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_BEST_TIME)
         ) {
             statement.setInt(1, userId);
@@ -100,7 +93,7 @@ public class BestResultServiceJDBC implements BestResultService {
 
     @Override
     public Integer getBestScore(int userId, int levelId) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_BEST_SCORE)
         ) {
             statement.setInt(1, userId);
@@ -121,7 +114,7 @@ public class BestResultServiceJDBC implements BestResultService {
 
     @Override
     public List<UserScore> getTopByScore() {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_TOP_TEN_BY_SCORE)
         ) {
             try (ResultSet rs = statement.executeQuery()) {
@@ -142,7 +135,7 @@ public class BestResultServiceJDBC implements BestResultService {
 
     @Override
     public Integer getBestOverallScore(int userId) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_OVERALL_SCORE)
         ) {
             statement.setInt(1, userId);
@@ -162,7 +155,7 @@ public class BestResultServiceJDBC implements BestResultService {
     public List<BestLevelResult> getBestResultsByUserId(int userId) {
         List<BestLevelResult> bestResults = new ArrayList<>();
 
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_ALL_BEST_SCORE_AND_TIME)
         ) {
             statement.setInt(1, userId);

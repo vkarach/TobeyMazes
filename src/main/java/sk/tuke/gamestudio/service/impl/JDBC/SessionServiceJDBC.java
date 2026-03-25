@@ -7,10 +7,6 @@ import java.sql.*;
 import java.util.UUID;
 
 public class SessionServiceJDBC implements SessionService {
-    public static final String URL = "jdbc:postgresql://localhost/gamestudio";
-    public static final String USER = "postgres";
-    public static final String PASSWORD = "as2368";
-
     public static final String INSERT_SESSION =
             "INSERT INTO user_sessions (user_id, session_token) VALUES (?, ?)";
 
@@ -31,7 +27,7 @@ public class SessionServiceJDBC implements SessionService {
     @Override
     public String createSession(int userId) {
         try (
-                Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                Connection connection = ConnectionManager.getConnection();
                 PreparedStatement statement = connection.prepareStatement(INSERT_SESSION)
         ) {
             String token = UUID.randomUUID().toString();
@@ -50,7 +46,7 @@ public class SessionServiceJDBC implements SessionService {
     @Override
     public int getUserIdBySessionToken(String sessionToken) {
         try (
-                Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                Connection connection = ConnectionManager.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SELECT_USER_ID_BY_SESSION_TOKEN)
         ) {
             statement.setString(1, sessionToken);
@@ -69,7 +65,7 @@ public class SessionServiceJDBC implements SessionService {
     @Override
     public void updateSessionTokenExpireDate(String sessionToken) {
         try (
-                Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                Connection connection = ConnectionManager.getConnection();
                 PreparedStatement statement = connection.prepareStatement(UPDATE_SESSION_TOKEN_EXPIRE_DATE)
         ) {
             statement.setString(1, sessionToken);
@@ -83,7 +79,7 @@ public class SessionServiceJDBC implements SessionService {
     @Override
     public String getSessionTokenByUserId(int userId) {
         try (
-                Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                Connection connection = ConnectionManager.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SELECT_USER_SESSION_TOKEN_BY_ID)
         ) {
             statement.setInt(1, userId);
@@ -102,7 +98,7 @@ public class SessionServiceJDBC implements SessionService {
     @Override
     public boolean sessionTokenExpired(String sessionToken) {
         try (
-                Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                Connection connection = ConnectionManager.getConnection();
                 PreparedStatement statement = connection.prepareStatement(IS_SESSION_TOKEN_EXPIRED)
         ) {
             statement.setString(1, sessionToken);

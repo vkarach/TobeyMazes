@@ -7,10 +7,6 @@ import sk.tuke.gamestudio.service.exception.ScoreException;
 import java.sql.*;
 
 public class LevelServiceJDBC implements LevelService {
-    public static final String URL = "jdbc:postgresql://localhost/gamestudio";
-    public static final String USER = "postgres";
-    public static final String PASSWORD = "as2368";
-
     public static final String ADD_OR_UPDATE_LEVEL =
             "INSERT INTO levels (level_id, level_name) " +
             "VALUES (?, ?) " +
@@ -18,7 +14,7 @@ public class LevelServiceJDBC implements LevelService {
 
     @Override
     public void addOrUpdateLevel(int levelId, String levelName) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(ADD_OR_UPDATE_LEVEL)
         ) {
             statement.setInt(1, levelId);
