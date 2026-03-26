@@ -31,16 +31,17 @@ public class LevelUI {
     }
 
     private void renderHorizontalWallLine(boolean[][] hWalls, int rowIndex, int colCount, int x, int y) {
+        char crossCh = '+';
         AttributedStringBuilder sb = new AttributedStringBuilder();
         for (int col = 0; col < colCount; col++) {
-            sb.style(crossWallStyle).append('+');
+            sb.style(crossWallStyle).append(crossCh);
             if (hWalls[rowIndex][col]) {
                 sb.style(wallStyle).append("--");
             } else {
                 sb.style(AttributedStyle.DEFAULT).append("  ");
             }
         }
-        sb.style(crossWallStyle).append('+');
+        sb.style(crossWallStyle).append(crossCh);
         console.print(sb, x, y);
     }
 

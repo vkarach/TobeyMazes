@@ -10,7 +10,7 @@ import sk.tuke.gamestudio.service.*;
 
 @Component
 public class Game {
-    public static final String version = "0.7.43";
+    public static final String version = "0.7.44";
     public static final String author = "Valentyn";
 
     private final Console console;
@@ -47,8 +47,6 @@ public class Game {
 
         this.currentUser = authService.getUserBySessionToken();
         backgroundLoop.loop();
-
-        gameMenu.selectLevel(currentUser);
     }
 
     public void launch() {

@@ -69,7 +69,7 @@ public class SessionServiceJPA implements SessionService {
             return session.getExpireAt().isBefore(LocalDateTime.now());
         }
         else {
-            throw new SessionException("Session not found");
+            return true;
         }
     }
 }

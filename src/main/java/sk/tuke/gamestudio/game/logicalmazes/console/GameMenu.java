@@ -244,7 +244,7 @@ public class GameMenu {
 
         int y = 24;
         if (currentUser == null) {
-            console.print("Login/Register to save your time/score", selectUIX - 2, y - scrollStart.length - 1);
+            console.print("Sign in to save your score and time", selectUIX - 2, y - scrollStart.length - 1);
         }
 
         for (int i = 0; i < options.length; i++) {
@@ -287,7 +287,7 @@ public class GameMenu {
         printRating(reviewService, 65, y);
 
         if (currentUser == null) {
-            console.print("Login to rate the game", selectUIX, y);
+            console.print("Sign in to rate the game", selectUIX, y);
             fakeChoose(selectUIX, 30);
             return;
         }

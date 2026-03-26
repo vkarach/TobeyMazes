@@ -2,6 +2,7 @@ package sk.tuke.gamestudio.game.logicalmazes.console;
 
 import org.jline.reader.*;
 import org.springframework.stereotype.Component;
+import org.yaml.snakeyaml.util.ArrayUtils;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.terminal.Attributes;
@@ -10,6 +11,7 @@ import org.jline.utils.*;
 import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 @Component
 public class Console {
@@ -98,10 +100,21 @@ public class Console {
     public InputType readAction() {
         int ch = readInput(50);
 
-        if (ch == 'q' || ch == 'Q' || ch == -1 || ch == 4) return InputType.QUIT;
-        else if (ch == 'r' || ch == 'R') return InputType.RELOAD;
-        else if (ch == '\r' || ch == '\n') return InputType.ENTER;
-        if (ch != 27) return InputType.NONE; // not ESC
+        int[] quitKeys = new int[] {'q', 'Q', 'Й', 'й', 4, -1};
+        int[] reloadKeys = new int[] {'r', 'R', 'к', 'К'};
+
+        if (Arrays.stream(quitKeys).anyMatch(key -> key == ch)) {
+            return InputType.QUIT;
+        }
+        if (Arrays.stream(reloadKeys).anyMatch(key -> key == ch)) {
+            return InputType.RELOAD;
+        }
+        if (ch == '\r' || ch == '\n') {
+            return InputType.ENTER;
+        }
+        if (ch != 27) { // not ESC
+            return InputType.NONE;
+        }
 
         int second = readInput(100);
         if (second < 0) return InputType.NONE;
