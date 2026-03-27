@@ -1,20 +1,20 @@
-package sk.tuke.gamestudio.game.logicalmazes.console;
+package sk.tuke.gamestudio.game.logicalmazes.ui.console;
 
 import org.jline.reader.*;
 import org.springframework.stereotype.Component;
-import org.yaml.snakeyaml.util.ArrayUtils;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
 import org.jline.utils.*;
+import sk.tuke.gamestudio.game.logicalmazes.ui.GameInput;
 import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
 
 @Component
-public class Console {
+public class Console implements GameInput {
     private final Terminal terminal;
     private final NonBlockingReader reader;
     private final LineReader lineReader;
@@ -38,7 +38,7 @@ public class Console {
                     .build();
         }
         catch (Exception e) {
-            throw new RuntimeException("can not launch console");
+            throw new RuntimeException("can not mainMenu console");
         }
 
         reader = terminal.reader();
@@ -88,7 +88,7 @@ public class Console {
         }
     }
 
-    private int readInput(long timeout) {
+    private int getInput(long timeout) {
         try {
             return reader.read(timeout);
         }
@@ -97,8 +97,8 @@ public class Console {
         }
     }
 
-    public InputType readAction() {
-        int ch = readInput(50);
+    public InputType getInput() {
+        int ch = getInput(50);
 
         int[] quitKeys = new int[] {'q', 'Q', 'Й', 'й', 4, -1};
         int[] reloadKeys = new int[] {'r', 'R', 'к', 'К'};
@@ -116,11 +116,11 @@ public class Console {
             return InputType.NONE;
         }
 
-        int second = readInput(100);
+        int second = getInput(100);
         if (second < 0) return InputType.NONE;
 
         if (second == '[' || second == 'O') {
-            int third = readInput(100);
+            int third = getInput(100);
             if (third < 0) return InputType.NONE;
 
             return switch (third) {

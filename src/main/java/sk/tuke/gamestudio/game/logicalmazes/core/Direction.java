@@ -1,7 +1,5 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
-import sk.tuke.gamestudio.game.logicalmazes.console.Console;
-
 public enum Direction {
     LEFT, RIGHT, UP, DOWN, NONE;
 

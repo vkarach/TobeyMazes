@@ -12,6 +12,5 @@ public class TobeyMazes {
 
         Game game = context.getBean(Game.class);
         game.launch();
-        game.exit();
     }
 }

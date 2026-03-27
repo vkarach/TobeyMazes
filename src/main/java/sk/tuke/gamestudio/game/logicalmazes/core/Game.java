@@ -1,23 +1,23 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
 import org.springframework.stereotype.Component;
-import sk.tuke.gamestudio.game.logicalmazes.console.AuthConsole;
-import sk.tuke.gamestudio.game.logicalmazes.console.Console;
-import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
+import sk.tuke.gamestudio.game.logicalmazes.ui.AuthView;
+import sk.tuke.gamestudio.game.logicalmazes.ui.MenuOption;
+import sk.tuke.gamestudio.game.logicalmazes.ui.MenuView;
+import sk.tuke.gamestudio.game.logicalmazes.ui.ProfileOption;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 import sk.tuke.gamestudio.service.*;
 
 @Component
 public class Game {
-    public static final String version = "0.7.44";
+    public static final String version = "0.8.45";
     public static final String author = "Valentyn";
 
-    private final Console console;
-    private final GameMenu gameMenu;
+    private final MenuView menuView;
     private final LevelManager levelManager;
     private final AuthService authService;
-    private final AuthConsole authConsole;
+    private final AuthView authView;
     private final ReviewService reviewService;
 
     private final SoundUtil backgroundLoop = new SoundUtil("sounds/jazz_loop.wav", 0.1f);
@@ -27,20 +27,17 @@ public class Game {
     private User currentUser;
 
     public Game(
-            Console console,
-            GameMenu gameMenu,
+            MenuView menuView,
             LevelManager levelManager,
             AuthService authService,
-            AuthConsole authConsole,
             ReviewService reviewService,
-            LevelService levelService
-        ) {
-        this.console = console;
-        this.gameMenu = gameMenu;
+            LevelService levelService,
+            AuthView authView) {
+        this.menuView = menuView;
         this.levelManager = levelManager;
         this.reviewService = reviewService;
         this.authService = authService;
-        this.authConsole = authConsole;
+        this.authView = authView;
 
 
         levelService.syncLevelsFromEnum(Level.class);
@@ -52,29 +49,25 @@ public class Game {
     public void launch() {
         mainLoop:
         while (true) {
-            GameMenu.MenuOption menuOption = gameMenu.launch();
+            MenuOption menuOption = menuView.mainMenu();
             switch (menuOption) {
                 case START       -> handleStartAndPlayLevel();
                 case PROFILE     -> handleProfile();
-                case LEADERBOARD -> gameMenu.leaderboardPage(currentUser);
-                case RATE        -> gameMenu.reviewPage(currentUser, reviewService);
-                case ABOUT       -> gameMenu.aboutPage();
-                case EXIT        -> { exit(); break mainLoop; }
+                case LEADERBOARD -> menuView.leaderboardPage(currentUser);
+                case RATE        -> menuView.reviewPage(currentUser, reviewService);
+                case ABOUT       -> menuView.aboutPage();
+                case EXIT        -> {
+                    backgroundLoop.stop();
+                    menuView.exit();
+                    break mainLoop;
+                }
             }
         }
     }
 
-    public void exit() {
-        backgroundLoop.stop();
-        console.clear();
-        console.setCursorPosition(0, 0);
-        console.print("exiting...\n");
-        console.close();
-    }
-
     private void handleStartAndPlayLevel() {
         while (true) {
-            Level level = gameMenu.selectLevel(currentUser);
+            Level level = menuView.selectLevel(currentUser);
             if (level == null) {
                 break;
             }
@@ -112,7 +105,7 @@ public class Game {
                             score
                     );
                 }
-                gameMenu.winPage(
+                menuView.winPage(
                         playedTimeMs,
                         score,
                         isTimeRecord,
@@ -133,17 +126,17 @@ public class Game {
     }
 
     private void handleGuestProfile() {
-        GameMenu.ProfileOption selected;
+        ProfileOption selected;
 
         do {
-            selected = gameMenu.guestProfilePage();
-            if (selected == null || selected == GameMenu.ProfileOption.BACK) {
+            selected = menuView.guestProfilePage();
+            if (selected == null || selected == ProfileOption.BACK) {
                 return;
             }
 
             switch (selected) {
-                case REGISTER -> currentUser = authConsole.register();
-                case LOGIN -> currentUser = authConsole.login();
+                case REGISTER -> currentUser = authView.register();
+                case LOGIN -> currentUser = authView.login();
             }
         }
         while (currentUser == null);
@@ -151,8 +144,8 @@ public class Game {
 
     private void handleAuthorizedProfile() {
         while (currentUser != null) {
-            GameMenu.ProfileOption selected = gameMenu.authorizedProfilePage(currentUser);
-            if (selected == null || selected == GameMenu.ProfileOption.BACK) {
+            ProfileOption selected = menuView.authorizedProfilePage(currentUser);
+            if (selected == null || selected == ProfileOption.BACK) {
                 return;
             }
 
@@ -162,7 +155,7 @@ public class Game {
                     currentUser = null;
                     handleGuestProfile();
                 }
-                case CHANGE_PASSWORD -> authConsole.changePassword(currentUser.getId());
+                case CHANGE_PASSWORD -> authView.changePassword(currentUser.getId());
             }
         }
     }

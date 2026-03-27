@@ -3,8 +3,8 @@ package sk.tuke.gamestudio.game.logicalmazes.service.JPA;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
-import sk.tuke.gamestudio.game.logicalmazes.console.Console;
-import sk.tuke.gamestudio.game.logicalmazes.console.GameMenu;
+import sk.tuke.gamestudio.game.logicalmazes.ui.console.Console;
+import sk.tuke.gamestudio.game.logicalmazes.ui.console.GameMenu;
 
 @SpringBootTest
 @Transactional

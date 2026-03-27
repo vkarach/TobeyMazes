@@ -1,12 +1,15 @@
-package sk.tuke.gamestudio.game.logicalmazes.console;
+package sk.tuke.gamestudio.game.logicalmazes.ui.console;
 
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.core.*;
+import sk.tuke.gamestudio.game.logicalmazes.ui.LevelView;
 
-public class LevelUI {
+@Component
+public class LevelUI implements LevelView {
     private final Console console;
+    private final ConsoleRenderer consoleRenderer;
 
     private final AttributedStyle wallStyle =
         AttributedStyle.DEFAULT.foreground(103);
@@ -26,8 +29,15 @@ public class LevelUI {
 
     private final char targetCh = '✿';
 
-    public LevelUI(Console console) {
+    private Field gameField;
+    private Player player;
+    private int x;
+    private int y;
+    private int hudX;
+
+    public LevelUI(Console console, ConsoleRenderer consoleRenderer) {
         this.console = console;
+        this.consoleRenderer = consoleRenderer;
     }
 
     private void renderHorizontalWallLine(boolean[][] hWalls, int rowIndex, int colCount, int x, int y) {
@@ -80,9 +90,24 @@ public class LevelUI {
         }
     }
 
-    public void renderHud(long startTime, int targetCount, int points, int x, int y) {
+    public void launchLevel(Field field) {
+        this.gameField = field;
+        this.x = (console.getWidth() / 2) - (field.getRowCount() * 3);
+        this.y = 20;
+        this.hudX = x + this.gameField.getRowCount() * 3 + 5;
+
+        console.clear();
+        consoleRenderer.renderFromFile("uiTexts/game_title.txt");
+
+        int lowerBoundPad = gameField.getRowCount() * 2;
+        int konekTobeyPadY = lowerBoundPad - consoleRenderer.getRenderFromFileSize("uiTexts/konek_tobey.txt").height() + 1;
+        consoleRenderer.renderFromFile("uiTexts/konek_tobey.txt", hudX, y + konekTobeyPadY, true);
+    }
+
+    public void updateHud(long startTime, int targetCount, int points) {
+        int curY = this.y;
         String vBound = "+" + "-".repeat(11) + "+";
-        console.print(vBound, x, y++, wallStyle);
+        console.print(vBound, hudX, curY++, wallStyle);
 
         String[] toPrint = new String[] {
             String.format(" %-10s", formatTimerString(startTime)),
@@ -95,13 +120,13 @@ public class LevelUI {
             sb.style(wallStyle).append('|');
             sb.style(textStyle).append(s);
             sb.style(wallStyle).append('|');
-            console.print(sb, x, y++);
+            console.print(sb, hudX, curY++);
         }
-        console.print(vBound, x, y++, wallStyle);
-
+        console.print(vBound, hudX, curY, wallStyle);
     }
 
-    public void renderTips(int x, int y) {
+    public void renderTips() {
+        int tipsY = this.y + gameField.getRowCount() * 2 + 2;
         AttributedStringBuilder sb = new AttributedStringBuilder();
         sb.style(crossWallStyle).append("←↓↑→");
         sb.style(textStyle).append(" move · ");
@@ -109,23 +134,22 @@ public class LevelUI {
         sb.style(textStyle).append(" - Quit · ");
         sb.style(crossWallStyle).append("R");
         sb.style(textStyle).append(" - Restart");
-        console.print(sb, x, y);
+        console.print(sb, x, tipsY);
     }
 
-    public void renderGameField(Field mapField, Player player, int x, int y) {
+    public void renderField(Field field, Player player) {
         console.moveCursorToStart();
         final char playerCh = '♞';
-//        final char targetCh = '✿';
 
         int px = player.getX();
         int py = player.getY();
 
-        int rowCount = mapField.getRowCount();
-        int colCount = mapField.getColCount();
+        int rowCount = field.getRowCount();
+        int colCount = field.getColCount();
 
-        Tile[][] tiles = mapField.getTiles();
-        boolean[][] hWalls = mapField.getHWalls();
-        boolean[][] vWalls = mapField.getVWalls();
+        Tile[][] tiles = field.getTiles();
+        boolean[][] hWalls = field.getHWalls();
+        boolean[][] vWalls = field.getVWalls();
 
         for (int row = 0; row < rowCount; row++) {
             int yHoriz = y + row * 2;

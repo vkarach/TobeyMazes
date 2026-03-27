@@ -1,4 +1,4 @@
-package sk.tuke.gamestudio.game.logicalmazes.console;
+package sk.tuke.gamestudio.game.logicalmazes.ui.console;
 
 import org.jline.utils.AttributedStyle;
 import org.springframework.stereotype.Component;

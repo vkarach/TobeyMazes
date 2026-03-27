@@ -1,8 +1,9 @@
-package sk.tuke.gamestudio.game.logicalmazes.console;
+package sk.tuke.gamestudio.game.logicalmazes.ui.console;
 
 import org.jline.utils.AttributedStyle;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
+import sk.tuke.gamestudio.game.logicalmazes.ui.GameInput;
 import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 
 @Component
@@ -10,9 +11,11 @@ public class InputHelper {
     private final Console console;
 
     private final SoundUtil clickSound = new SoundUtil("sounds/enter.wav");
+    private final GameInput gameInput;
 
-    public InputHelper(Console console) {
+    public InputHelper(Console console, GameInput gameInput) {
         this.console = console;
+        this.gameInput = gameInput;
     }
 
     public String getUserInput(String prompt, int x, int y) {
@@ -20,7 +23,6 @@ public class InputHelper {
     }
 
     public String getUserInput(String prompt, int x, int y, int clearLen) {
-//        console.print(" ".repeat(50), x + prompt.length(), y);
         console.setCursorPosition(x, y);
 
         console.exitRawMode();
@@ -46,7 +48,7 @@ public class InputHelper {
                 AttributedStyle.DEFAULT.background(AttributedStyle.WHITE).foreground(AttributedStyle.BLACK)
         );
         while (true) {
-            InputType input = console.readAction();
+            InputType input = gameInput.getInput();
             if (input == InputType.ENTER || input == InputType.QUIT) {
                 clickSound.play();
                 return;

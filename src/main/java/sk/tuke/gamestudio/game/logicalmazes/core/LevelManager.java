@@ -2,9 +2,8 @@ package sk.tuke.gamestudio.game.logicalmazes.core;
 
 
 import org.springframework.stereotype.Component;
-import sk.tuke.gamestudio.game.logicalmazes.console.Console;
-import sk.tuke.gamestudio.game.logicalmazes.console.ConsoleRenderer;
-import sk.tuke.gamestudio.game.logicalmazes.console.LevelUI;
+import sk.tuke.gamestudio.game.logicalmazes.ui.GameInput;
+import sk.tuke.gamestudio.game.logicalmazes.ui.LevelView;
 import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 import sk.tuke.gamestudio.service.BestResultService;
 
@@ -13,25 +12,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class LevelManager {
-    private final Console console;
-    private final LevelUI levelUI;
+    private final LevelView levelView;
+    private final GameInput gameInput;
+
     private final MapParser mapParser;
     private final BestResultService bestResultService;
-    private final ConsoleRenderer consoleRenderer;
 
     private final SoundUtil pickupSound = new SoundUtil("sounds/pickup.wav");
 
     private Level currentLevel;
     private Field gameField;
     private Player player;
-    private volatile int targetCount;
+    private final AtomicInteger targetCount = new AtomicInteger(0);
 
-    public LevelManager(Console console, BestResultService bestResultService, ConsoleRenderer consoleRenderer) {
-        this.console = console;
-        this.levelUI = new LevelUI(console);
+    public LevelManager(GameInput gameInput,  LevelView levelView, BestResultService bestResultService) {
+        this.gameInput = gameInput;
+        this.levelView = levelView;
         this.mapParser = new MapParser();
         this.bestResultService = bestResultService;
-        this.consoleRenderer = consoleRenderer;
+
     }
 
     public record LevelResult(LevelState levelState, int stepCount, long playedTimeNs) {}
@@ -40,7 +39,7 @@ public class LevelManager {
         currentLevel = null;
         gameField = null;
         player = null;
-        targetCount = 0;
+        targetCount.set(0);
     }
 
     public LevelResult playLevel(Level level) {
@@ -96,36 +95,28 @@ public class LevelManager {
         MapParser.Result result = mapParser.parseMap(filepath);
         this.gameField = result.mapField();
         this.player = result.player();
-        this.targetCount = result.targetCount();
+        this.targetCount.set(result.targetCount());
     }
 
     private LevelResult startLevel() {
         long startTime = System.nanoTime();
-        int x = (console.getWidth() / 2) - (gameField.getRowCount() * 3);
-        int y = 20;
-        int lowerBoundPad = gameField.getRowCount() * 2;
-        int hudX = x + gameField.getRowCount() * 3 + 5;
-        int konekTobeyPadY = lowerBoundPad - consoleRenderer.getRenderFromFileSize("uiTexts/konek_tobey.txt").height() + 1;
-
-        console.clear();
-        consoleRenderer.renderFromFile("uiTexts/game_title.txt");
-        consoleRenderer.renderFromFile("uiTexts/konek_tobey.txt", hudX, y + konekTobeyPadY, true);
 
         AtomicInteger stepCont = new AtomicInteger(0);
         GameController controller = new GameController(gameField, player);
         LevelState levelState = LevelState.PLAYING;
 
+        levelView.launchLevel(gameField);
+        levelView.renderTips();
         // render every 100 ms regardless of input
         ScheduledExecutorService renderScheduler = Executors.newSingleThreadScheduledExecutor();
         renderScheduler.scheduleAtFixedRate(() -> {
             long elapsed = System.nanoTime() - startTime;
-            levelUI.renderHud(startTime, targetCount, computePoints(elapsed, stepCont.get(), currentLevel.getDifficulty()), hudX, y);
-            levelUI.renderGameField(gameField, player, x, y);
-            levelUI.renderTips(x, y + lowerBoundPad + 2);
+            levelView.updateHud(startTime, targetCount.get(), computePoints(elapsed, stepCont.get(), currentLevel.getDifficulty()));
+            levelView.renderField(gameField, player);
         }, 0, 75, TimeUnit.MILLISECONDS);
 
         while (levelState == LevelState.PLAYING) {
-            InputType inputType = console.readAction();
+            InputType inputType = gameInput.getInput();
 
             switch (inputType) {
                 case QUIT -> levelState = LevelState.EXITED;
@@ -145,7 +136,7 @@ public class LevelManager {
 
             if (gameField.takeTarget(player)) {
                 pickupSound.play();
-                if (targetCount-- == 1) {
+                if (targetCount.decrementAndGet() == 0) {
                     levelState = LevelState.SOLVED;
                 }
             }

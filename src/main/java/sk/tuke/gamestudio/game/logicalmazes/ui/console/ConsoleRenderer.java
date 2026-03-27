@@ -1,4 +1,4 @@
-package sk.tuke.gamestudio.game.logicalmazes.console;
+package sk.tuke.gamestudio.game.logicalmazes.ui.console;
 
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.core.FileReader;
