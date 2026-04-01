@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.game.logicalmazes.ui.console.pages;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.Review;
 import sk.tuke.gamestudio.entity.User;
@@ -11,8 +12,10 @@ import sk.tuke.gamestudio.game.logicalmazes.ui.console.Selector;
 import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 import sk.tuke.gamestudio.service.ReviewService;
 
+@Profile("console")
 @Component
 public class ReviewPage {
+    private final ReviewService reviewService;
     private final Console console;
     private final ConsoleRenderer consoleRenderer;
     private final Selector selector;
@@ -21,7 +24,8 @@ public class ReviewPage {
 
     private final SoundUtil confirmSound = new SoundUtil("sounds/confirm.wav");
 
-    public ReviewPage(Console console, ConsoleRenderer consoleRenderer, Selector selector, InputHelper inputHelper, Notifier notifier) {
+    public ReviewPage(ReviewService reviewService, Console console, ConsoleRenderer consoleRenderer, Selector selector, InputHelper inputHelper, Notifier notifier) {
+        this.reviewService = reviewService;
         this.console = console;
         this.consoleRenderer = consoleRenderer;
         this.selector = selector;
@@ -29,11 +33,11 @@ public class ReviewPage {
         this.notifier = notifier;
     }
 
-    public void show(User currentUser, ReviewService reviewService) {
+    public void show(User currentUser) {
         console.clear();
-        consoleRenderer.renderFromFile("uiTexts/rate_title.txt");
-        consoleRenderer.renderFromFile("uiTexts/stars.txt", 120, 0);
-        consoleRenderer.renderFromFile("uiTexts/stars.txt", 120, 15);
+        consoleRenderer.renderFromFile("ui/console/uiTexts/rate_title.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/stars.txt", 120, 0);
+        consoleRenderer.renderFromFile("ui/console/uiTexts/stars.txt", 120, 15);
 
         int x = Selector.DEFAULT_X;
         int y = 21;

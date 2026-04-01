@@ -2,10 +2,12 @@ package sk.tuke.gamestudio.game.logicalmazes.ui.console;
 
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.core.*;
 import sk.tuke.gamestudio.game.logicalmazes.ui.LevelView;
 
+@Profile("console")
 @Component
 public class LevelUI implements LevelView {
     private final Console console;
@@ -97,11 +99,11 @@ public class LevelUI implements LevelView {
         this.hudX = x + this.gameField.getRowCount() * 3 + 5;
 
         console.clear();
-        consoleRenderer.renderFromFile("uiTexts/game_title.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/game_title.txt");
 
         int lowerBoundPad = gameField.getRowCount() * 2;
-        int konekTobeyPadY = lowerBoundPad - consoleRenderer.getRenderFromFileSize("uiTexts/konek_tobey.txt").height() + 1;
-        consoleRenderer.renderFromFile("uiTexts/konek_tobey.txt", hudX, y + konekTobeyPadY, true);
+        int konekTobeyPadY = lowerBoundPad - consoleRenderer.getRenderFromFileSize("ui/console/uiTexts/konek_tobey.txt").height() + 1;
+        consoleRenderer.renderFromFile("ui/console/uiTexts/konek_tobey.txt", hudX, y + konekTobeyPadY, true);
     }
 
     public void updateHud(long startTime, int targetCount, int points) {

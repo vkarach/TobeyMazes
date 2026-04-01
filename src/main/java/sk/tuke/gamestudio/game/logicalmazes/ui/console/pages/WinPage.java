@@ -2,6 +2,7 @@ package sk.tuke.gamestudio.game.logicalmazes.ui.console.pages;
 
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.ui.console.Console;
 import sk.tuke.gamestudio.game.logicalmazes.ui.console.ConsoleRenderer;
@@ -9,6 +10,7 @@ import sk.tuke.gamestudio.game.logicalmazes.ui.console.InputHelper;
 
 import java.time.Duration;
 
+@Profile("console")
 @Component
 public class WinPage {
     private final Console console;
@@ -28,12 +30,12 @@ public class WinPage {
         long millis  = duration.minusMinutes(minutes).minusSeconds(seconds).toMillis() / 10;
 
         console.clear();
-        consoleRenderer.renderFromFile("uiTexts/level_complete.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/level_complete.txt");
 
         int x = 10;
         int y = 20;
 
-        consoleRenderer.renderFromFile("uiTexts/megamind.txt", 50, y);
+        consoleRenderer.renderFromFile("ui/console/uiTexts/megamind.txt", 50, y);
 
         console.print("+---------------------------+", x, y++);
         console.print("|        MEGA   MIND        |", x, y++);

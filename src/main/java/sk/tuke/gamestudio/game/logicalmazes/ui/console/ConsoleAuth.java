@@ -2,14 +2,16 @@ package sk.tuke.gamestudio.game.logicalmazes.ui.console;
 
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.ui.AuthView;
 import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 import sk.tuke.gamestudio.service.AuthService;
 
+@Profile("console")
 @Component
-public class AuthConsole implements AuthView {
+public class ConsoleAuth implements AuthView {
     private final Console console;
     private final AuthService authService;
     private final ConsoleRenderer consoleRenderer;
@@ -18,7 +20,7 @@ public class AuthConsole implements AuthView {
 
     private final SoundUtil confirmSound = new SoundUtil("sounds/confirm.wav");
 
-    public AuthConsole(Console console, AuthService authService, ConsoleRenderer consoleRenderer, InputHelper inputHelper, Notifier notifier) {
+    public ConsoleAuth(Console console, AuthService authService, ConsoleRenderer consoleRenderer, InputHelper inputHelper, Notifier notifier) {
         this.console = console;
         this.authService = authService;
         this.consoleRenderer = consoleRenderer;
@@ -64,7 +66,7 @@ public class AuthConsole implements AuthView {
     public User register() {
         console.clear();
 
-        consoleRenderer.renderFromFile("uiTexts/register.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/register.txt");
 
         int x = 30, y = 20;
 
@@ -86,7 +88,7 @@ public class AuthConsole implements AuthView {
         String email = readValidInput("email: ", regex, 5, 60, x, y);
         if (email == null) return register(); // ???
 
-        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 75, x, ++y);
+        Thread loadAnim = consoleRenderer.renderAnimation("ui/console/animations/loading.txt", 75, x, ++y);
 
         if (authService.emailTaken(email)) {
             loadAnim.interrupt();
@@ -110,7 +112,7 @@ public class AuthConsole implements AuthView {
             console.clearLine(100, x, y + i);
         }
 
-        loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 75, x, y);
+        loadAnim = consoleRenderer.renderAnimation("ui/console/animations/loading.txt", 75, x, y);
 
         User user = authService.register(name, password, email);
 
@@ -133,7 +135,7 @@ public class AuthConsole implements AuthView {
     public User login() {
         console.clear();
 
-        consoleRenderer.renderFromFile("uiTexts/login.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/login.txt");
 
         int x = 30, y = 20;
 
@@ -147,7 +149,7 @@ public class AuthConsole implements AuthView {
         String name = namePassword[0];
         String password = namePassword[1];
 
-        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 75, x, y);
+        Thread loadAnim = consoleRenderer.renderAnimation("ui/console/animations/loading.txt", 75, x, y);
 
         User user = authService.login(name, password);
 
@@ -172,11 +174,11 @@ public class AuthConsole implements AuthView {
     public void changePassword(int userId) {
         console.clear();
 
-        consoleRenderer.renderFromFile("uiTexts/change_password.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/change_password.txt");
 
         int x = 20, y = 20;
 
-        Thread loadAnim = consoleRenderer.renderAnimation("animations/loading.txt", 75, x, y);
+        Thread loadAnim = consoleRenderer.renderAnimation("ui/console/animations/loading.txt", 75, x, y);
         int code = authService.getOrCreateEmailVerificationCode(userId);
         loadAnim.interrupt();
 

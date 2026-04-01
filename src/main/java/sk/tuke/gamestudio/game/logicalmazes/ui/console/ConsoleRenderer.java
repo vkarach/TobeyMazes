@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.game.logicalmazes.ui.console;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.core.FileReader;
 
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Profile("console")
 @Component
 public class  ConsoleRenderer {
     private final Console console;

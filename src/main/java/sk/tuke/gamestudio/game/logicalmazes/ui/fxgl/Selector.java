@@ -1,0 +1,121 @@
+package sk.tuke.gamestudio.game.logicalmazes.ui.fxgl;
+
+import com.almasb.fxgl.app.scene.GameScene;
+import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.input.UserAction;
+import javafx.application.Platform;
+import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
+import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
+
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Profile("fxgl")
+@Component
+public class Selector {
+    private final FxglInput gameInput;
+    private volatile boolean inputRegistered = false;
+
+    public Selector(FxglInput gameInput) {
+        this.gameInput = gameInput;
+    }
+
+    public <T> T select(T[] items, List<Text> buttons, Color selectColor) {
+        ensureInputRegistered();
+
+        AtomicInteger selected = new AtomicInteger(0);
+
+        List<Paint> origColors = buttons.stream().map(Text::getFill).toList();
+
+        Platform.runLater(() -> {
+            for (int i = 0; i < buttons.size(); i++) {
+                final int index = i;
+                buttons.get(i).setOnMouseClicked(e -> {
+                    selected.set(index);
+                    gameInput.push(InputType.ENTER);
+                });
+                buttons.get(i).setOnMouseEntered(e -> {
+                    selected.set(index);
+                    updateSelection(buttons, index, selectColor, origColors);
+                });
+            }
+            updateSelection(buttons, 0, selectColor, origColors);
+        });
+
+        while (true) {
+            InputType input = gameInput.getInput();
+            int sel = selected.get();
+            switch (input) {
+                case DOWN  -> sel = (sel + 1) % items.length;
+                case UP    -> sel = (sel - 1 + items.length) % items.length;
+                case ENTER -> { return items[selected.get()]; }
+                case QUIT  -> { return null; }
+                default    -> { continue; }
+            }
+            selected.set(sel);
+            final int finalSel = sel;
+            Platform.runLater(() -> updateSelection(buttons, finalSel, selectColor, origColors));
+        }
+    }
+
+    public void waitForConfirm(Text button, Color selectColor) {
+        Paint origButtonColor = button.getFill();
+        ensureInputRegistered();
+        Platform.runLater(() -> {
+            button.setOnMouseClicked(e -> gameInput.push(InputType.ENTER));
+            button.setOnMouseEntered(e -> button.setFill(selectColor));
+            button.setOnMouseExited(e -> button.setFill(origButtonColor));
+        });
+        while (true) {
+            InputType input = gameInput.getInput();
+            if (input == InputType.ENTER || input == InputType.QUIT) {
+                return;
+            }
+        }
+    }
+
+    private void ensureInputRegistered() {
+        if (inputRegistered) return;
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            addBinding("NavUp",    KeyCode.UP,    InputType.UP);
+            addBinding("NavDown",  KeyCode.DOWN,  InputType.DOWN);
+            addBinding("NavLeft",  KeyCode.LEFT,  InputType.LEFT);
+            addBinding("NavRight", KeyCode.RIGHT, InputType.RIGHT);
+            addBinding("NavEnter", KeyCode.ENTER, InputType.ENTER);
+            addBinding("NavQuit",  KeyCode.Q,     InputType.QUIT);
+            inputRegistered = true;
+            latch.countDown();
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void addBinding(String name, KeyCode key, InputType type) {
+        try {
+            FXGL.getInput().addAction(new UserAction(name) {
+                @Override
+                protected void onActionBegin() {
+                    gameInput.push(type);
+                }
+            }, key);
+        } catch (IllegalArgumentException ignored) {
+            // already registered
+        }
+    }
+
+    private void updateSelection(List<Text> buttons, int selected, Color selectColor, List<Paint> origColors) {
+        for (int i = 0; i < buttons.size(); i++) {
+            buttons.get(i).setFill(i == selected ? selectColor : origColors.get(i));
+        }
+    }
+}

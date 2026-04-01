@@ -2,6 +2,7 @@ package sk.tuke.gamestudio.game.logicalmazes.ui.console.pages;
 
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.entity.UserScore;
@@ -13,6 +14,7 @@ import sk.tuke.gamestudio.service.BestResultService;
 
 import java.util.List;
 
+@Profile("console")
 @Component
 public class LeaderboardPage {
     private final Console console;
@@ -42,10 +44,10 @@ public class LeaderboardPage {
             "=(________________________________)="
         };
 
-        consoleRenderer.renderFromFile("uiTexts/leaderboard.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/leaderboard.txt");
 
-        ConsoleRenderer.RenderSize size = consoleRenderer.getRenderFromFileSize("uiTexts/trophy.txt");
-        consoleRenderer.renderFromFile("uiTexts/trophy.txt", 85, console.getHeight() - size.height());
+        ConsoleRenderer.RenderSize size = consoleRenderer.getRenderFromFileSize("ui/console/uiTexts/trophy.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/trophy.txt", 85, console.getHeight() - size.height());
 
         List<UserScore> topUserScores = bestResultService.getTopByScore();
         if (topUserScores.isEmpty()) {

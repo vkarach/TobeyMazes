@@ -8,7 +8,7 @@ public class KonekTobeyAnimation {
     private final Console console;
     private final ConsoleRenderer consoleRenderer;
 
-    private static final String FILE_PATH = "uiTexts/konek_tobey.txt";
+    private static final String FILE_PATH = "ui/console/uiTexts/konek_tobey.txt";
     private final ConsoleRenderer.RenderSize size;
     private final List<String> sprite;
 

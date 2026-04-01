@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.game.logicalmazes.ui.console.pages;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.ui.ProfileOption;
@@ -8,6 +9,7 @@ import sk.tuke.gamestudio.game.logicalmazes.ui.console.ConsoleRenderer;
 import sk.tuke.gamestudio.game.logicalmazes.ui.console.Selector;
 import sk.tuke.gamestudio.service.BestResultService;
 
+@Profile("console")
 @Component
 public class ProfilePage {
     private final Console console;
@@ -24,10 +26,10 @@ public class ProfilePage {
 
     public ProfileOption showGuest() {
         console.clear();
-        consoleRenderer.renderFromFile("uiTexts/login_or_register.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/login_or_register.txt");
 
-        ConsoleRenderer.RenderSize size = consoleRenderer.getRenderFromFileSize("uiTexts/who_are_you.txt");
-        consoleRenderer.renderFromFile("uiTexts/who_are_you.txt",
+        ConsoleRenderer.RenderSize size = consoleRenderer.getRenderFromFileSize("ui/console/uiTexts/who_are_you.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/who_are_you.txt",
                 console.getWidth() - size.width() - 20, console.getHeight() - size.height());
 
         ProfileOption[] options = {ProfileOption.REGISTER, ProfileOption.LOGIN, ProfileOption.BACK};
@@ -36,15 +38,15 @@ public class ProfilePage {
 
     public ProfileOption showAuthorized(User user) {
         console.clear();
-        consoleRenderer.renderFromFile("uiTexts/your_profile.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/your_profile.txt");
 
         Integer bestScore = bestResultService.getBestOverallScore(user.getId());
         String horzBound = "+" + "-".repeat(25) + "+";
         String name  = String.format("Name: %s", user.getName());
         String score = String.format("Overall score: %d", bestScore != null ? bestScore : 0);
 
-        consoleRenderer.renderFromFile("uiTexts/konek_tobey_big.txt", 75, 0);
-        consoleRenderer.renderFromFile("uiTexts/frames/hello_there_frame.txt", 127, 8);
+        consoleRenderer.renderFromFile("ui/console/uiTexts/konek_tobey_big.txt", 75, 0);
+        consoleRenderer.renderFromFile("ui/console/uiTexts/frames/hello_there_frame.txt", 127, 8);
 
         int x = 20, y = 20;
         console.print(horzBound, x, y++);

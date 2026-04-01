@@ -3,7 +3,7 @@ package sk.tuke.gamestudio.game.logicalmazes.ui;
 public enum MenuOption {
     START("Start game"),
     PROFILE("Profile"),
-    LEADERBOARD("Leader board"),
+    LEADERBOARD("Leaderboard"),
     RATE("Rate game"),
     ABOUT("About"),
     EXIT("Exit");

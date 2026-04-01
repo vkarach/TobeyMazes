@@ -11,14 +11,13 @@ import sk.tuke.gamestudio.service.*;
 
 @Component
 public class Game {
-    public static final String version = "0.8.45";
+    public static final String version = "0.9.46";
     public static final String author = "Valentyn";
 
     private final MenuView menuView;
     private final LevelManager levelManager;
     private final AuthService authService;
     private final AuthView authView;
-    private final ReviewService reviewService;
 
     private final SoundUtil backgroundLoop = new SoundUtil("sounds/jazz_loop.wav", 0.1f);
     private final SoundUtil playLoop = new SoundUtil("sounds/energizing_music_loop.wav", 0.05f);
@@ -30,12 +29,10 @@ public class Game {
             MenuView menuView,
             LevelManager levelManager,
             AuthService authService,
-            ReviewService reviewService,
             LevelService levelService,
             AuthView authView) {
         this.menuView = menuView;
         this.levelManager = levelManager;
-        this.reviewService = reviewService;
         this.authService = authService;
         this.authView = authView;
 
@@ -44,17 +41,21 @@ public class Game {
 
         this.currentUser = authService.getUserBySessionToken();
         backgroundLoop.loop();
+
+        SoundUtil.setVolumeCoef(0);
     }
 
     public void launch() {
+//        handleProfile();
         mainLoop:
         while (true) {
             MenuOption menuOption = menuView.mainMenu();
+            if (menuOption == null) menuOption = MenuOption.EXIT;
             switch (menuOption) {
                 case START       -> handleStartAndPlayLevel();
                 case PROFILE     -> handleProfile();
                 case LEADERBOARD -> menuView.leaderboardPage(currentUser);
-                case RATE        -> menuView.reviewPage(currentUser, reviewService);
+                case RATE        -> menuView.reviewPage(currentUser);
                 case ABOUT       -> menuView.aboutPage();
                 case EXIT        -> {
                     backgroundLoop.stop();

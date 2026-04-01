@@ -4,13 +4,20 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import sk.tuke.gamestudio.game.logicalmazes.core.Game;
+import sk.tuke.gamestudio.game.logicalmazes.ui.fxgl.FxglApp;
+
+import java.util.Arrays;
 
 @SpringBootApplication
 public class TobeyMazes {
     public static void main(String[] args) {
-        ConfigurableApplicationContext context = SpringApplication.run(TobeyMazes.class, args);
-
-        Game game = context.getBean(Game.class);
-        game.launch();
+        boolean fxgl = Arrays.asList(args).contains("--ui=fxgl");
+        if (fxgl) {
+            FxglApp.launch(args);
+        }
+        else {
+            ConfigurableApplicationContext ctx = SpringApplication.run(TobeyMazes.class, args);
+            ctx.getBean(Game.class).launch();
+        }
     }
 }

@@ -1,9 +1,11 @@
 package sk.tuke.gamestudio.game.logicalmazes.ui.console;
 
 import org.jline.utils.AttributedStyle;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 
+@Profile("console")
 @Component
 public class Notifier {
     private final Console console;

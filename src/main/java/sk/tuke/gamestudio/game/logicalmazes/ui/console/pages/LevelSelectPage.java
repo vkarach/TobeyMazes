@@ -1,6 +1,7 @@
 package sk.tuke.gamestudio.game.logicalmazes.ui.console.pages;
 
 import org.jline.utils.AttributedStyle;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.entity.BestLevelResult;
 import sk.tuke.gamestudio.entity.User;
@@ -14,6 +15,7 @@ import sk.tuke.gamestudio.service.BestResultService;
 import java.util.List;
 import java.util.Random;
 
+@Profile("console")
 @Component
 public class LevelSelectPage {
     private final Console console;
@@ -30,19 +32,19 @@ public class LevelSelectPage {
 
     public Level show(User currentUser) {
         console.clear();
-        consoleRenderer.renderFromFile("uiTexts/konek_tobey_big.txt", 75, 0);
+        consoleRenderer.renderFromFile("ui/console/uiTexts/konek_tobey_big.txt", 75, 0);
 
         String[] files = {
-            "uiTexts/frames/hardcore_frame.txt",
-            "uiTexts/frames/ready_frame.txt",
-            "uiTexts/frames/u_got_this_frame.txt",
-            "uiTexts/frames/braining_frame.txt",
+            "ui/console/uiTexts/frames/hardcore_frame.txt",
+            "ui/console/uiTexts/frames/ready_frame.txt",
+            "ui/console/uiTexts/frames/u_got_this_frame.txt",
+            "ui/console/uiTexts/frames/braining_frame.txt",
         };
         Random random = new Random();
 
         Thread anim = null;
         if (random.nextInt(20) == 0) {
-            anim = consoleRenderer.renderAnimation("uiTexts/frames/brosky_anim.txt", 50, 127, 8);
+            anim = consoleRenderer.renderAnimation("ui/console/uiTexts/frames/brosky_anim.txt", 50, 127, 8);
         } else {
             consoleRenderer.renderFromFile(files[random.nextInt(files.length)], 127, 8);
         }
@@ -58,7 +60,7 @@ public class LevelSelectPage {
             "=(_________________________________________)="
         };
 
-        consoleRenderer.renderFromFile("uiTexts/select_level.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/select_level.txt");
         LevelOption[] options = buildLevelOption(currentUser);
 
         int x = Selector.DEFAULT_X;

@@ -4,7 +4,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 import sk.tuke.gamestudio.game.logicalmazes.ui.console.Console;
-import sk.tuke.gamestudio.game.logicalmazes.ui.console.GameMenu;
+import sk.tuke.gamestudio.game.logicalmazes.ui.console.ConsoleMenu;
 
 @SpringBootTest
 @Transactional
@@ -15,5 +15,5 @@ public abstract class BaseJPATest {
 
     // Prevent Game constructor from calling gameMenu.selectLevel() and blocking on input
     @MockBean
-    protected GameMenu gameMenu;
+    protected ConsoleMenu consoleMenu;
 }

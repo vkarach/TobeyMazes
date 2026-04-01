@@ -7,7 +7,7 @@ import sk.tuke.gamestudio.service.ReviewService;
 public interface MenuView {
     MenuOption mainMenu();
     Level selectLevel(User currentUser);
-    void reviewPage(User currentUser, ReviewService reviewService);
+    void reviewPage(User currentUser);
     void aboutPage();
     void winPage(long playedTimeMs, int points, boolean isTimeRecord, boolean isScoreRecord);
     void leaderboardPage(User user);

@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.game.logicalmazes.ui.console.pages;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.core.Game;
 import sk.tuke.gamestudio.game.logicalmazes.ui.MenuOption;
@@ -8,6 +9,7 @@ import sk.tuke.gamestudio.game.logicalmazes.ui.console.ConsoleRenderer;
 import sk.tuke.gamestudio.game.logicalmazes.ui.console.KonekTobeyAnimation;
 import sk.tuke.gamestudio.game.logicalmazes.ui.console.Selector;
 
+@Profile("console")
 @Component
 public class MainMenuPage {
     private final Console console;
@@ -26,7 +28,7 @@ public class MainMenuPage {
         String versionText = String.format("Beta v%s", Game.version);
         console.print(versionText, console.getWidth() - versionText.length(), console.getHeight() - 1);
 
-        consoleRenderer.renderFromFile("uiTexts/game_title.txt");
+        consoleRenderer.renderFromFile("ui/console/uiTexts/game_title.txt");
         Thread anim = new KonekTobeyAnimation(console, consoleRenderer).startKonekTobeyAnimation(80, 20);
 
         MenuOption[] actions = {

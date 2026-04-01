@@ -1,6 +1,7 @@
 package sk.tuke.gamestudio.game.logicalmazes.ui.console;
 
 import org.jline.reader.*;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 import org.jline.terminal.TerminalBuilder;
@@ -13,6 +14,7 @@ import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
+@Profile("console")
 @Component
 public class Console implements GameInput {
     private final Terminal terminal;

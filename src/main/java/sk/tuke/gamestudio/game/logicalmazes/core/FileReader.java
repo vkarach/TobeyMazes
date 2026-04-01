@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class FileReader {
-    private static InputStream getInputStream(String filepath) {
+    public static InputStream getInputStream(String filepath) {
         InputStream stream = MapParser.class
                 .getClassLoader()
                 .getResourceAsStream(filepath);
