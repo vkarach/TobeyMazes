@@ -10,9 +10,11 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.boot.SpringApplication;
-import sk.tuke.gamestudio.TobeyMazes;
+import sk.tuke.gamestudio.game.logicalmazes.TobeyMazes;
 import sk.tuke.gamestudio.game.logicalmazes.core.FileReader;
 import sk.tuke.gamestudio.game.logicalmazes.core.Game;
 
@@ -48,7 +50,10 @@ public class FxglApp extends GameApplication {
 
     @Override
     protected void initGame() {
-        springContext = SpringApplication.run(TobeyMazes.class, appArgs);
+        springContext = new SpringApplicationBuilder(TobeyMazes.class)
+                .web(WebApplicationType.NONE)
+                .run(appArgs);
+
         Game game = springContext.getBean(Game.class);
         new Thread(game::launch, "game-thread").start();
     }

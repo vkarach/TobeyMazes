@@ -56,7 +56,7 @@ public class ReviewServiceJDBC implements ReviewService {
     }
 
     @Override
-    public float getOverallRating() {
+    public Float getOverallRating() {
         try (Connection connection = ConnectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_OVERALL_RATING)
         ) {
@@ -64,7 +64,7 @@ public class ReviewServiceJDBC implements ReviewService {
                 if (rs.next()) {
                     return rs.getFloat("average_rating");
                 }
-                return 0;
+                return null;
             }
         }
         catch (SQLException e) {

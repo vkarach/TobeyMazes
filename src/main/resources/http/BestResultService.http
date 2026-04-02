@@ -1,0 +1,1 @@
+POST http://localhost:8081/api/bestResult/score?userId=604&levelId=1&bestScore=696245

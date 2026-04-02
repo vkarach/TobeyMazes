@@ -1,6 +1,7 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.ui.GameInput;
 import sk.tuke.gamestudio.game.logicalmazes.ui.LevelView;
@@ -10,6 +11,7 @@ import sk.tuke.gamestudio.service.BestResultService;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Profile({"console", "fxgl"})
 @Component
 public class LevelManager {
     private final LevelView levelView;

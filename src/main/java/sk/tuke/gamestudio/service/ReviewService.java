@@ -7,5 +7,5 @@ import sk.tuke.gamestudio.service.exception.ReviewException;
 public interface ReviewService {
     void addOrUpdateReview(Review review) throws ReviewException;
     Review getReview(int userId) throws ReviewException;
-    float getOverallRating() throws ReviewException;
+    Float getOverallRating() throws ReviewException;
 }

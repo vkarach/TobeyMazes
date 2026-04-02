@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.game.logicalmazes.core;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.game.logicalmazes.ui.AuthView;
 import sk.tuke.gamestudio.game.logicalmazes.ui.MenuOption;
@@ -9,9 +10,10 @@ import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.game.logicalmazes.utils.SoundUtil;
 import sk.tuke.gamestudio.service.*;
 
+@Profile({"console", "fxgl"})
 @Component
 public class Game {
-    public static final String version = "0.9.46";
+    public static final String version = "0.10.47";
     public static final String author = "Valentyn";
 
     private final MenuView menuView;

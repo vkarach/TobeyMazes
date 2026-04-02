@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.service.impl.JPA;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import sk.tuke.gamestudio.entity.BestLevelResult;
 import sk.tuke.gamestudio.entity.BestLevelResultId;
@@ -9,11 +10,10 @@ import sk.tuke.gamestudio.entity.UserScore;
 
 import org.springframework.data.domain.PageRequest;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
+@Profile("server")
 @Service
 public class BestResultServiceJPA implements BestResultService {
     private final BestLevelResultRepository bestLevelResultRepository;

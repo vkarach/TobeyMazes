@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.service.impl.JPA;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import sk.tuke.gamestudio.entity.EmailVerification;
 import sk.tuke.gamestudio.repository.EmailVerificationRepository;
@@ -8,6 +9,7 @@ import sk.tuke.gamestudio.service.EmailVerificationService;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@Profile("server")
 @Service
 public class EmailVerificationServiceJPA implements EmailVerificationService {
     private final EmailVerificationRepository emailVerificationRepository;

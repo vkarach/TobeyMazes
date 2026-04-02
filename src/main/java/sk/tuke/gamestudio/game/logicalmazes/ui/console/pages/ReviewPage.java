@@ -86,9 +86,9 @@ public class ReviewPage {
     }
 
     private void printRating(ReviewService reviewService, int x, int y) {
-        float overallRating = reviewService.getOverallRating();
+        Float overallRating = reviewService.getOverallRating();
         String ratingText = String.format("Overall rating: %s",
-                overallRating > 0 ? String.format("%.2f", overallRating) : "no one rated yet");
+                overallRating != null ? String.format("%.2f", overallRating) : "no one rated yet");
         console.print(ratingText, x, y);
     }
 }

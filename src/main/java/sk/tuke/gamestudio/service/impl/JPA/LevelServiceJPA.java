@@ -1,11 +1,13 @@
 package sk.tuke.gamestudio.service.impl.JPA;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import sk.tuke.gamestudio.entity.LevelEntity;
 import sk.tuke.gamestudio.game.logicalmazes.core.Level;
 import sk.tuke.gamestudio.repository.LevelRepository;
 import sk.tuke.gamestudio.service.LevelService;
 
+@Profile("server")
 @Service
 public class LevelServiceJPA implements LevelService {
     private final LevelRepository levelRepository;

@@ -44,7 +44,7 @@ public class SessionServiceJDBC implements SessionService {
     }
 
     @Override
-    public int getUserIdBySessionToken(String sessionToken) {
+    public Integer getUserIdBySessionToken(String sessionToken) {
         try (
                 Connection connection = ConnectionManager.getConnection();
                 PreparedStatement statement = connection.prepareStatement(SELECT_USER_ID_BY_SESSION_TOKEN)

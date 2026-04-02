@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.service.impl.JPA;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import sk.tuke.gamestudio.entity.UserSession;
 import sk.tuke.gamestudio.repository.UserSessionRepository;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+@Profile("server")
 @Service
 public class SessionServiceJPA implements SessionService {
     private final UserSessionRepository userSessionRepository;
@@ -32,7 +34,7 @@ public class SessionServiceJPA implements SessionService {
     }
 
     @Override
-    public int getUserIdBySessionToken(String sessionToken) {
+    public Integer getUserIdBySessionToken(String sessionToken) {
         Optional<UserSession> userSession = userSessionRepository.findBySessionToken(sessionToken);
         if (userSession.isPresent()) {
             return userSession.get().getUserId();

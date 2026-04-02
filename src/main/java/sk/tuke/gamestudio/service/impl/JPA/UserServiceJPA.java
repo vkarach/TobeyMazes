@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.service.impl.JPA;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.repository.UserRepository;
@@ -7,6 +8,7 @@ import sk.tuke.gamestudio.service.UserService;
 
 import java.util.Optional;
 
+@Profile("server")
 @Service
 public class UserServiceJPA implements UserService {
     private final UserRepository userRepository;
