@@ -13,8 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.boot.SpringApplication;
-import sk.tuke.gamestudio.game.logicalmazes.TobeyMazes;
+import sk.tuke.gamestudio.game.logicalmazes.core.TobeyMazes;
 import sk.tuke.gamestudio.game.logicalmazes.core.FileReader;
 import sk.tuke.gamestudio.game.logicalmazes.core.Game;
 

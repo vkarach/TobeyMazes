@@ -22,8 +22,8 @@ import java.util.concurrent.CountDownLatch;
 @Profile("fxgl")
 @Component
 public class ProfilePage {
-    private final Selector selector;
     private final BestResultService bestResultService;
+    private final Selector selector;
     private final ParallaxBackground bg;
 
     private static final ProfileOption[] AUTHORIZED_ACTIONS = {
@@ -33,10 +33,13 @@ public class ProfilePage {
             ProfileOption.REGISTER, ProfileOption.LOGIN, ProfileOption.BACK
     };
 
-    public ProfilePage(Selector selector, BestResultService bestResultService,
-                       @Qualifier("profileBackground") ParallaxBackground bg) {
-        this.selector = selector;
+    public ProfilePage(
+            BestResultService bestResultService,
+            Selector selector,
+            @Qualifier("profileBackground") ParallaxBackground bg
+    ) {
         this.bestResultService = bestResultService;
+        this.selector = selector;
         this.bg = bg;
     }
 

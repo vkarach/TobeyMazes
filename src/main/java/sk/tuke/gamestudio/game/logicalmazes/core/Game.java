@@ -13,7 +13,7 @@ import sk.tuke.gamestudio.service.*;
 @Profile({"console", "fxgl"})
 @Component
 public class Game {
-    public static final String version = "0.10.47";
+    public static final String version = "0.11.48";
     public static final String author = "Valentyn";
 
     private final MenuView menuView;
@@ -48,7 +48,6 @@ public class Game {
     }
 
     public void launch() {
-//        handleProfile();
         mainLoop:
         while (true) {
             MenuOption menuOption = menuView.mainMenu();

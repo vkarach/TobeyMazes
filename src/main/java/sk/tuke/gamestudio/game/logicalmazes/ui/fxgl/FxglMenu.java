@@ -20,19 +20,23 @@ public class FxglMenu implements MenuView {
     private final ProfilePage profilePage;
     private final LeaderboardPage leaderboardPage;
     private final ReviewPage reviewPage;
+    private final LevelSelectPage levelSelectPage;
+
 
     public FxglMenu(
         MainMenuPage mainMenuPage,
         AboutPage aboutPage,
         ProfilePage profilePage,
         LeaderboardPage leaderboardPage,
-        ReviewPage reviewPage
+        ReviewPage reviewPage,
+        LevelSelectPage levelSelectPage
     ) {
         this.mainMenuPage = mainMenuPage;
         this.aboutPage = aboutPage;
         this.profilePage = profilePage;
         this.leaderboardPage = leaderboardPage;
         this.reviewPage = reviewPage;
+        this.levelSelectPage = levelSelectPage;
     }
 
     @Override
@@ -41,11 +45,13 @@ public class FxglMenu implements MenuView {
     }
 
     @Override
-    public Level selectLevel(User currentUser) { return null; }
+    public Level selectLevel(User currentUser) {
+        return levelSelectPage.show();
+    }
 
     @Override
     public void reviewPage(User currentUser) {
-        reviewPage.show();
+        reviewPage.show(currentUser);
     }
 
     @Override

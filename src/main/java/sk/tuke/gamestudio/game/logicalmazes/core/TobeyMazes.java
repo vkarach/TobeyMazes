@@ -1,17 +1,20 @@
-package sk.tuke.gamestudio.game.logicalmazes;
+package sk.tuke.gamestudio.game.logicalmazes.core;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestTemplate;
-import sk.tuke.gamestudio.game.logicalmazes.core.Game;
 import sk.tuke.gamestudio.game.logicalmazes.ui.fxgl.FxglApp;
 
 import java.util.Arrays;
 
-@SpringBootApplication(scanBasePackages = "sk.tuke.gamestudio")
+@SpringBootApplication
+@ComponentScan(
+        basePackages = "sk.tuke.gamestudio",
+        excludeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = "sk\\.tuke\\.gamestudio\\.server\\..*")
+)
 public class TobeyMazes {
     public static void main(String[] args) {
         boolean fxgl = Arrays.asList(args).contains("--ui=fxgl");

@@ -8,4 +8,5 @@ public interface LevelView {
     void renderField(Field field, Player player);
     void updateHud(long startTime, int targetCount, int points);
     void renderTips();
+    default void stopLevel() {}
 }

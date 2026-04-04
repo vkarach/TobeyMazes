@@ -10,6 +10,7 @@ import sk.tuke.gamestudio.service.BestResultService;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Profile({"console", "fxgl"})
 @Component
@@ -50,6 +51,7 @@ public class LevelManager {
         loadLevel(currentLevel.getFilepath());
 
         LevelResult result = startLevel();
+        levelView.stopLevel();
 
         cleanup();
         return result;
@@ -105,23 +107,31 @@ public class LevelManager {
 
         AtomicInteger stepCont = new AtomicInteger(0);
         GameController controller = new GameController(gameField, player);
-        LevelState levelState = LevelState.PLAYING;
+        AtomicReference<LevelState> stateRef = new AtomicReference<>(LevelState.PLAYING);
 
         levelView.launchLevel(gameField);
         levelView.renderTips();
-        // render every 100 ms regardless of input
         ScheduledExecutorService renderScheduler = Executors.newSingleThreadScheduledExecutor();
         renderScheduler.scheduleAtFixedRate(() -> {
+            if (stateRef.get() != LevelState.PLAYING) return;
             long elapsed = System.nanoTime() - startTime;
             levelView.updateHud(startTime, targetCount.get(), computePoints(elapsed, stepCont.get(), currentLevel.getDifficulty()));
             levelView.renderField(gameField, player);
+
+            if (gameField.takeTarget(player)) {
+                pickupSound.play();
+                if (targetCount.decrementAndGet() == 0) {
+                    stateRef.set(LevelState.SOLVED);
+                    gameInput.wakeUp();
+                }
+            }
         }, 0, 75, TimeUnit.MILLISECONDS);
 
-        while (levelState == LevelState.PLAYING) {
+        while (stateRef.get() == LevelState.PLAYING) {
             InputType inputType = gameInput.getInput();
 
             switch (inputType) {
-                case QUIT -> levelState = LevelState.EXITED;
+                case QUIT -> stateRef.set(LevelState.EXITED);
                 case RELOAD -> {
                     stopScheduler(renderScheduler);
                     controller.shutdown();
@@ -135,19 +145,12 @@ public class LevelManager {
                 }
                 case NONE -> {}
             }
-
-            if (gameField.takeTarget(player)) {
-                pickupSound.play();
-                if (targetCount.decrementAndGet() == 0) {
-                    levelState = LevelState.SOLVED;
-                }
-            }
         }
 
         stopScheduler(renderScheduler);
         controller.shutdown();
 
-        return new LevelResult(levelState, stepCont.get(), System.nanoTime() - startTime);
+        return new LevelResult(stateRef.get(), stepCont.get(), System.nanoTime() - startTime);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

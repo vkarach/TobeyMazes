@@ -27,9 +27,9 @@ public class FxglUi {
     public static final int DEFAULT_TEXT_SIZE = 18;
 
     public static Font createFont(int size) {
-        String font = "ui/fxgl/fonts/PressStart2P-Regular.ttf";
         return Font.loadFont(
-                FileReader.getInputStream(font), size
+            FileReader.getInputStream("ui/fxgl/fonts/PressStart2P-Regular.ttf"),
+            size
         );
     }
 

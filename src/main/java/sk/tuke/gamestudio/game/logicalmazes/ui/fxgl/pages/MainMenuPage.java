@@ -32,7 +32,10 @@ public class MainMenuPage {
     private final Selector selector;
     private final ParallaxBackground bg;
 
-    public MainMenuPage(Selector selector, @Qualifier("mainMenuBackground") ParallaxBackground bg) {
+    public MainMenuPage(
+            Selector selector,
+            @Qualifier("mainMenuBackground") ParallaxBackground bg
+    ) {
         this.selector = selector;
         this.bg = bg;
     }

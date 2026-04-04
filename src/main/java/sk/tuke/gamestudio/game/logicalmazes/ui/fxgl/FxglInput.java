@@ -18,6 +18,11 @@ public class FxglInput implements GameInput {
     }
 
     @Override
+    public void wakeUp() {
+        queue.offer(InputType.NONE);
+    }
+
+    @Override
     public InputType getInput() {
         try {
             return queue.take();

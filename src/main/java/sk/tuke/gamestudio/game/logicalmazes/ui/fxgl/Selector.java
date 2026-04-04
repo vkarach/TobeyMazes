@@ -80,16 +80,36 @@ public class Selector {
         }
     }
 
+    public Thread onQuit(Runnable callback) {
+        ensureInputRegistered();
+        Thread t = new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                if (gameInput.getInput() == InputType.QUIT) {
+                    Platform.runLater(callback);
+                    return;
+                }
+            }
+        }, "quit-watcher");
+        t.setDaemon(true);
+        t.start();
+        return t;
+    }
+
+    public void ensureBindings() {
+        ensureInputRegistered();
+    }
+
     private void ensureInputRegistered() {
         if (inputRegistered) return;
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
-            addBinding("NavUp",    KeyCode.UP,    InputType.UP);
-            addBinding("NavDown",  KeyCode.DOWN,  InputType.DOWN);
-            addBinding("NavLeft",  KeyCode.LEFT,  InputType.LEFT);
-            addBinding("NavRight", KeyCode.RIGHT, InputType.RIGHT);
-            addBinding("NavEnter", KeyCode.ENTER, InputType.ENTER);
-            addBinding("NavQuit",  KeyCode.Q,     InputType.QUIT);
+            addBinding("NavUp",     KeyCode.UP,    InputType.UP);
+            addBinding("NavDown",   KeyCode.DOWN,  InputType.DOWN);
+            addBinding("NavLeft",   KeyCode.LEFT,  InputType.LEFT);
+            addBinding("NavRight",  KeyCode.RIGHT, InputType.RIGHT);
+            addBinding("NavEnter",  KeyCode.ENTER, InputType.ENTER);
+            addBinding("NavQuit",   KeyCode.Q,     InputType.QUIT);
+            addBinding("NavReload", KeyCode.R,     InputType.RELOAD);
             inputRegistered = true;
             latch.countDown();
         });

@@ -32,7 +32,6 @@ public class LevelUI implements LevelView {
     private final char targetCh = '✿';
 
     private Field gameField;
-    private Player player;
     private int x;
     private int y;
     private int hudX;

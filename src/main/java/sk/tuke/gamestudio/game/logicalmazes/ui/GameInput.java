@@ -4,4 +4,5 @@ import sk.tuke.gamestudio.game.logicalmazes.core.InputType;
 
 public interface GameInput {
     InputType getInput();
+    default void wakeUp() {}
 }

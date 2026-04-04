@@ -1,5 +1,6 @@
 *.iml
 *.log
+.claude
 .idea
 system
 target

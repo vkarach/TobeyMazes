@@ -26,8 +26,10 @@ public class AboutPage {
     private static final Color BUTTON_COLOR = Color.rgb(145, 205, 255);
     private static final Color SELECT_COLOR = Color.rgb(203, 145, 255);
 
-    public AboutPage(Selector selector,
-                     @Qualifier("aboutBackground") ParallaxBackground bg) {
+    public AboutPage(
+            Selector selector,
+            @Qualifier("aboutBackground") ParallaxBackground bg
+    ) {
         this.selector = selector;
         this.bg = bg;
     }
