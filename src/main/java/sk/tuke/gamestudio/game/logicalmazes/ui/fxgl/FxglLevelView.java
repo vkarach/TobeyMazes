@@ -31,7 +31,7 @@ public class FxglLevelView implements LevelView {
 
     private static final int  CELL    = 52;
     private static final int  WALL    = 5;
-    // how long (ns) to animate one tile step — slightly above GameController's 75ms interval
+    // how long (ns) to animate one tile step - slightly above GameController's 75ms interval
     private static final long STEP_NS = 82_000_000L;
 
     // salto spritesheet: 13 frames × 70×70 px, horizontal strip
@@ -54,7 +54,7 @@ public class FxglLevelView implements LevelView {
     private static final Color HUD_ACC    = FxglUi.DEFAULT_TITLE_COLOR;       // gold
 
     // ---- state ----
-    private Player currentPlayer;   // volatile fields — safe to read from AnimationTimer
+    private Player currentPlayer;   // volatile fields - safe to read from AnimationTimer
     private int    originX, originY;
 
     // step-based render position (pixels, FX thread only)
@@ -117,7 +117,7 @@ public class FxglLevelView implements LevelView {
                 }
             }
 
-            // player sprite — salto spritesheet, frame 0 is idle
+            // player sprite - salto spritesheet, frame 0 is idle
             Image saltoSheet = new Image(FileReader.getInputStream("ui/fxgl/animations/KonekTobeySalto70x70.png"));
             playerView = new ImageView(saltoSheet);
             playerView.setViewport(new Rectangle2D(0, 0, ANIM_FRAME_W, ANIM_FRAME_H));
@@ -155,9 +155,9 @@ public class FxglLevelView implements LevelView {
     }
 
     @Override
-    public void updateHud(long startTime, int targetCount, int points) {
+    public void updateHud(long elapsedNs, int targetCount, int points) {
         if (timerText == null) return;
-        String time = formatTime(startTime);
+        String time = formatTime(elapsedNs);
         Platform.runLater(() -> {
             timerText.setText(time);
             pointsText.setText(String.valueOf(points));
@@ -204,7 +204,7 @@ public class FxglLevelView implements LevelView {
                 int lx = p.getX();
                 int ly = p.getY();
 
-                // new logical step detected — start movement animation
+                // new logical step detected - start movement animation
                 if (lx != lastLogicalX || ly != lastLogicalY) {
                     animStartX  = renderX;
                     animStartY  = renderY;
@@ -213,12 +213,12 @@ public class FxglLevelView implements LevelView {
                     animStartNs = now;
 
                     if (lx != lastLogicalX) {
-                        // horizontal step — flip sprite direction
+                        // horizontal step - flip sprite direction
                         int dir = lx > lastLogicalX ? 1 : -1;
                         if (dir < 0) playerView.setScaleX(-1);
                         else         playerView.setScaleX(1);
 
-                        // first step of a new slide sequence — decide whether to animate
+                        // first step of a new slide sequence - decide whether to animate
                         if (lastHorizStepNs < 0 || (now - lastHorizStepNs) > STEP_NS) {
                             int totalDist = countHorizSteps(field, lastLogicalX, lastLogicalY, dir);
                             if (totalDist >= 3) {
@@ -249,7 +249,7 @@ public class FxglLevelView implements LevelView {
                     }
                 }
 
-                // linear progress — constant speed, no deceleration, no pauses
+                // linear progress - constant speed, no deceleration, no pauses
                 if (animStartNs >= 0) {
                     double t = Math.min((double)(now - animStartNs) / STEP_NS, 1.0);
                     renderX = animStartX + (animTargetX - animStartX) * t;
@@ -313,7 +313,7 @@ public class FxglLevelView implements LevelView {
         boolean[][] hWalls = field.getHWalls();
         boolean[][] vWalls = field.getVWalls();
 
-        // horizontal segments — no arc, centered on the grid line
+        // horizontal segments - no arc, centered on the grid line
         for (int r = 0; r <= rows; r++)
             for (int c = 0; c < cols; c++)
                 if (hWalls[r][c])
@@ -327,7 +327,7 @@ public class FxglLevelView implements LevelView {
                     addUI(rect(originX + c * CELL - WALL / 2.0, originY + r * CELL - WALL / 2.0,
                                WALL, CELL + WALL, WALL_CLR, 0));
 
-        // corner fill squares — everywhere at least one adjacent wall touches the junction
+        // corner fill squares - everywhere at least one adjacent wall touches the junction
         for (int r = 0; r <= rows; r++) {
             for (int c = 0; c <= cols; c++) {
                 boolean right = c < cols  && hWalls[r][c];
@@ -345,8 +345,8 @@ public class FxglLevelView implements LevelView {
         int hx = originX + cols * CELL + 30;
         int hy = originY + rows * CELL / 2 - 80;
 
-        // labels — system font (readable at small sizes)
-        // values — PressStart2P at 16 (crisp at exact pixel size)
+        // labels - system font (readable at small sizes)
+        // values - PressStart2P at 16 (crisp at exact pixel size)
         addUI(hudLabel("TIME", hx, hy));
         timerText = FxglUi.createText("0:00", 16, HUD_CLR);
         timerText.setTranslateX(hx); timerText.setTranslateY(hy + 34);
@@ -388,8 +388,8 @@ public class FxglLevelView implements LevelView {
         FXGL.getGameScene().addUINode(node);
     }
 
-    private String formatTime(long startNs) {
-        long ms = (System.nanoTime() - startNs) / 1_000_000L;
+    private String formatTime(long elapsedNs) {
+        long ms = elapsedNs / 1_000_000L;
         if (ms < 0) ms = 0;
         long totalSec = ms / 1000L;
         long min = totalSec / 60L;

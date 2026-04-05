@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About</title>
+</head>
+<body>
+
+<h1>About</h1>
+
+<p>TobeyMazes <span th:text="${version}"></span></p>
+<p>An improved version of the terminal-based maze game built with Java and Spring.</p>
+<p>Made by <span th:text="${author}"></span> - this is my fourth game.</p>
+<p>Thanks for participating in beta testing :)</p>
+
+<br/><a th:href="@{/menu}">Back to menu</a>
+
+</body>
+</html>

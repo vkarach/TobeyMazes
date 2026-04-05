@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import sk.tuke.gamestudio.entity.Review;
 import sk.tuke.gamestudio.repository.ReviewRepository;
 import sk.tuke.gamestudio.service.ReviewService;
-import sk.tuke.gamestudio.service.exception.ReviewException;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -33,6 +32,7 @@ public class ReviewServiceJPA implements ReviewService {
 
     @Override
     public Float getOverallRating() {
-        return reviewRepository.getOverallRating().floatValue();
+        Double avg = reviewRepository.getOverallRating();
+        return avg != null ? avg.floatValue() : 0f;
     }
 }

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Review</title>
+</head>
+<body>
+
+<h1>Review</h1>
+
+<p>Overall rating: <strong th:text="${overallRating} + ' / 5'"></strong></p>
+
+<div th:if="${user != null}">
+    <h2 th:text="${review != null} ? 'Your review' : 'Leave a review'"></h2>
+
+    <div th:if="${review != null}">
+        <p>Rating: <span th:text="${review.rating}"></span> / 5</p>
+        <p>Comment: <span th:text="${review.comment}"></span></p>
+        <p>Updated: <span th:text="${review.updatedAt}"></span></p>
+    </div>
+
+    <form th:action="@{/review/submit}" method="get">
+        <label>Rating (1–5):
+            <input type="number" name="rating" min="1" max="5"
+                   th:value="${review != null} ? ${review.rating} : 5" required/>
+        </label><br/>
+        <label>Comment:
+            <textarea name="review" rows="3" cols="40"
+                      th:text="${review != null} ? ${review.comment} : ''"></textarea>
+        </label><br/>
+        <button type="submit" th:text="${review != null} ? 'Update' : 'Submit'"></button>
+    </form>
+</div>
+
+<div th:if="${user == null}">
+    <p>Please <a th:href="@{/profile}">log in</a> to leave a review.</p>
+</div>
+
+<br/><a th:href="@{/menu}">Back to menu</a>
+
+</body>
+</html>

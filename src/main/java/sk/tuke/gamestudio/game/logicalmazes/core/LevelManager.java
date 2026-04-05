@@ -10,6 +10,7 @@ import sk.tuke.gamestudio.service.BestResultService;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Profile({"console", "fxgl"})
@@ -103,7 +104,7 @@ public class LevelManager {
     }
 
     private LevelResult startLevel() {
-        long startTime = System.nanoTime();
+        AtomicLong startTimeNs = new AtomicLong(0); // 0 = not yet started
 
         AtomicInteger stepCont = new AtomicInteger(0);
         GameController controller = new GameController(gameField, player);
@@ -114,8 +115,9 @@ public class LevelManager {
         ScheduledExecutorService renderScheduler = Executors.newSingleThreadScheduledExecutor();
         renderScheduler.scheduleAtFixedRate(() -> {
             if (stateRef.get() != LevelState.PLAYING) return;
-            long elapsed = System.nanoTime() - startTime;
-            levelView.updateHud(startTime, targetCount.get(), computePoints(elapsed, stepCont.get(), currentLevel.getDifficulty()));
+            long startNs = startTimeNs.get();
+            long elapsedNs = startNs == 0 ? 0 : System.nanoTime() - startNs;
+            levelView.updateHud(elapsedNs, targetCount.get(), computePoints(elapsedNs, stepCont.get(), currentLevel.getDifficulty()));
             levelView.renderField(gameField, player);
 
             if (gameField.takeTarget(player)) {
@@ -140,6 +142,7 @@ public class LevelManager {
                 }
                 case UP, DOWN, LEFT, RIGHT -> {
                     if (controller.onInput(Direction.InputToDirection(inputType))) {
+                        startTimeNs.compareAndSet(0, System.nanoTime());
                         stepCont.incrementAndGet();
                     }
                 }
@@ -150,7 +153,9 @@ public class LevelManager {
         stopScheduler(renderScheduler);
         controller.shutdown();
 
-        return new LevelResult(stateRef.get(), stepCont.get(), System.nanoTime() - startTime);
+        long startNs = startTimeNs.get();
+        long playedNs = startNs == 0 ? 0 : System.nanoTime() - startNs;
+        return new LevelResult(stateRef.get(), stepCont.get(), playedNs);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

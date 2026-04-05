@@ -1,6 +1,6 @@
 TobeyMazes PURPLEv%sOFF
 
 A terminal-based maze game built with Java and JLine.
-Made by YELLOW%sOFF — this is my fourth game.
+Made by YELLOW%sOFF - this is my fourth game.
 
 Thanks for participating in beta testing :)

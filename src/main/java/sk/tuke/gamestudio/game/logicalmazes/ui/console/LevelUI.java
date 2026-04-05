@@ -56,9 +56,8 @@ public class LevelUI implements LevelView {
         console.print(sb, x, y);
     }
 
-    private String formatTimerString(long startTime) {
-        final long nowNs = System.nanoTime();
-        long durationMs = (nowNs - startTime) / 1_000_000L;
+    private String formatTimerString(long elapsedNs) {
+        long durationMs = elapsedNs / 1_000_000L;
 
         if (durationMs < 0) durationMs = 0;
 
@@ -105,13 +104,13 @@ public class LevelUI implements LevelView {
         consoleRenderer.renderFromFile("ui/console/uiTexts/konek_tobey.txt", hudX, y + konekTobeyPadY, true);
     }
 
-    public void updateHud(long startTime, int targetCount, int points) {
+    public void updateHud(long elapsedNs, int targetCount, int points) {
         int curY = this.y;
         String vBound = "+" + "-".repeat(11) + "+";
         console.print(vBound, hudX, curY++, wallStyle);
 
         String[] toPrint = new String[] {
-            String.format(" %-10s", formatTimerString(startTime)),
+            String.format(" %-10s", formatTimerString(elapsedNs)),
             String.format(" %-10s", "🏆 " + points),
             String.format(" %-10s", " " + targetCount + ' ' + targetCh)
         };

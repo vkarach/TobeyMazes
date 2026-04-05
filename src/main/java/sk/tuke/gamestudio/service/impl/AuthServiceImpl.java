@@ -1,7 +1,11 @@
 package sk.tuke.gamestudio.service.impl;
 
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+import sk.tuke.gamestudio.config.RestClientConfig;
 import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.service.*;
 
@@ -10,7 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import java.util.Map;
 import java.security.SecureRandom;
 
 @Component
@@ -20,7 +24,14 @@ public class AuthServiceImpl implements AuthService {
     private final EmailSendService emailSendService;
     private final EmailVerificationService emailVerificationService;
 
-    public AuthServiceImpl (UserService userService, SessionService sessionService, EmailSendService emailSendService, EmailVerificationService emailVerificationService) {
+    // null on server profile — RestTemplate bean exists only on console/fxgl
+    @Autowired(required = false)
+    private RestTemplate restTemplate;
+
+    @Autowired(required = false)
+    private RestClientConfig restClientConfig;
+
+    public AuthServiceImpl(UserService userService, SessionService sessionService, EmailSendService emailSendService, EmailVerificationService emailVerificationService) {
         this.userService = userService;
         this.emailSendService = emailSendService;
         this.emailVerificationService = emailVerificationService;
@@ -89,15 +100,32 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public User login(String name, String password) {
+        if (restTemplate != null) {
+            return loginViaServer(name, password);
+        }
         Integer userId = userService.getUserIdByName(name);
         if (userId == null || !checkPassword(password, userService.getPasswordByUserId(userId))) {
             return null;
         }
-
         name = userService.getUserNameById(userId);
         updateSession(userId);
-
         return new User(userId, name);
+    }
+
+    private User loginViaServer(String name, String password) {
+        String url = restClientConfig.getBaseUrl() + "/api/auth/login";
+        try {
+            String token = restTemplate.postForObject(
+                    url, Map.of("username", name, "password", password), String.class
+            );
+            if (token == null) return null;
+            saveSession(token);
+            int userId = sessionService.getUserIdBySessionToken(token);
+            return new User(userId, name);
+        }
+        catch (HttpClientErrorException.Unauthorized e) {
+            return null;
+        }
     }
 
     public void deleteSession() {
@@ -129,6 +157,77 @@ public class AuthServiceImpl implements AuthService {
 
         return code;
     }
+
+    public void initiateEmailVerification(String email) {
+        if (restTemplate != null) {
+            restTemplate.postForObject(
+                    restClientConfig.getBaseUrl() + "/api/auth/send-email-code",
+                    Map.of("email", email), Void.class
+            );
+        } else {
+            getOrCreateVerificationCodeByEmail(email);
+        }
+    }
+
+    public User registerWithCode(String name, String password, String email, int code) {
+        if (restTemplate != null) {
+            try {
+                String token = restTemplate.postForObject(
+                        restClientConfig.getBaseUrl() + "/api/auth/register",
+                        Map.of("username", name, "password", password, "email", email, "code", String.valueOf(code)),
+                        String.class
+                );
+                if (token == null) return null;
+                saveSession(token);
+                int userId = sessionService.getUserIdBySessionToken(token);
+                return new User(userId, name);
+            } catch (HttpClientErrorException e) {
+                return null;
+            }
+        }
+        Integer storedCode = emailVerificationService.getCodeByEmail(email);
+        if (storedCode == null || storedCode != code) return null;
+        emailVerificationService.expireEmail(email);
+        int userId = userService.createUser(name, stringToHash(password), email);
+        updateSession(userId);
+        return new User(userId, name);
+    }
+
+    public void initiatePasswordChange(int userId) {
+        if (restTemplate != null) {
+            restTemplate.postForObject(
+                restClientConfig.getBaseUrl() + "/api/auth/send-password-change-code",
+                null, Void.class
+            );
+        }
+        else {
+            String email = userService.getEmailByUserId(userId);
+            getOrCreateVerificationCodeByEmail(email);
+        }
+    }
+
+    public boolean changePasswordWithCode(int userId, int code, String newPassword) {
+        if (restTemplate != null) {
+            try {
+                restTemplate.postForObject(
+                        restClientConfig.getBaseUrl() + "/api/auth/change-password-with-code",
+                        Map.of("code", String.valueOf(code), "newPassword", stringToHash(newPassword)),
+                        Void.class
+                );
+                return true;
+            } catch (HttpClientErrorException e) {
+                return false;
+            }
+        }
+        String email = userService.getEmailByUserId(userId);
+        Integer storedCode = emailVerificationService.getCodeByEmail(email);
+        if (storedCode == null || storedCode != code) return false;
+        emailVerificationService.expireEmail(email);
+        userService.changePassword(userId, stringToHash(newPassword));
+        return true;
+    }
+
+    // legacy — used only by web controllers (server-mode)
 
     public int getOrCreateEmailVerificationCode(int userId) {
         String email = userService.getEmailByUserId(userId);

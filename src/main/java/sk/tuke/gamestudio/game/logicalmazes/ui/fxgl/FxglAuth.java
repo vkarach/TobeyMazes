@@ -63,14 +63,14 @@ public class FxglAuth implements AuthView {
 
             String password = askValidated("ENTER PASSWORD", true,
                     v -> validate(v, REGEX_NAME, 3, 16), null);
-            if (password == null) continue; // ESC — back to username
+            if (password == null) continue; // ESC - back to username
 
             String email = null;
             String emailError = null;
             while (email == null) {
                 String input = askValidated("ENTER EMAIL", false,
                         v -> validate(v, REGEX_EMAIL, 5, 60), emailError);
-                if (input == null) break; // ESC — back to username loop
+                if (input == null) break; // ESC - back to username loop
 
                 Runnable stopEmailCheck = showLoading("CHECKING");
                 boolean emailTaken = authService.emailTaken(input);
@@ -242,7 +242,7 @@ public class FxglAuth implements AuthView {
      * Shows an input panel. Blocks game thread until Enter or ESC.
      *
      * Layout uses fixed offsets so the panel never resizes between calls
-     * — error space is always reserved.
+     * - error space is always reserved.
      *
      * @param subtitle optional second line (e.g. "Code sent to email")
      * @param error    optional red error text, auto-fades after 2.5 s
@@ -260,7 +260,7 @@ public class FxglAuth implements AuthView {
 
             double pad    = 26;
             double panelW = isPassword ? 640 : 620;
-            // Fixed height — always includes error row so panel never shifts on error
+            // Fixed height - always includes error row so panel never shifts on error
             double panelH = hasSubtitle ? 230 : 200;
             double panelX = (W - panelW) / 2;
             double panelY = (H - panelH) / 2;
@@ -297,7 +297,7 @@ public class FxglAuth implements AuthView {
             titleNode.setTranslateX(panelX + pad);
             titleNode.setTranslateY(titleY);
 
-            // ESC - BACK — clickable with hover highlight
+            // ESC - BACK - clickable with hover highlight
             Color escNormal = Color.rgb(180, 180, 210);
             Color escHover  = FxglUi.DEFAULT_TITLE_COLOR;
             Text escHint = plainText("ESC - BACK", 13, escNormal);
@@ -318,7 +318,7 @@ public class FxglAuth implements AuthView {
             }
             nodes.add(escHint);
 
-            // Error always in the reserved row — auto-fades after 2.5 s
+            // Error always in the reserved row - auto-fades after 2.5 s
             if (hasError) {
                 Text errNode = plainText("!  " + error, 14, Color.rgb(255, 100, 100));
                 errNode.setTranslateX(panelX + pad);
@@ -441,7 +441,7 @@ public class FxglAuth implements AuthView {
         field.setOnAction(e -> confirm.run());
         field.setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) cancel.run(); });
 
-        // SHOW / HIDE — plain text, no shadow, readable
+        // SHOW / HIDE - plain text, no shadow, readable
         Text toggleBtn = plainText("SHOW", 14, FxglUi.DEFAULT_BUTTON_COLOR);
         toggleBtn.setTranslateX(panelX + panelW - pad - 60);
         toggleBtn.setTranslateY(fieldY + 22);
@@ -484,7 +484,7 @@ public class FxglAuth implements AuthView {
         );
     }
 
-    /** Plain text without stroke/shadow — readable at small sizes. */
+    /** Plain text without stroke/shadow - readable at small sizes. */
     private static Text plainText(String str, int size, Color color) {
         Text t = new Text(str);
         t.setFont(FxglUi.createFont(size));

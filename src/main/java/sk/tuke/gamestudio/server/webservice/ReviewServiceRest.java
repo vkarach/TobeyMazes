@@ -1,6 +1,9 @@
 package sk.tuke.gamestudio.server.webservice;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import sk.tuke.gamestudio.entity.Review;
 import sk.tuke.gamestudio.service.ReviewService;
 
@@ -16,8 +19,11 @@ public class ReviewServiceRest {
     @PutMapping("/{userId}/review")
     public void addOrUpdateReview(
             @PathVariable int userId,
-            @RequestBody Review review
+            @RequestBody Review review,
+            Authentication auth
     ) {
+        int tokenUserId = (Integer) auth.getPrincipal();
+        if (tokenUserId != userId) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         reviewService.addOrUpdateReview(review);
     }
 

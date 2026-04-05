@@ -51,7 +51,7 @@ public class AboutPage {
                     "TobeyMazes v" + Game.version,
                     "An improved version of terminal - based maze game",
                     "Built with Java and Fxgl.",
-                    "Made by " + Game.author + " — this is my fourth game.",
+                    "Made by " + Game.author + " - this is my fourth game.",
                     "",
                     "Thanks for participating in beta testing :)"
             };

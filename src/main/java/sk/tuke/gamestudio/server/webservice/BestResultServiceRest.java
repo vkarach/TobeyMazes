@@ -1,6 +1,9 @@
 package sk.tuke.gamestudio.server.webservice;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import sk.tuke.gamestudio.entity.BestLevelResult;
 import sk.tuke.gamestudio.entity.UserScore;
 import sk.tuke.gamestudio.service.BestResultService;
@@ -20,8 +23,10 @@ public class BestResultServiceRest {
     public void updateBestTime(
             @PathVariable int userId,
             @PathVariable int levelId,
-            @RequestParam long timeMs
+            @RequestParam long timeMs,
+            Authentication auth
     ) {
+        requireOwnership(auth, userId);
         bestResultService.updateBestTime(userId, levelId, timeMs);
     }
 
@@ -29,9 +34,18 @@ public class BestResultServiceRest {
     public void updateBestScore(
             @PathVariable int userId,
             @PathVariable int levelId,
-            @RequestParam int bestScore
+            @RequestParam int bestScore,
+            Authentication auth
     ) {
+        requireOwnership(auth, userId);
         bestResultService.updateBestScore(userId, levelId, bestScore);
+    }
+
+    private void requireOwnership(Authentication auth, int targetUserId) {
+        int tokenUserId = (Integer) auth.getPrincipal();
+        if (tokenUserId != targetUserId) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
     }
 
     @GetMapping("/{userId}/levels/{levelId}/best-time")

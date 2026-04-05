@@ -1,7 +1,10 @@
 package sk.tuke.gamestudio.server.webservice;
 
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import sk.tuke.gamestudio.service.UserService;
 
 import java.util.Map;
@@ -13,6 +16,13 @@ public class UserServiceRest {
 
     public UserServiceRest(UserService userService) {
         this.userService = userService;
+    }
+
+    private void requireOwnership(Authentication auth, int targetUserId) {
+        int tokenUserId = (Integer) auth.getPrincipal();
+        if (tokenUserId != targetUserId) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
     }
 
     @GetMapping("/name/{name}/exists")
@@ -35,7 +45,10 @@ public class UserServiceRest {
     }
 
     @DeleteMapping("/{name}")
-    void deleteUserByName(@PathVariable("name") String userName) {
+    void deleteUserByName(@PathVariable("name") String userName, Authentication auth) {
+        Integer targetUserId = userService.getUserIdByName(userName);
+        if (targetUserId == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        requireOwnership(auth, targetUserId);
         userService.deleteUserByName(userName);
     }
 
@@ -55,12 +68,14 @@ public class UserServiceRest {
     }
 
     @GetMapping("/{userId}/email")
-    String getEmailByUserId(@PathVariable int userId) {
+    String getEmailByUserId(@PathVariable int userId, Authentication auth) {
+        requireOwnership(auth, userId);
         return userService.getEmailByUserId(userId);
     }
 
     @PostMapping("/{userId}/password/change")
-    void changePassword(@PathVariable int userId, @RequestBody Map<String, String> body) {
+    void changePassword(@PathVariable int userId, @RequestBody Map<String, String> body, Authentication auth) {
+        requireOwnership(auth, userId);
         userService.changePassword(userId, body.get("newPassword"));
     }
 }

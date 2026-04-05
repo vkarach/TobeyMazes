@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Level</title>
+    <style>
+        .level-card {
+            display: inline-block;
+            margin: 8px;
+            padding: 12px 20px;
+            border: 2px solid #333;
+            cursor: pointer;
+            text-align: center;
+            min-width: 120px;
+        }
+        .level-card:hover { background: #eee; }
+        .diff-EASY   { border-color: green; }
+        .diff-NORMAL { border-color: steelblue; }
+        .diff-MEDIUM { border-color: orange; }
+        .diff-HARD   { border-color: red; }
+    </style>
+</head>
+<body>
+
+<h1>Select Level</h1>
+
+<div th:each="level : ${levels}">
+    <form method="post" th:action="@{/game/start}" style="display:inline;">
+        <input type="hidden" name="levelId" th:value="${level.id}"/>
+        <button type="submit" class="level-card" th:classappend="'diff-' + ${level.difficulty}">
+            <strong th:text="${level.title}"></strong><br/>
+            <small th:text="${level.difficulty}"></small>
+        </button>
+    </form>
+</div>
+
+<br/><br/><a th:href="@{/menu}">Back to menu</a>
+
+</body>
+</html>

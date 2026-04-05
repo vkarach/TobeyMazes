@@ -96,29 +96,33 @@ public class ConsoleAuth implements AuthView {
             return register();
         }
 
-        int code = authService.sendOrGetVerificationCodeByEmail(email);
+        authService.initiateEmailVerification(email);
 
         loadAnim.interrupt();
         console.clearLine(10, x, y);
 
         console.print("We've sent a verification code to your email.", x, ++y);
+        console.print("Enter the code below to complete registration.", x, ++y);
+        y += 2;
 
-        console.print("Enter the code below to confirm password change.", x, ++y);
+        User user = null;
+        while (user == null) {
+            String codeInput = inputHelper.getUserInput("Code: ", x, y);
+            if (codeInput == null) return register();
 
-        y+=2;
-        if (!verifyCode(code, x, y)) return register();
+            if (!codeInput.matches("\\d{6}")) {
+                notifier.showError("Code must contain exactly 6 digits", x, y + 2);
+                continue;
+            }
 
-        for (int i = 0; i < 10; i++) {
-            console.clearLine(100, x, y + i);
+            loadAnim = consoleRenderer.renderAnimation("ui/console/animations/loading.txt", 75, x, y + 2);
+            user = authService.registerWithCode(name, password, email, Integer.parseInt(codeInput));
+            loadAnim.interrupt();
+
+            if (user == null) {
+                notifier.showError("Wrong code", x, y + 2);
+            }
         }
-
-        loadAnim = consoleRenderer.renderAnimation("ui/console/animations/loading.txt", 75, x, y);
-
-        User user = authService.register(name, password, email);
-
-        loadAnim.interrupt();
-
-        authService.expireEmail(email);
 
         confirmSound.play();
 
@@ -179,54 +183,46 @@ public class ConsoleAuth implements AuthView {
         int x = 20, y = 20;
 
         Thread loadAnim = consoleRenderer.renderAnimation("ui/console/animations/loading.txt", 75, x, y);
-        int code = authService.getOrCreateEmailVerificationCode(userId);
+        authService.initiatePasswordChange(userId);
         loadAnim.interrupt();
 
         console.print("We've sent a verification code to your email.", x, y++);
-
-        console.print("Enter the code below to confirm password change.", x, y);
-        y+=2;
-
-        if (!verifyCode(code, x, y++)) return;
+        console.print("Enter the code and new password below.", x, y);
+        y += 2;
 
         String newPassword = readValidInput("New password: ", x, y);
         if (newPassword == null) return;
-        y+=2;
+        y += 2;
 
-        authService.changePassword(userId, newPassword);
+        boolean changed = false;
+        while (!changed) {
+            String codeInput = inputHelper.getUserInput("Code: ", x, y);
+            if (codeInput == null) return;
+
+            if (!codeInput.matches("\\d{6}")) {
+                notifier.showError("Code must contain exactly 6 digits", x, y + 2);
+                continue;
+            }
+
+            loadAnim = consoleRenderer.renderAnimation("ui/console/animations/loading.txt", 75, x, y + 2);
+            changed = authService.changePasswordWithCode(userId, Integer.parseInt(codeInput), newPassword);
+            loadAnim.interrupt();
+
+            if (!changed) {
+                notifier.showError("Wrong code", x, y + 2);
+            }
+        }
 
         confirmSound.play();
 
         AttributedStringBuilder sb = new AttributedStringBuilder();
         sb.style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN)).append("✓");
         sb.style(AttributedStyle.DEFAULT).append(" Password successfully changed");
-        console.print(sb, x, y);
-        y+=2;
-
-        authService.expireEmailByUserId(userId);
+        console.print(sb, x, y + 2);
+        y += 4;
 
         inputHelper.waitForConfirm("Back", x, y + 1);
     }
 
-    private boolean verifyCode(int code, int x, int y) {
-        while (true) {
-            String input = inputHelper.getUserInput("Code: ", x, y);
-            if (input == null) {
-                return false;
-            }
-
-            if (!input.matches("\\d{6}")) {
-                notifier.showError("Code must contain exactly 6 digits", x, y + 2);
-                continue;
-            }
-
-            if (code != Integer.parseInt(input)) {
-                notifier.showError("Wrong code", x, y + 2);
-                continue;
-            }
-            break;
-        }
-        return true;
-    }
 
 }

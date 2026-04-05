@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaderboard</title>
+</head>
+<body>
+
+<h1>Leaderboard</h1>
+
+<div th:if="${user != null}">
+    <p>Logged in as: <strong th:text="${user.name}"></strong></p>
+</div>
+
+<table border="1" cellpadding="8">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Player</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="entry, stat : ${topPlayers}">
+            <td th:text="${stat.count}"></td>
+            <td th:text="${entry.userName}"></td>
+            <td th:text="${entry.totalScore}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(topPlayers)}">
+            <td colspan="3">No results yet</td>
+        </tr>
+    </tbody>
+</table>
+
+<br/><a th:href="@{/menu}">Back to menu</a>
+
+</body>
+</html>
