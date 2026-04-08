@@ -20,6 +20,7 @@ deploy:
         set -e
         cd /home/valik/TobeyMazes
         git pull origin master
-        pkill -f \"^/usr/bin/mvn .*spring-boot:run.*server\" || true
+        fuser -k 8080/tcp || true
+        sleep 2
         nohup /usr/bin/mvn spring-boot:run -Dspring-boot.run.profiles=server > app.log 2>&1 < /dev/null &
       "'
