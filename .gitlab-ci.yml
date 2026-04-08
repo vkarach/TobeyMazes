@@ -1,0 +1,25 @@
+deploy:
+  stage: deploy
+  image: ubuntu:22.04
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+
+  before_script:
+    - apt-get update -y
+    - apt-get install -y openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
+
+  script:
+    - |
+      ssh $SERVER_USER@$SERVER_HOST '
+        set -e
+        cd /home/valik/TobeyMazes
+        pkill -f "spring-boot:run.*server" || true
+        git pull origin master
+        nohup mvn spring-boot:run -Dspring-boot.run.profiles=server > app.log 2>&1 < /dev/null &
+      '
