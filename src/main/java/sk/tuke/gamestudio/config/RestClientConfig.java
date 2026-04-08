@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 @Profile({"console", "fxgl"})
 @Configuration
 public class RestClientConfig {
-    private static final String BASE_URL = "http://localhost:8081";
+    private static final String BASE_URL = "http://localhost:8080";
 
     @Bean
     public RestTemplate restTemplate() {
