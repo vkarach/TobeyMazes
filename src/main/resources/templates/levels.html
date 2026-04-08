@@ -1,40 +1,67 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Select Level</title>
-    <style>
-        .level-card {
-            display: inline-block;
-            margin: 8px;
-            padding: 12px 20px;
-            border: 2px solid #333;
-            cursor: pointer;
-            text-align: center;
-            min-width: 120px;
-        }
-        .level-card:hover { background: #eee; }
-        .diff-EASY   { border-color: green; }
-        .diff-NORMAL { border-color: steelblue; }
-        .diff-MEDIUM { border-color: orange; }
-        .diff-HARD   { border-color: red; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Select Level - TobeyMazes</title>
+  <link rel="stylesheet" th:href="@{/css/base.css}">
+  <link rel="stylesheet" th:href="@{/css/levels.css}">
 </head>
-<body>
+<body th:attr="data-user-id=${currentUserId}">
 
-<h1>Select Level</h1>
-
-<div th:each="level : ${levels}">
-    <form method="post" th:action="@{/game/start}" style="display:inline;">
-        <input type="hidden" name="levelId" th:value="${level.id}"/>
-        <button type="submit" class="level-card" th:classappend="'diff-' + ${level.difficulty}">
-            <strong th:text="${level.title}"></strong><br/>
-            <small th:text="${level.difficulty}"></small>
-        </button>
-    </form>
+<div class="bg bg-fixed">
+  <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+  <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+  <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+  <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4.png"></div>
 </div>
 
-<br/><br/><a th:href="@{/menu}">Back to menu</a>
+<div class="page">
+  <div class="page-title">SELECT LEVEL</div>
+
+  <div class="level-grid">
+    <div th:each="level : ${levels}">
+      <form method="post" th:action="@{/game/start}">
+        <input type="hidden" name="levelId" th:value="${level.id}"/>
+        <button type="button"
+                class="level-card"
+                th:classappend="'diff-' + ${level.difficulty}"
+                th:attr="data-level-id=${level.id},
+                         data-level-title=${level.title},
+                         data-level-difficulty=${level.difficulty}">
+          <div class="card-number" th:text="'#' + ${level.id}"></div>
+          <div class="card-title"  th:text="${level.title}"></div>
+          <div class="card-diff"   th:text="${level.difficulty}"></div>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay">
+    <div id="level-modal" class="level-modal">
+      <div class="level-modal-body">
+        <img src="" alt="Level preview" id="level-preview" class="level-preview">
+
+        <div class="level-info">
+          <div id ="info-label"      class="info-label"></div>
+          <div id="modal-difficulty" class="info-text"></div>
+          <div id="modal-time"       class="info-text"></div>
+          <div id="modal-score"      class="info-text"></div>
+          <div class="level-modal-actions">
+            <button id="modal-back-btn" class="level-btn ghost">BACK</button>
+            <button id="modal-start-btn" class="level-btn primary">START</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a th:href="@{/menu}" class="back-link">
+    <span class="key">[ESC]</span> Back to Menu
+  </a>
+</div>
+
+<script th:src="@{/js/parallax-shared.js}"></script>
+<script th:src="@{/js/levels.js}"></script>
 
 </body>
 </html>

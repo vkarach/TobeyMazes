@@ -186,14 +186,6 @@ public class FxglLevelView implements LevelView {
             FXGL.getGameScene().getContentRoot().setCursor(Cursor.DEFAULT));
     }
 
-    // -------------------------------------------------------------------------
-
-    /**
-     * Started once per level. Each frame (matches display refresh rate):
-     *  - detects logical position change
-     *  - starts a new step animation from current render pos to new tile
-     *  - advances linear interpolation over STEP_NS
-     */
     private void startAnimTimer(Field field) {
         playerAnimTimer = new AnimationTimer() {
             @Override
@@ -270,7 +262,6 @@ public class FxglLevelView implements LevelView {
         playerAnimTimer.start();
     }
 
-    /** Count how many tiles the player can slide from (x,y) in direction dir (+1=right,-1=left). */
     private int countHorizSteps(Field field, int x, int y, int dir) {
         boolean[][] vWalls = field.getVWalls();
         int cols = field.getColCount();
@@ -306,8 +297,6 @@ public class FxglLevelView implements LevelView {
         playerView.setLayoutX(cx - playerView.getFitWidth()  / 2.0);
         playerView.setLayoutY(cy - playerView.getFitHeight() / 2.0);
     }
-
-    // -------------------------------------------------------------------------
 
     private void drawWalls(Field field, int rows, int cols) {
         boolean[][] hWalls = field.getHWalls();
@@ -371,8 +360,6 @@ public class FxglLevelView implements LevelView {
         t.setTranslateY(y);
         return t;
     }
-
-    // -------------------------------------------------------------------------
 
     private double cellCX(int col) { return originX + col * CELL + CELL / 2.0; }
     private double cellCY(int row) { return originY + row * CELL + CELL / 2.0; }

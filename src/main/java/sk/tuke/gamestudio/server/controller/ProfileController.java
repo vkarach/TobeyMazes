@@ -3,156 +3,127 @@ package sk.tuke.gamestudio.server.controller;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import sk.tuke.gamestudio.entity.User;
+import sk.tuke.gamestudio.service.BestResultService;
 import sk.tuke.gamestudio.service.EmailSendService;
 import sk.tuke.gamestudio.service.EmailVerificationService;
 import sk.tuke.gamestudio.service.UserService;
 
 import java.security.SecureRandom;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/profile")
 public class ProfileController {
     private final WebGameSession session;
     private final UserService userService;
+    private final BestResultService bestResultService;
     private final EmailVerificationService emailVerificationService;
     private final EmailSendService emailSendService;
 
     public ProfileController(
             WebGameSession session,
             UserService userService,
+            BestResultService bestResultService,
             EmailVerificationService emailVerificationService,
             EmailSendService emailSendService
     ) {
         this.session = session;
         this.userService = userService;
+        this.bestResultService = bestResultService;
         this.emailVerificationService = emailVerificationService;
         this.emailSendService = emailSendService;
     }
 
     @GetMapping
     public String profile(Model model) {
-        model.addAttribute("user", session.getCurrentUser());
+        User user = session.getCurrentUser();
+        model.addAttribute("user", user);
+        if (user != null) {
+            Integer score = bestResultService.getBestOverallScore(user.getId());
+            model.addAttribute("overallScore", score != null ? score : 0);
+        }
         return "profile";
     }
 
-    @PostMapping("/register")
-    public String register(
-        Model model,
-        @RequestParam String username,
-        @RequestParam String password,
-        @RequestParam String email
-    ) {
-        if (userService.userExists(username)) {
-            model.addAttribute("error", "Name already taken");
-            return "profile";
-        }
-        if (userService.emailExists(email)) {
-            model.addAttribute("error", "Email already taken");
-            return "profile";
-        }
+    // AJAX endpoints
+    @PostMapping("/login/ajax")
+    @ResponseBody
+    public Map<String, Object> loginAjax(@RequestParam String username, @RequestParam String password) {
+        Integer userId = userService.getUserIdByName(username);
+        if (userId == null) return Map.of("error", "User not found");
+        if (!BCrypt.checkpw(password, userService.getPasswordByUserId(userId)))
+            return Map.of("error", "Wrong password");
+        session.setCurrentUser(new User(userId, username));
+        return Map.of("ok", true);
+    }
 
+    @PostMapping("/register/ajax")
+    @ResponseBody
+    public Map<String, Object> registerAjax(
+            @RequestParam String username,
+            @RequestParam String password,
+            @RequestParam String email
+    ) {
+        if (userService.userExists(username)) return Map.of("error", "Name already taken");
+        if (userService.emailExists(email))   return Map.of("error", "Email already taken");
         int code = generateCode();
         emailVerificationService.saveEmailVerificationCode(email, code);
         emailSendService.sendCode(email, code);
-
-        model.addAttribute("username", username);
-        model.addAttribute("password", password);
-        model.addAttribute("email", email);
-        return "confirm";
+        return Map.of("ok", true);
     }
 
-    @PostMapping("/login")
-    public String login(
-        Model model,
-        @RequestParam String username,
-        @RequestParam String password
-    ) {
-        Integer userId = userService.getUserIdByName(username);
-        if (userId == null) {
-            model.addAttribute("error", "User with this name not found");
-            return "profile";
-        }
-        String hash = userService.getPasswordByUserId(userId);
-        if (!BCrypt.checkpw(password, hash)) {
-            model.addAttribute("error", "Wrong password");
-            return "profile";
-        }
-        session.setCurrentUser(new User(userId, username));
-        return "redirect:/profile";
-    }
-
-    @PostMapping("/logout")
-    public String logout() {
-        session.setCurrentUser(null);
-        return "redirect:/profile";
-    }
-
-    @PostMapping("/confirm")
-    public String confirmCode(
-            Model model,
+    @PostMapping("/confirm/ajax")
+    @ResponseBody
+    public Map<String, Object> confirmAjax(
             @RequestParam String username,
             @RequestParam String password,
             @RequestParam String email,
             @RequestParam int userCode
     ) {
         Integer code = emailVerificationService.getCodeByEmail(email);
-        if (code == null || code != userCode) {
-            model.addAttribute("error", "Wrong code");
-            model.addAttribute("username", username);
-            model.addAttribute("password", password);
-            model.addAttribute("email", email);
-            return "confirm";
-        }
+        if (code == null || code != userCode) return Map.of("error", "Wrong code");
         emailVerificationService.expireEmail(email);
-
         String hash = BCrypt.hashpw(password, BCrypt.gensalt());
         int userId = userService.createUser(username, hash, email);
         session.setCurrentUser(new User(userId, username));
-
-        return "redirect:/profile";
+        return Map.of("ok", true);
     }
 
-    @GetMapping("/change-password")
-    public String changePasswordPage() {
-        if (session.getCurrentUser() == null) {
-            return "redirect:/profile";
-        }
-        int userId = session.getCurrentUser().getId();
-        String email = userService.getEmailByUserId(userId);
-
-        int code = generateCode();
-        emailVerificationService.saveEmailVerificationCode(email, code);
-        emailSendService.sendCode(email, code);
-
-        return "change-password";
-    }
-
-    @PostMapping("/change-password")
-    public String changePassword(
-            Model model,
-            @RequestParam int userCode,
-            @RequestParam String newPassword
-    ) {
+    @PostMapping("/change-password/request")
+    @ResponseBody
+    public Map<String, Object> changePasswordRequest() {
         User user = session.getCurrentUser();
-        if (user == null) {
-            return "redirect:/profile";
+        if (user == null) return Map.of("error", "Not logged in");
+        String email = userService.getEmailByUserId(user.getId());
+        if (emailVerificationService.getCodeByEmail(email) == null) {
+            int code = generateCode();
+            emailVerificationService.saveEmailVerificationCode(email, code);
+            emailSendService.sendCode(email, code);
         }
+        return Map.of("ok", true);
+    }
+
+    @PostMapping("/change-password/ajax")
+    @ResponseBody
+    public Map<String, Object> changePasswordAjax(@RequestParam int userCode, @RequestParam String newPassword) {
+        User user = session.getCurrentUser();
+        if (user == null) return Map.of("error", "Not logged in");
         String email = userService.getEmailByUserId(user.getId());
         Integer code = emailVerificationService.getCodeByEmail(email);
-
-        if (code == null || code != userCode) {
-            model.addAttribute("error", "Wrong code");
-            return "change-password";
-        }
+        if (code == null || code != userCode) return Map.of("error", "Wrong code");
         emailVerificationService.expireEmail(email);
         userService.changePassword(user.getId(), BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+        return Map.of("ok", true);
+    }
 
-        return "redirect:/profile";
+    // Legacy form endpoints (kept for fallback)
+    @PostMapping("/logout")
+    @ResponseBody
+    public Map<String, Object> logout() {
+        session.setCurrentUser(null);
+        return Map.of("ok", true);
     }
 
     private int generateCode() {

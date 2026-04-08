@@ -73,10 +73,6 @@ public class FxglUi {
         return textObj;
     }
 
-    /**
-     * Removes all UI nodes from the scene except those in {@code toKeep}.
-     * Use this instead of {@code clearUINodes()} to preserve a shared background.
-     */
     public static void clearContentNodes(GameScene scene, List<Node> toKeep) {
         List<Node> current = new ArrayList<>(scene.getUINodes());
         for (Node node : current) {

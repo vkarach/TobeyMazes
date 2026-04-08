@@ -24,14 +24,19 @@ public class AuthServiceImpl implements AuthService {
     private final EmailSendService emailSendService;
     private final EmailVerificationService emailVerificationService;
 
-    // null on server profile — RestTemplate bean exists only on console/fxgl
+    // null on server profile - RestTemplate bean exists only on console/fxgl
     @Autowired(required = false)
     private RestTemplate restTemplate;
 
     @Autowired(required = false)
     private RestClientConfig restClientConfig;
 
-    public AuthServiceImpl(UserService userService, SessionService sessionService, EmailSendService emailSendService, EmailVerificationService emailVerificationService) {
+    public AuthServiceImpl(
+            UserService userService,
+            SessionService sessionService,
+            EmailSendService emailSendService,
+            EmailVerificationService emailVerificationService
+    ) {
         this.userService = userService;
         this.emailSendService = emailSendService;
         this.emailVerificationService = emailVerificationService;
@@ -227,7 +232,7 @@ public class AuthServiceImpl implements AuthService {
         return true;
     }
 
-    // legacy — used only by web controllers (server-mode)
+    // legacy - used only by web controllers (server-mode)
 
     public int getOrCreateEmailVerificationCode(int userId) {
         String email = userService.getEmailByUserId(userId);

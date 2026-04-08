@@ -1,0 +1,149 @@
+.bg-layer-1 { background-image: url('/ui/fxgl/backgrounds/profilePageParallax/1.png'); }
+.bg-layer-2 { background-image: url('/ui/fxgl/backgrounds/profilePageParallax/2.png'); }
+.bg-layer-3 { background-image: url('/ui/fxgl/backgrounds/profilePageParallax/3.png'); }
+.bg-layer-4 { background-image: url('/ui/fxgl/backgrounds/profilePageParallax/4.png'); }
+
+.title-line-2 { margin-bottom: 20px; }
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Info rows same style as menu-btn but white */
+.info-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+    -webkit-text-stroke: 1px #000;
+    margin-bottom: 15px;
+}
+
+.confirm-btn {
+    display: block;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: #91CDFF;
+    text-decoration: none;
+    text-shadow: 2px 2px 0 #000;
+    -webkit-text-stroke: 1px #000;
+    background: none;
+    border: none;
+}
+
+.confirm-btn:hover {
+    color: #FFD700;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.error-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: #ff6b6b;
+    text-shadow: 1px 1px 0 #000;
+    margin-bottom: 10px;
+}
+
+.modal-box {
+    opacity: 0;
+    transform: translateY(25px) scale(0.70);
+    transition: opacity 0.30s ease, transform 0.30s ease;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: rgba(20, 10, 5, 0.88);
+    border: 2px solid #F5C518;
+    padding: 28px 40px;
+    min-width: 335px;
+}
+
+.modal-overlay.open .modal-box {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.modal-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    color: #F5C518;
+    text-shadow: 2px 2px 0 #000;
+    -webkit-text-stroke: 1px #000;
+    margin-top: -5px;
+}
+
+/* Each step is a vertical column */
+.modal-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+.pixel-input {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #F5C518;
+    color: #fff;
+    padding: 8px 12px;
+    width: 240px;
+    outline: none;
+}
+.pixel-input:focus { border-color: #FFD700; }
+
+.modal-hint {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: #aaa;
+    text-shadow: 1px 1px 0 #000;
+    text-align: center;
+}
+.success-hint { color: #7fff7f; }
+
+.modal-error {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: #ff6b6b;
+    text-shadow: 1px 1px 0 #000;
+    text-align: center;
+    /* Always reserve space so modal never shifts when error appears */
+    min-height: 2.4em;
+    opacity: 0;
+}
+
+.pixel-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(245, 197, 24, 0.3);
+    border-top-color: #F5C518;
+    animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.modal-close {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: #555;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 60ms;
+    margin-top: 4px;
+}
+.modal-close:hover { color: #aaa; }

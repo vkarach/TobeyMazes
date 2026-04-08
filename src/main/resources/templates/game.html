@@ -1,269 +1,134 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title th:text="${levelTitle}">Game</title>
-    <style>
-        .maze-wrap {
-            position: relative;
-            display: inline-block;
-        }
-        .maze-grid {
-            display: inline-block;
-        }
-        .maze-row {
-            display: flex;
-        }
-        .cell {
-            width: 40px;
-            height: 40px;
-            box-sizing: border-box;
-            border: 1px solid #ddd;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-        .wall-top    { border-top:    3px solid #222; }
-        .wall-bottom { border-bottom: 3px solid #222; }
-        .wall-left   { border-left:   3px solid #222; }
-        .wall-right  { border-right:  3px solid #222; }
-
-        #player {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            pointer-events: none;
-            z-index: 10;
-            transition: top 75ms linear, left 75ms linear;
-        }
-
-        .controls { margin-top: 16px; }
-        .controls button {
-            width: 48px; height: 48px;
-            font-size: 20px; cursor: pointer;
-        }
-        .ctrl-row { display: flex; justify-content: center; gap: 4px; }
-
-        #win-panel {
-            display: none;
-            margin-top: 16px;
-            color: green;
-            font-size: 1.2em;
-        }
-        .record-badge { color: goldenrod; font-weight: bold; }
-    </style>
+  <meta charset="UTF-8">
+  <title th:text="${levelTitle}">TobeyMazes</title>
+  <link rel="stylesheet" th:href="@{/css/game.css}">
 </head>
 <body>
 
-<h2 th:text="${levelTitle}">Level</h2>
-<p>Steps: <strong id="step-count" th:text="${stepCount}">0</strong>
-&nbsp;&nbsp; Time: <strong id="timer">0.00</strong>s</p>
+<!-- Parallax background layers (shared with menu/levels via sessionStorage) -->
+<div class="bg bg-fixed">
+  <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+  <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+  <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+  <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4.png"></div>
+</div>
 
-<div class="maze-wrap">
-    <div class="maze-grid">
-        <div class="maze-row" th:each="row, rStat : ${cells}">
+<!-- Win overlay (hidden until win) -->
+<div id="win-overlay">
+  <div class="win-burst"></div>
+  <div class="win-title">YOU WIN!</div>
+  <div class="win-stats">
+    <div class="win-stat">
+      <div class="win-stat-label">TIME</div>
+      <div class="win-stat-value" id="win-time">-</div>
+    </div>
+    <div class="win-stat">
+      <div class="win-stat-label">SCORE</div>
+      <div class="win-stat-value" id="win-score">-</div>
+    </div>
+  </div>
+  <div class="record-badge" id="record-msg"></div>
+  <div class="win-actions">
+    <form id="win-restart-form" method="post" th:action="@{/game/restart}">
+      <button type="submit" class="win-btn ghost">Play Again</button>
+    </form>
+    <a th:href="@{/game/levels}" class="win-btn primary">Level Select</a>
+  </div>
+</div>
+
+<!-- Game page -->
+<div class="page">
+  <div class="game-area">
+
+    <div class="maze-wrap">
+      <div class="level-title" th:text="${levelTitle}">Level</div>
+
+      <div class="maze-panel">
+        <div class="maze-grid" id="maze-grid">
+          <div class="maze-row" th:each="row, rStat : ${cells}">
             <div th:each="cell, cStat : ${row}"
                  class="cell"
-                 th:id="'cell-' + ${rStat.index} + '-' + ${cStat.index}"
                  th:classappend="(${cell.top}    ? ' wall-top'    : '') +
                                  (${cell.bottom} ? ' wall-bottom' : '') +
                                  (${cell.left}   ? ' wall-left'   : '') +
                                  (${cell.right}  ? ' wall-right'  : '')">
-                <span th:if="${cell.content == 'T'}"
-                      th:id="'target-' + ${rStat.index} + '-' + ${cStat.index}">⭐</span>
+              <div th:if="${cell.content == 'T'}"
+                   class="target-gem"
+                   th:id="'target-' + ${rStat.index} + '-' + ${cStat.index}"></div>
             </div>
+          </div>
+
+          <div id="player"
+               th:style="'top:' + ${playerY * 56} + 'px; left:' + ${playerX * 56} + 'px'">
+          </div>
         </div>
+      </div>
     </div>
 
-    <div id="player"
-         th:style="'top:' + ${playerY * 40} + 'px; left:' + ${playerX * 40} + 'px'">
-        🟡
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+      <!-- HUD -->
+      <div class="hud">
+        <div class="hud-row">
+          <div class="hud-label">TIME</div>
+          <div class="hud-value" id="timer">0:00</div>
+        </div>
+        <div class="hud-row">
+          <div class="hud-label">STEPS</div>
+          <div class="hud-value" id="step-count" th:text="${stepCount}">0</div>
+        </div>
+        <div class="hud-row">
+          <div class="hud-label">TARGETS</div>
+          <div class="hud-value blue" id="targets-left">-</div>
+        </div>
+      </div>
+
+      <!-- Arrow buttons -->
+      <div class="controls">
+        <div class="ctrl-row">
+          <div class="ctrl-spacer"></div>
+          <button class="ctrl-btn" onclick="sendMove('UP')" title="Up (↑)">▲</button>
+          <div class="ctrl-spacer"></div>
+        </div>
+        <div class="ctrl-row">
+          <button class="ctrl-btn" onclick="sendMove('LEFT')"  title="Left (←)">◀</button>
+          <button class="ctrl-btn" onclick="sendMove('DOWN')"  title="Down (↓)">▼</button>
+          <button class="ctrl-btn" onclick="sendMove('RIGHT')" title="Right (→)">▶</button>
+        </div>
+      </div>
+
     </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <form id="restart-form" method="post" th:action="@{/game/restart}" style="display:flex;align-items:center;">
+      <button type="submit" class="action-link"><span class="key">[R]</span> Restart</button>
+    </form>
+    <div class="bar-sep"></div>
+    <a th:href="@{/game/levels}" class="action-link"><span class="key">[Q]</span> Levels</a>
+    <div class="bar-sep"></div>
+    <a th:href="@{/menu}" class="action-link"><span class="key">[M]</span> Menu</a>
+  </div>
+
 </div>
-
-<!-- shown after win via JS -->
-<div id="win-panel">
-    <p>🎉 You won!</p>
-    <p>Time: <span id="win-time"></span>s &nbsp; Score: <span id="win-score"></span></p>
-    <p id="record-msg" class="record-badge"></p>
-    <a th:href="@{/game/levels}">Play another level</a>
-</div>
-
-<div class="controls" id="controls">
-    <div class="ctrl-row">
-        <button onclick="sendMove('UP')">▲</button>
-    </div>
-    <div class="ctrl-row">
-        <button onclick="sendMove('LEFT')">◀</button>
-        <button onclick="sendMove('DOWN')">▼</button>
-        <button onclick="sendMove('RIGHT')">▶</button>
-    </div>
-</div>
-
-<br/>
-<form id="restart-form" method="post" th:action="@{/game/restart}" style="display:inline;">
-    <button type="submit">Restart (R)</button>
-</form>
-&nbsp;
-<a th:href="@{/game/levels}">Level select (Q)</a>
-&nbsp;|&nbsp;
-<a th:href="@{/menu}">Menu</a>
 
 <script th:inline="javascript">
-    const CELL_SIZE = 40;
-    const STEP_DELAY_MS = 75; // same as GameController
-    const PENDING_SAFE_BOUND_MS = 200; // same as GameController
-
-    let animating = false;
-    let pendingDir = null;
-    let pendingSavedMs = 0;
-
-    let timerStartMs = null;
-    let timerInterval = null;
-
-    const playerEl   = document.getElementById('player');
-    const stepCountEl = document.getElementById('step-count');
-    const timerEl    = document.getElementById('timer');
-    const controlsEl = document.getElementById('controls');
-    const winPanel   = document.getElementById('win-panel');
-
-    function startTimer() {
-        if (timerStartMs !== null) return; // already started
-        timerStartMs = Date.now();
-        timerInterval = setInterval(() => {
-            timerEl.textContent = ((Date.now() - timerStartMs) / 1000).toFixed(2);
-        }, 50);
-    }
-
-    function stopTimer() {
-        clearInterval(timerInterval);
-    }
-
-    // If game already won on page load (e.g. after refresh)
-    if (/*[[${gameWon}]]*/ false) {
-        showWinFromModel(
-            /*[[${lastTimeMs}]]*/ null,
-            /*[[${lastScore}]]*/ null,
-            /*[[${timeRecord}]]*/ false,
-            /*[[${scoreRecord}]]*/ false
-        );
-    }
-
-    function sendMove(direction) {
-        if (animating) {
-            pendingDir = direction;
-            pendingSavedMs = Date.now();
-            return;
-        }
-        animating = true;
-        startTimer();
-
-        fetch('/game/move', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'direction=' + direction
-        })
-        .then(r => r.json())
-        .then(data => {
-            animatePath(data.path, data.collectedTargets, () => {
-                stepCountEl.textContent = data.stepCount;
-                animating = false;
-
-                if (data.gameWon) {
-                    pendingDir = null;
-                    stopTimer();
-                    if (data.lastTimeMs != null) {
-                        timerEl.textContent = (data.lastTimeMs / 1000).toFixed(2);
-                    }
-                    showWinFromModel(data.lastTimeMs, data.lastScore, data.timeRecord, data.scoreRecord);
-                    return;
-                }
-
-                // check pending direction (same logic as GameController)
-                const next = pendingDir;
-                const age = Date.now() - pendingSavedMs;
-                pendingDir = null;
-                pendingSavedMs = 0;
-                if (next !== null && age < PENDING_SAFE_BOUND_MS) {
-                    sendMove(next);
-                }
-            });
-        })
-        .catch(() => { animating = false; });
-    }
-
-    function animatePath(path, collectedTargets, onDone) {
-        if (!path || path.length === 0) {
-            onDone();
-            return;
-        }
-
-        // Build a set of cells where targets were collected, keyed by "x,y"
-        const collected = new Set((collectedTargets || []).map(p => p[0] + ',' + p[1]));
-
-        let i = 0;
-        function nextStep() {
-            if (i >= path.length) {
-                onDone();
-                return;
-            }
-            const [x, y] = path[i++];
-
-            // Move player (CSS transition handles smooth glide)
-            playerEl.style.left = (x * CELL_SIZE) + 'px';
-            playerEl.style.top  = (y * CELL_SIZE) + 'px';
-
-            // Remove target if collected at this cell
-            if (collected.has(x + ',' + y)) {
-                const t = document.getElementById('target-' + y + '-' + x);
-                if (t) t.remove();
-            }
-
-            setTimeout(nextStep, STEP_DELAY_MS);
-        }
-        nextStep();
-    }
-
-    function showWinFromModel(timeMs, score, timeRecord, scoreRecord) {
-        controlsEl.style.display = 'none';
-        winPanel.style.display = 'block';
-
-        if (timeMs != null) {
-            document.getElementById('win-time').textContent = (timeMs / 1000).toFixed(2);
-            document.getElementById('win-score').textContent = score;
-
-            const badges = [];
-            if (timeRecord)  badges.push('★ New time record!');
-            if (scoreRecord) badges.push('★ New score record!');
-            document.getElementById('record-msg').textContent = badges.join('  ');
-        }
-    }
-
-    // Keyboard support
-    document.addEventListener('keydown', e => {
-        const map = { ArrowUp: 'UP', ArrowDown: 'DOWN', ArrowLeft: 'LEFT', ArrowRight: 'RIGHT' };
-        const dir = map[e.key];
-        if (dir) {
-            e.preventDefault();
-            sendMove(dir);
-            return;
-        }
-        if (e.key === 'r' || e.key === 'R') {
-            e.preventDefault();
-            document.getElementById('restart-form').submit();
-        }
-        if (e.key === 'q' || e.key === 'Q') {
-            e.preventDefault();
-            window.location.href = '/game/levels';
-        }
-    });
+  window.GAME_INIT = {
+    playerX:     /*[[${playerX}]]*/     0,
+    playerY:     /*[[${playerY}]]*/     0,
+    gameWon:     /*[[${gameWon}]]*/     false,
+    lastTimeMs:  /*[[${lastTimeMs}]]*/  null,
+    lastScore:   /*[[${lastScore}]]*/   null,
+    timeRecord:  /*[[${timeRecord}]]*/  false,
+    scoreRecord: /*[[${scoreRecord}]]*/ false
+  };
 </script>
+<script th:src="@{/js/parallax-shared.js}"></script>
+<script th:src="@{/js/game.js}"></script>
 
 </body>
 </html>

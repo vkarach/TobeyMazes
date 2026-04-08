@@ -26,7 +26,6 @@ public class ParallaxBackground {
         this.speeds = speeds;
     }
 
-    /** Returns all ImageView nodes managed by this background (for use with clearContentNodes). */
     public List<Node> getAllNodes() {
         List<Node> all = new ArrayList<>();
         for (ImageView[] pair : layerPairs) {
@@ -36,10 +35,6 @@ public class ParallaxBackground {
         return all;
     }
 
-    /**
-     * Starts the background. Idempotent: if already started, re-adds missing nodes
-     * and resumes the timer without resetting positions.
-     */
     public void start(GameScene scene) {
         if (started) {
             List<Node> inScene = scene.getUINodes();

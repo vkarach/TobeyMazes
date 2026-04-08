@@ -69,7 +69,7 @@ public class ProfilePage {
 
             Text text2 = FxglUi.createTitle("PROFILE", FxglUi.DEFAULT_TITLE_COLOR);
             text2.setTranslateY(y);
-            FxglUi.addTextCenteredX(scene, text2, +50);
+            FxglUi.addTextCenteredX(scene, text2, +150);
             y*=1.3;
 
             Text userName = FxglUi.createText(user.getName(), FxglUi.DEFAULT_TEXT_SIZE, Color.WHITE);

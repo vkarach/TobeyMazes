@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Profile("fxgl")
@@ -40,8 +41,6 @@ public class FxglAuth implements AuthView {
     public FxglAuth(AuthService authService) {
         this.authService = authService;
     }
-
-    // ── Public API ──────────────────────────────────────────────────────────────
 
     @Override
     public User register() {
@@ -63,14 +62,14 @@ public class FxglAuth implements AuthView {
 
             String password = askValidated("ENTER PASSWORD", true,
                     v -> validate(v, REGEX_NAME, 3, 16), null);
-            if (password == null) continue; // ESC - back to username
+            if (password == null) continue;
 
             String email = null;
             String emailError = null;
             while (email == null) {
                 String input = askValidated("ENTER EMAIL", false,
                         v -> validate(v, REGEX_EMAIL, 5, 60), emailError);
-                if (input == null) break; // ESC - back to username loop
+                if (input == null) break;
 
                 Runnable stopEmailCheck = showLoading("CHECKING");
                 boolean emailTaken = authService.emailTaken(input);
@@ -79,13 +78,13 @@ public class FxglAuth implements AuthView {
                 if (emailTaken) { emailError = "Email already registered"; continue; }
                 email = input;
             }
-            if (email == null) continue; // ESC from email → back to username
+            if (email == null) continue;
 
             Runnable stopSend = showLoading("SENDING CODE");
             int code = authService.sendOrGetVerificationCodeByEmail(email);
             stopSend.run();
 
-            if (!askCode(code, email)) continue; // wrong code or ESC → restart
+            if (!askCode(code, email)) continue;
 
             Runnable stopReg = showLoading("REGISTERING");
             User user = authService.register(name, password, email);
@@ -98,9 +97,11 @@ public class FxglAuth implements AuthView {
 
     @Override
     public User login() {
+        String errorMsg = null;
         while (true) {
             String name = askValidated("ENTER USERNAME", false,
-                    v -> validate(v, REGEX_NAME, 3, 16), null);
+                    v -> validate(v, REGEX_NAME, 3, 16), errorMsg);
+            errorMsg = null;
             if (name == null) return null;
 
             String password = askValidated("ENTER PASSWORD", true,
@@ -112,11 +113,7 @@ public class FxglAuth implements AuthView {
             stop.run();
 
             if (user == null) {
-                // Show error on the username field and loop back
-                String retryName = askValidated("ENTER USERNAME", false,
-                        v -> validate(v, REGEX_NAME, 3, 16), "Wrong name or password");
-                if (retryName == null) return null;
-                // Re-enter username as next iteration
+                errorMsg = "Wrong name or password";
                 continue;
             }
             return user;
@@ -141,8 +138,6 @@ public class FxglAuth implements AuthView {
         stopChange.run();
     }
 
-    // ── Validation helpers ──────────────────────────────────────────────────────
-
     private static String validate(String input, String regex, int min, int max) {
         if (input.length() < min) return "Min " + min + " characters";
         if (input.length() > max) return "Max " + max + " characters";
@@ -150,46 +145,22 @@ public class FxglAuth implements AuthView {
         return null;
     }
 
-    // ── High-level UI helpers ───────────────────────────────────────────────────
-
-    /** Loops askField until validator returns null (valid) or ESC is pressed (returns null). */
+    // Simplified - popup handles validation internally, no outer loop needed
     private String askValidated(String label, boolean isPassword,
                                  Function<String, String> validator, String initialError) {
-        String error = initialError;
-        while (true) {
-            String value = askField(label, null, isPassword, error);
-            if (value == null) return null; // ESC
-            error = validator.apply(value);
-            if (error == null) return value;
-        }
+        return askField(label, null, isPassword, validator, initialError);
     }
 
-    /**
-     * Shows a panel with a code entry field.
-     * Retries until correct code entered or ESC pressed.
-     */
     private boolean askCode(int expectedCode, String email) {
         String subtitle = email != null ? "Code sent to " + email : "Code sent to your email";
-        String error = null;
-        while (true) {
-            String input = askField("ENTER CODE", subtitle, false, error);
-            if (input == null) return false; // ESC
-            if (!input.matches(REGEX_CODE)) {
-                error = "Must be exactly 6 digits";
-                continue;
-            }
-            if (Integer.parseInt(input) != expectedCode) {
-                error = "Wrong code";
-                continue;
-            }
-            return true;
-        }
+        String val = askField("ENTER CODE", subtitle, false, input -> {
+            if (!input.matches(REGEX_CODE)) return "Must be exactly 6 digits";
+            if (Integer.parseInt(input) != expectedCode) return "Wrong code";
+            return null;
+        }, null);
+        return val != null;
     }
 
-    /**
-     * Shows loading animation panel on the FX thread.
-     * Returns a Runnable that removes it (must be called from the game thread).
-     */
     private Runnable showLoading(String message) {
         List<Node> nodes = new ArrayList<>();
         Timeline[] tl = {null};
@@ -236,19 +207,11 @@ public class FxglAuth implements AuthView {
         });
     }
 
-    // ── Core field dialog ───────────────────────────────────────────────────────
-
-    /**
-     * Shows an input panel. Blocks game thread until Enter or ESC.
-     *
-     * Layout uses fixed offsets so the panel never resizes between calls
-     * - error space is always reserved.
-     *
-     * @param subtitle optional second line (e.g. "Code sent to email")
-     * @param error    optional red error text, auto-fades after 2.5 s
-     * @return typed text, or null if ESC / ESC-BACK was pressed
-     */
-    private String askField(String title, String subtitle, boolean isPassword, String error) {
+    // Popup stays open on error - no close/reopen jitter.
+    // validator is called on submit; null = success, string = error to show inline.
+    // initialError is shown immediately (e.g. server-side errors like "Username already taken").
+    private String askField(String title, String subtitle, boolean isPassword,
+                             Function<String, String> validator, String initialError) {
         CountDownLatch latch = new CountDownLatch(1);
         String[] result = {null};
         AtomicBoolean done = new AtomicBoolean(false);
@@ -256,16 +219,14 @@ public class FxglAuth implements AuthView {
         Platform.runLater(() -> {
             double W = FXGL.getAppWidth(), H = FXGL.getAppHeight();
             boolean hasSubtitle = subtitle != null && !subtitle.isEmpty();
-            boolean hasError    = error    != null && !error.isEmpty();
 
             double pad    = 26;
             double panelW = isPassword ? 640 : 620;
-            // Fixed height - always includes error row so panel never shifts on error
+            // Fixed height - error row space is always reserved
             double panelH = hasSubtitle ? 230 : 200;
             double panelX = (W - panelW) / 2;
             double panelY = (H - panelH) / 2;
 
-            // Fixed Y offsets from panelY (Text Y = baseline; TextField Y = top-left)
             double titleY    = panelY + 42;
             double subtitleY = panelY + 76;
             double errorY    = panelY + (hasSubtitle ? 110 : 96);
@@ -283,7 +244,6 @@ public class FxglAuth implements AuthView {
             };
             cancelRef[0] = cancel;
 
-            // Panel background
             Rectangle panel = new Rectangle(panelW, panelH);
             panel.setFill(Color.rgb(15, 5, 30, 0.94));
             panel.setStroke(FxglUi.DEFAULT_TITLE_COLOR);
@@ -297,7 +257,6 @@ public class FxglAuth implements AuthView {
             titleNode.setTranslateX(panelX + pad);
             titleNode.setTranslateY(titleY);
 
-            // ESC - BACK - clickable with hover highlight
             Color escNormal = Color.rgb(180, 180, 210);
             Color escHover  = FxglUi.DEFAULT_TITLE_COLOR;
             Text escHint = plainText("ESC - BACK", 13, escNormal);
@@ -308,6 +267,25 @@ public class FxglAuth implements AuthView {
             escHint.setOnMouseExited(e -> escHint.setFill(escNormal));
             escHint.setOnMouseClicked(e -> cancelRef[0].run());
 
+            // Error node always present - opacity 0 when no error, no layout shift
+            Text errNode = plainText("", 14, Color.rgb(255, 100, 100));
+            errNode.setTranslateX(panelX + pad);
+            errNode.setTranslateY(errorY);
+            errNode.setOpacity(0);
+            Timeline[] currentFade = {null};
+
+            Consumer<String> showError = msg -> {
+                if (currentFade[0] != null) currentFade[0].stop();
+                errNode.setText("!  " + msg);
+                errNode.setOpacity(1.0);
+                currentFade[0] = new Timeline(
+                    new KeyFrame(Duration.millis(2500)),
+                    new KeyFrame(Duration.millis(3100),
+                        new KeyValue(errNode.opacityProperty(), 0.0))
+                );
+                currentFade[0].play();
+            };
+
             nodes.add(panel);
             nodes.add(titleNode);
             if (hasSubtitle) {
@@ -317,32 +295,26 @@ public class FxglAuth implements AuthView {
                 nodes.add(subtitleNode);
             }
             nodes.add(escHint);
-
-            // Error always in the reserved row - auto-fades after 2.5 s
-            if (hasError) {
-                Text errNode = plainText("!  " + error, 14, Color.rgb(255, 100, 100));
-                errNode.setTranslateX(panelX + pad);
-                errNode.setTranslateY(errorY);
-                nodes.add(errNode);
-
-                Timeline fade = new Timeline(
-                    new KeyFrame(Duration.millis(2000), ev -> {}),
-                    new KeyFrame(Duration.millis(2600),
-                        new KeyValue(errNode.opacityProperty(), 0.0))
-                );
-                fade.play();
-            }
+            nodes.add(errNode);
 
             if (isPassword) {
                 setupPasswordField(nodes, panelX, panelW, pad, fieldTopY, fieldW,
-                        result, done, cleanup, cancel, latch);
-            }
-            else {
+                        result, done, cleanup, cancel, latch, validator, showError);
+                if (initialError != null && !initialError.isEmpty()) {
+                    showError.accept(initialError);
+                }
+            } else {
                 TextField tf = new TextField();
                 styleField(tf, panelX + pad, fieldTopY, fieldW);
                 Runnable confirm = () -> {
+                    String val = tf.getText();
+                    if (val.isBlank()) { showError.accept("Please fill in the field"); return; }
+                    if (validator != null) {
+                        String err = validator.apply(val);
+                        if (err != null) { showError.accept(err); return; }
+                    }
                     if (!done.compareAndSet(false, true)) return;
-                    result[0] = tf.getText();
+                    result[0] = val;
                     cleanup.run();
                     latch.countDown();
                 };
@@ -350,6 +322,9 @@ public class FxglAuth implements AuthView {
                 tf.setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) cancel.run(); });
                 nodes.add(tf);
                 nodes.forEach(FXGL.getGameScene()::addUINode);
+                if (initialError != null && !initialError.isEmpty()) {
+                    showError.accept(initialError);
+                }
                 tf.requestFocus();
             }
         });
@@ -358,15 +333,15 @@ public class FxglAuth implements AuthView {
         return result[0];
     }
 
-    // ── Password field with manual * masking ────────────────────────────────────
-
     private void setupPasswordField(
             List<Node> nodes,
             double panelX, double panelW, double pad,
             double fieldY, double fieldW,
             String[] result, AtomicBoolean done,
             Runnable cleanup, Runnable cancel,
-            CountDownLatch latch
+            CountDownLatch latch,
+            Function<String, String> validator,
+            Consumer<String> showError
     ) {
         String[] realPwd = {""};
         boolean[] showing = {false};
@@ -433,15 +408,20 @@ public class FxglAuth implements AuthView {
         });
 
         Runnable confirm = () -> {
+            String val = showing[0] ? field.getText() : realPwd[0];
+            if (val.isBlank()) { showError.accept("Please fill in the field"); return; }
+            if (validator != null) {
+                String err = validator.apply(val);
+                if (err != null) { showError.accept(err); return; }
+            }
             if (!done.compareAndSet(false, true)) return;
-            result[0] = showing[0] ? field.getText() : realPwd[0];
+            result[0] = val;
             cleanup.run();
             latch.countDown();
         };
         field.setOnAction(e -> confirm.run());
         field.setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) cancel.run(); });
 
-        // SHOW / HIDE - plain text, no shadow, readable
         Text toggleBtn = plainText("SHOW", 14, FxglUi.DEFAULT_BUTTON_COLOR);
         toggleBtn.setTranslateX(panelX + panelW - pad - 60);
         toggleBtn.setTranslateY(fieldY + 22);
@@ -465,8 +445,6 @@ public class FxglAuth implements AuthView {
         field.requestFocus();
     }
 
-    // ── Styling ─────────────────────────────────────────────────────────────────
-
     private void styleField(TextField field, double x, double y, double width) {
         field.setTranslateX(x);
         field.setTranslateY(y);
@@ -484,7 +462,6 @@ public class FxglAuth implements AuthView {
         );
     }
 
-    /** Plain text without stroke/shadow - readable at small sizes. */
     private static Text plainText(String str, int size, Color color) {
         Text t = new Text(str);
         t.setFont(FxglUi.createFont(size));

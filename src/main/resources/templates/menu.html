@@ -3,18 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <title>Tobey Mazes</title>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/menu.css}">
+    <script defer th:src="@{/js/scale.js}"></script>
+    <script defer th:src="@{/js/parallax-shared.js}"></script>
+    <script defer th:src="@{/js/transitions.js}"></script>
+    <script defer th:src="@{/js/menu.js}"></script>
 </head>
 <body>
 
-<h1>Tobey Mazes</h1>
+<div class="game-root">
+    <div class="bg">
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png"></div>
+    </div>
 
-<ul>
-    <li><a th:href="@{/game/levels}">Start game</a></li>
-    <li><a th:href="@{/profile}">Profile</a></li>
-    <li><a th:href="@{/leaderboard}">Leaderboard</a></li>
-    <li><a th:href="@{/review}">Rate game</a></li>
-    <li><a th:href="@{/about}">About</a></li>
-</ul>
+    <div class="menu-wrap">
+        <div class="title-line title-line-1">TOBEY</div>
+        <div class="title-line title-line-2">MAZES</div>
 
+        <a th:href="@{/game/levels}" class="menu-btn">START</a>
+        <a th:href="@{/profile}"     class="menu-btn">PROFILE</a>
+        <a th:href="@{/leaderboard}" class="menu-btn">LEADERBOARD</a>
+        <a th:href="@{/review}"      class="menu-btn">RATE</a>
+        <a th:href="@{/about}"       class="menu-btn">ABOUT</a>
+    </div>
+</div>
 </body>
 </html>

@@ -38,9 +38,6 @@ public class RestClientConfig {
         try {
             return Files.readString(tokenFile).strip();
         }
-        catch (NoSuchFileException e) {
-            return null;
-        }
         catch (IOException e) {
             return null;
         }

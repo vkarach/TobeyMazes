@@ -20,7 +20,7 @@ public interface AuthService {
     void initiatePasswordChange(int userId);
     boolean changePasswordWithCode(int userId, int code, String newPassword);
 
-    // Legacy — server-side only (web controllers)
+    // Legacy - server-side only (web controllers)
     User register(String name, String password, String email);
     int getOrCreateEmailVerificationCode(int userId);
     int sendOrGetVerificationCodeByEmail(String email);

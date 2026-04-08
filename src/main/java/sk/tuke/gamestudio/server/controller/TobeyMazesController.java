@@ -32,6 +32,8 @@ public class TobeyMazesController {
     @GetMapping("/game/levels")
     public String levels(Model model) {
         model.addAttribute("levels", Level.values());
+        Integer currentUserId = session.getCurrentUser() != null ? session.getCurrentUser().getId() : null;
+        model.addAttribute("currentUserId", currentUserId);
         return "levels";
     }
 

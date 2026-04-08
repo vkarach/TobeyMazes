@@ -1,6 +1,5 @@
 package sk.tuke.gamestudio.server.webservice;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;

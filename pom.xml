@@ -133,7 +133,6 @@
                     <argLine>-XX:+EnableDynamicAgentLoading</argLine>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -142,15 +141,13 @@
                     <mainClass>sk.tuke.gamestudio.game.logicalmazes.core.TobeyMazes</mainClass>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>sk.tuke.gamestudio.game.logicalmazes.core.TobeyMazes</mainClass>
+                    <mainClass>sk.tuke.gamestudio.server.TobeyMazesServer</mainClass>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>
