@@ -25,7 +25,8 @@ public class TobeyMazesController {
     }
 
     @RequestMapping("/menu")
-    public String menu() {
+    public String menu(Model model) {
+        model.addAttribute("version", Game.version);
         return "menu";
     }
 
@@ -39,38 +40,30 @@ public class TobeyMazesController {
 
     @PostMapping("/game/start")
     public String startGame(@RequestParam int levelId) {
-        Level level = null;
         for (Level l : Level.values()) {
             if (l.getId() == levelId) {
-                level = l;
-                break;
+                session.setCurrentLevel(l);
+                return "redirect:/game";
             }
         }
-        if (level == null) return "redirect:/game/levels";
-
-        MapParser.Result result = new MapParser().parseMap(level.getFilepath());
-        session.setField(result.mapField());
-        session.setPlayer(result.player());
-        session.setTargetCount(result.targetCount());
-        session.setCurrentLevel(level);
-        session.setStepCount(0);
-        session.setGameWon(false);
-        session.setStartTimeMs(0); // will be set on first move
-        session.setLastScore(null);
-        session.setLastTimeMs(null);
-        session.setTimeRecord(false);
-        session.setScoreRecord(false);
-
-        return "redirect:/game";
+        return "redirect:/game/levels";
     }
 
     @PostMapping("/game/restart")
     public String restartGame() {
         if (session.getCurrentLevel() == null) return "redirect:/game/levels";
-        MapParser.Result result = new MapParser().parseMap(session.getCurrentLevel().getFilepath());
-        session.setField(result.mapField());
-        session.setPlayer(result.player());
-        session.setTargetCount(result.targetCount());
+        return "redirect:/game";
+    }
+
+    @GetMapping("/game")
+    public String game(Model model) {
+        if (session.getCurrentLevel() == null) return "redirect:/game/levels";
+
+        // Reset on every GET — covers F5, restart redirect, and start redirect
+        MapParser.Result parsed = new MapParser().parseMap(session.getCurrentLevel().getFilepath());
+        session.setField(parsed.mapField());
+        session.setPlayer(parsed.player());
+        session.setTargetCount(parsed.targetCount());
         session.setStepCount(0);
         session.setGameWon(false);
         session.setStartTimeMs(0);
@@ -78,23 +71,17 @@ public class TobeyMazesController {
         session.setLastTimeMs(null);
         session.setTimeRecord(false);
         session.setScoreRecord(false);
-        return "redirect:/game";
-    }
-
-    @GetMapping("/game")
-    public String game(Model model) {
-        if (session.getField() == null) return "redirect:/game/levels";
 
         model.addAttribute("cells", buildCells());
         model.addAttribute("playerX", session.getPlayer().getX());
         model.addAttribute("playerY", session.getPlayer().getY());
-        model.addAttribute("stepCount", session.getStepCount());
-        model.addAttribute("gameWon", session.isGameWon());
+        model.addAttribute("stepCount", 0);
+        model.addAttribute("gameWon", false);
         model.addAttribute("levelTitle", session.getCurrentLevel().getTitle());
-        model.addAttribute("lastScore", session.getLastScore());
-        model.addAttribute("lastTimeMs", session.getLastTimeMs());
-        model.addAttribute("timeRecord", session.isTimeRecord());
-        model.addAttribute("scoreRecord", session.isScoreRecord());
+        model.addAttribute("lastScore", null);
+        model.addAttribute("lastTimeMs", null);
+        model.addAttribute("timeRecord", false);
+        model.addAttribute("scoreRecord", false);
         return "game";
     }
 

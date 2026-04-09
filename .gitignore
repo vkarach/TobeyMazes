@@ -1,5 +1,4 @@
 src/main/resources/application.properties
-CLAUDE.md
 *.iml
 *.log
 .claude

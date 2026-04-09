@@ -3,12 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <title>Select Level - TobeyMazes</title>
+  <link rel="preload" th:href="@{/ui/fxgl/fonts/PressStart2P-Regular.ttf}" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" th:href="@{/css/menu.css}"    as="style">
+  <link rel="preload" th:href="@{/css/profile.css}" as="style">
+  <link rel="preload" th:href="@{/css/game.css}"    as="style">
   <link rel="stylesheet" th:href="@{/css/base.css}">
   <link rel="stylesheet" th:href="@{/css/levels.css}">
+  <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
+  <script defer th:src="@{/js/scale.js}"></script>
 </head>
 <body th:attr="data-user-id=${currentUserId}">
 
-<div class="bg bg-fixed">
+<div class="game-root">
+<div class="bg" id="bg-main" data-turbo-permanent>
+  <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+  <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+  <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+  <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png"></div>
+</div>
+<div class="bg" id="bg-profile" data-turbo-permanent>
+  <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/profilePageParallax/1.png"></div>
+  <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/profilePageParallax/2.png"></div>
+  <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/profilePageParallax/3.png"></div>
+  <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/profilePageParallax/4.png"></div>
+</div>
+<div class="bg" id="bg-game" data-turbo-permanent>
   <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
   <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
   <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
@@ -32,6 +51,7 @@
           <div class="card-title"  th:text="${level.title}"></div>
           <div class="card-diff"   th:text="${level.difficulty}"></div>
         </button>
+        <button type="submit" class="hidden-submit" aria-hidden="true" tabindex="-1"></button>
       </form>
     </div>
   </div>
@@ -62,6 +82,7 @@
 
 <script th:src="@{/js/parallax-shared.js}"></script>
 <script th:src="@{/js/levels.js}"></script>
+</div><!-- .game-root -->
 
 </body>
 </html>

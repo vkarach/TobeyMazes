@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'Press Start 2P';
   src: url('/ui/fxgl/fonts/PressStart2P-Regular.ttf') format('truetype');
-  font-display: swap;
+  font-display: block;
 }
 
 /* -----------------
@@ -18,18 +18,28 @@
 }
 
 html, body {
-  width: 100%; height: 100%;
+  width: 100vw; height: 100vh;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Press Start 2P', monospace;
   color: var(--text);
   user-select: none;
-  /* Sky-blue fallback until parallax images finish loading */
+  background-color: #442361;
+}
+
+.game-root {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  transform-origin: center center;
   background-color: #6B9FCC;
 }
 
-/* Full-viewport parallax container */
-.bg-fixed {
-  position: fixed;
+.bg {
+  position: absolute;
   inset: 0;
   z-index: 0;
 }
@@ -59,7 +69,6 @@ html, body {
   width: 100%;
   height: 100%;
   gap: 18px;
-  /* z-index set above together with .bg-fixed */
 }
 
 .game-wrap {
@@ -112,13 +121,26 @@ html, body {
   align-items: center;
   justify-content: center;
   border: 0;
+  box-sizing: border-box;
 }
 
-/* Walls: solid gold, no glow */
-.wall-top    { border-top:    4px solid var(--wall); }
-.wall-bottom { border-bottom: 4px solid var(--wall); }
-.wall-left   { border-left:   4px solid var(--wall); }
-.wall-right  { border-right:  4px solid var(--wall); }
+.wall-left   { border-left:  4px solid var(--wall); }
+.wall-right  { border-right: 4px solid var(--wall); }
+
+/* Horizontal walls overflow 4px past the cell sides so they cover the gap
+   where a neighbor cell's vertical wall meets this one at a corner. */
+.wall-top::before,
+.wall-bottom::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  height: 4px;
+  background: var(--wall);
+  z-index: 1;
+}
+.wall-top::before   { top: 0; }
+.wall-bottom::after { bottom: 0; }
 
 /* ---- Target flowers ---- */
 .target-gem {
@@ -144,34 +166,45 @@ html, body {
   100% { transform: scale(0);   opacity: 0; }
 }
 
-/* -----------------
-   PLAYER SPRITE
-   KonekTobeySalto70x70.png - 13 frames × 70×70 px
-   Displayed at 56×56 px  →  background-size: 728px 56px
------------------ */
+/* Player sprite. Both sheets share an 80x80 frame with the horse centered
+   identically, so switching between run/salto never shifts the anchor.
+   Frames are scaled to 48x48: salto strip 13*48=624, run strip 6*48=288. */
 #player {
   position: absolute;
   width: 48px;
   height: 48px;
   pointer-events: none;
   z-index: 10;
-  transition: top 75ms linear, left 75ms linear;
+  transition: top 120ms linear, left 120ms linear, rotate 100ms ease-out;
 
-  background-image: url('/img/KonekTobeySalto70x70.png');
+  background-image: url('/img/KonekTobeySalto80x80.png');
   background-repeat: no-repeat;
   background-position: 0 0;
-  /* 13 frames × 48px = 624px; height 48px (scaled from 70×70) */
   background-size: 624px 48px;
   image-rendering: pixelated;
 }
+#player.no-rot-trans {
+  transition: top 120ms linear, left 120ms linear;
+}
 
 @keyframes konek-salto {
-  from { background-position:    0 0; }
+  from { background-position:  -96px 0; }
   to   { background-position: -624px 0; }
 }
 
 #player.running {
-  animation: konek-salto 0.39s steps(13) 1;
+  animation: konek-salto 0.55s steps(11) 1;
+}
+
+@keyframes konek-run {
+  from { background-position:    0 0; }
+  to   { background-position: -288px 0; }
+}
+
+#player.walking {
+  background-image: url('/img/konekTobeyRun80x80.png');
+  background-size: 288px 48px;
+  animation: konek-run 0.2s steps(6) infinite;
 }
 
 /* -----------------
@@ -293,7 +326,7 @@ html, body {
 ----------------- */
 #win-overlay {
   display: none;
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 200;
   background: rgba(10, 5, 2, 0.92);

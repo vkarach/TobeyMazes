@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('/ui/fxgl/fonts/PressStart2P-Regular.ttf') format('truetype');
+  font-display: block;
+}
 
 * {
     margin: 0;
@@ -34,6 +38,14 @@ body {
     inset: 0;
     z-index: 0;
 }
+
+#bg-profile, #bg-game {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+body.on-profile #bg-profile { opacity: 1; }
+body.on-game #bg-game { opacity: 1; }
 .bg-layer {
     position: absolute;
     inset: 0;

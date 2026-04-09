@@ -3,12 +3,20 @@
     const baseMs  = parseFloat(sessionStorage.getItem(KEY) || '0');
     const startTs = performance.now();
 
-    // Persist elapsed time when navigating away so next page continues from same position
     window.addEventListener('pagehide', () => {
         sessionStorage.setItem(KEY, baseMs + (performance.now() - startTs));
     });
 
+    window._parallaxInited = window._parallaxInited || new WeakSet();
+    const inited = window._parallaxInited;
+
     document.querySelectorAll('.bg-layer[data-bg]').forEach(layer => {
+        // skip if same DOM element already animated (data-turbo-permanent .bg).
+        // WeakSet keyed by element ref — survives across script re-executions but
+        // a fresh element from a Turbo snapshot restore will not be in it.
+        if (inited.has(layer)) return;
+        inited.add(layer);
+
         const url   = layer.dataset.bg;
         const speed = parseFloat(layer.dataset.speed);
         const img   = new Image();

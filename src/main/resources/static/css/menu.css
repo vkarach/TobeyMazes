@@ -2,3 +2,16 @@
 .bg-layer-2 { background-image: url('/ui/fxgl/backgrounds/mainMenuParallax/2.png'); }
 .bg-layer-3 { background-image: url('/ui/fxgl/backgrounds/mainMenuParallax/3.png'); }
 .bg-layer-4 { background-image: url('/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png'); }
+
+.version-tag {
+  position: fixed;
+  right: 10px;
+  bottom: 6px;
+  z-index: 9999;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: rgba(245, 197, 24, 0.7);
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+  user-select: none;
+}

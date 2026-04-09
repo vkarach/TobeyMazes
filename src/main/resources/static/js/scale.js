@@ -7,3 +7,4 @@ function scaleGameRoot() {
 
 scaleGameRoot();
 window.addEventListener('resize', scaleGameRoot);
+document.addEventListener('turbo:load', scaleGameRoot);

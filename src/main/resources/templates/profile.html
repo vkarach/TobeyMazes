@@ -3,19 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <title>Profile</title>
+    <link rel="preload" th:href="@{/ui/fxgl/fonts/PressStart2P-Regular.ttf}" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" th:href="@{/css/menu.css}"   as="style">
+    <link rel="preload" th:href="@{/css/levels.css}" as="style">
+    <link rel="preload" th:href="@{/css/game.css}"   as="style">
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
     <script defer th:src="@{/js/scale.js}"></script>
-    <script defer th:src="@{/js/parallax.js}"></script>
-    <script defer th:src="@{/js/transitions.js}"></script>
 </head>
-<body>
+<body class="on-profile">
 <div class="game-root">
-    <div class="bg">
+    <div class="bg" id="bg-main" data-turbo-permanent>
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png"></div>
+    </div>
+    <div class="bg" id="bg-profile" data-turbo-permanent>
         <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/profilePageParallax/1.png"></div>
         <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/profilePageParallax/2.png"></div>
         <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/profilePageParallax/3.png"></div>
         <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/profilePageParallax/4.png"></div>
+    </div>
+    <div class="bg" id="bg-game" data-turbo-permanent>
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4.png"></div>
     </div>
 
     <!-- ===== AUTHORIZED ===== -->
@@ -100,6 +115,11 @@
                     <button class="confirm-btn" onclick="submitRegister()">CONFIRM</button>
                 </div>
 
+                <div class="modal-step" id="reg-loading" style="display:none">
+                    <p class="modal-hint">Sending code...</p>
+                    <div class="pixel-spinner"></div>
+                </div>
+
                 <div class="modal-step" id="reg-step2" style="display:none">
                     <p class="modal-hint">Enter the code sent to your email</p>
                     <input class="pixel-input" type="number" id="reg-code" placeholder="6-digit code"/>
@@ -112,6 +132,8 @@
     </div>
 </div>
 
+<script th:src="@{/js/parallax-shared.js}"></script>
+<script th:src="@{/js/transitions.js}"></script>
 <script th:src="@{/js/profile.js}"></script>
 </body>
 </html>
