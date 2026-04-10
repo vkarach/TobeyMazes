@@ -48,7 +48,7 @@ public class GameController {
             }
 
             mapField.step(player, activeDir);
-        }, 0, 75, TimeUnit.MILLISECONDS);
+        }, 0, 120, TimeUnit.MILLISECONDS);
     }
 
     private void stopMove() {

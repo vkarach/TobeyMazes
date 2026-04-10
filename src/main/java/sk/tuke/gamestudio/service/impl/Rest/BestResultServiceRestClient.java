@@ -67,6 +67,14 @@ public class BestResultServiceRestClient implements BestResultService {
     }
 
     @Override
+    public Integer getUserLeaderboardPosition(int userId) {
+        String url = String.format(
+                "%s/%d/leaderboard-position", baseUrl, userId
+        );
+        return restTemplate.getForObject(url, Integer.class);
+    }
+
+    @Override
     public List<UserScore> getTopByScore() {
         String url = String.format(
                 "%s/leaderboard", baseUrl

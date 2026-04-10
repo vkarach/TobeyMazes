@@ -7,6 +7,10 @@
   <link rel="preload" th:href="@{/css/menu.css}"    as="style">
   <link rel="preload" th:href="@{/css/profile.css}" as="style">
   <link rel="preload" th:href="@{/css/game.css}"    as="style">
+  <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/1.png}"             as="image">
+  <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/2.png}"             as="image">
+  <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/3.png}"             as="image">
+  <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png}"  as="image">
   <link rel="stylesheet" th:href="@{/css/base.css}">
   <link rel="stylesheet" th:href="@{/css/levels.css}">
   <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
@@ -61,14 +65,30 @@
       <div class="level-modal-body">
         <img src="" alt="Level preview" id="level-preview" class="level-preview">
 
-        <div class="level-info">
-          <div id ="info-label"      class="info-label"></div>
-          <div id="modal-difficulty" class="info-text"></div>
-          <div id="modal-time"       class="info-text"></div>
-          <div id="modal-score"      class="info-text"></div>
+        <div class="level-modal-right">
+          <div class="level-modal-header">
+            <div id="info-label" class="info-label"></div>
+            <div id="modal-difficulty" class="info-diff"></div>
+          </div>
+
+          <div class="lm-separator"></div>
+
+          <div class="level-modal-stats">
+            <div class="modal-stat">
+              <span class="modal-stat-label">BEST TIME</span>
+              <span class="modal-stat-value" id="modal-time">—</span>
+            </div>
+            <div class="modal-stat">
+              <span class="modal-stat-label">BEST SCORE</span>
+              <span class="modal-stat-value" id="modal-score">—</span>
+            </div>
+          </div>
+
+          <div class="lm-separator"></div>
+
           <div class="level-modal-actions">
-            <button id="modal-back-btn" class="level-btn ghost">BACK</button>
-            <button id="modal-start-btn" class="level-btn primary">START</button>
+            <button id="modal-back-btn" class="lm-nav lm-btn lm-btn-dim">BACK</button>
+            <button id="modal-start-btn" class="lm-nav lm-btn">START</button>
           </div>
         </div>
       </div>

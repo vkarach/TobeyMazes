@@ -2,6 +2,8 @@ package sk.tuke.gamestudio.service;
 
 import sk.tuke.gamestudio.service.exception.UserException;
 
+import java.time.LocalDateTime;
+
 public interface UserService {
     boolean userExists(String userName) throws UserException;
     boolean emailExists(String email) throws UserException;
@@ -16,4 +18,5 @@ public interface UserService {
 
     void changePassword(int userId, String newPassword) throws UserException;
 
+    default LocalDateTime getCreatedAt(int userId) throws UserException { return null; }
 }

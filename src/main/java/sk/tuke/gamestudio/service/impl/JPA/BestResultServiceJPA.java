@@ -56,6 +56,12 @@ public class BestResultServiceJPA implements BestResultService {
         return bestOverallScore.orElse(null);
     }
 
+    public Integer getUserLeaderboardPosition(int userId) {
+        Optional<Integer> leaderboardPosition =
+                bestLevelResultRepository.getUserLeaderboardPosition(userId);
+        return leaderboardPosition.orElse(null);
+    }
+
     public List<UserScore> getTopByScore() {
         return bestLevelResultRepository.getTopTenUsers(PageRequest.of(0, 10));
     }

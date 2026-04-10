@@ -7,6 +7,10 @@
   <link rel="preload" th:href="@{/css/menu.css}"    as="style">
   <link rel="preload" th:href="@{/css/levels.css}"  as="style">
   <link rel="preload" th:href="@{/css/profile.css}" as="style">
+  <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/1.png}" as="image">
+  <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/2.png}" as="image">
+  <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/3.png}" as="image">
+  <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/4.png}" as="image">
   <link rel="stylesheet" th:href="@{/css/base.css}">
   <link rel="stylesheet" th:href="@{/css/game.css}">
   <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
@@ -43,19 +47,19 @@
     <div class="win-stat">
       <div class="win-stat-label">TIME</div>
       <div class="win-stat-value" id="win-time">-</div>
+      <div class="win-improve" id="win-time-improve"></div>
     </div>
     <div class="win-stat">
       <div class="win-stat-label">SCORE</div>
       <div class="win-stat-value" id="win-score">-</div>
+      <div class="win-improve" id="win-score-improve"></div>
     </div>
   </div>
-  <div class="record-badge" id="record-msg"></div>
   <div class="win-actions">
-    <form id="win-restart-form" method="post" th:action="@{/game/restart}">
-      <button type="submit" class="win-btn ghost">Play Again</button>
-    </form>
-    <a th:href="@{/game/levels}" class="win-btn primary">Level Select</a>
+    <a th:href="@{/game/levels}" class="win-nav win-btn">LEVELS</a>
+    <a href="#" class="win-nav win-btn" id="win-replay">PLAY AGAIN</a>
   </div>
+  <form id="win-restart-form" method="post" th:action="@{/game/restart}" style="display:none"></form>
 </div>
 
 <!-- Game page -->
@@ -144,7 +148,8 @@
     lastTimeMs:  /*[[${lastTimeMs}]]*/  null,
     lastScore:   /*[[${lastScore}]]*/   null,
     timeRecord:  /*[[${timeRecord}]]*/  false,
-    scoreRecord: /*[[${scoreRecord}]]*/ false
+    scoreRecord: /*[[${scoreRecord}]]*/ false,
+    difficulty:  /*[[${difficulty}]]*/  'EASY'
   };
 </script>
 <script th:src="@{/js/parallax-shared.js}"></script>

@@ -7,6 +7,8 @@ import org.springframework.web.server.ResponseStatusException;
 import sk.tuke.gamestudio.entity.Review;
 import sk.tuke.gamestudio.service.ReviewService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 public class ReviewServiceRest {
@@ -30,6 +32,11 @@ public class ReviewServiceRest {
     @GetMapping("/{userId}/review")
     public Review getReview(@PathVariable int userId) {
         return reviewService.getReview(userId);
+    }
+
+    @GetMapping("/reviews")
+    public List<Review> getAllReviews() {
+        return reviewService.getAllReviews();
     }
 
     @GetMapping("/overall-rating")

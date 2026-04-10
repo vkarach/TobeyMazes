@@ -7,6 +7,8 @@ import sk.tuke.gamestudio.config.RestClientConfig;
 import sk.tuke.gamestudio.entity.Review;
 import sk.tuke.gamestudio.service.ReviewService;
 
+import java.util.List;
+
 @Profile({"console", "fxgl"})
 @Service
 public class ReviewServiceRestClient implements ReviewService {
@@ -32,6 +34,15 @@ public class ReviewServiceRestClient implements ReviewService {
                 "%s/%d/review", baseUrl, userId
         );
         return restTemplate.getForObject(url, Review.class);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Review> getAllReviews() {
+        String url = String.format(
+          "%s/reviews", baseUrl
+        );
+        return restTemplate.getForObject(url, List.class);
     }
 
     @Override

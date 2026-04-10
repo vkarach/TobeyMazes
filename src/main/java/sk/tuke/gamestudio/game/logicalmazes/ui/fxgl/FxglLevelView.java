@@ -31,8 +31,8 @@ public class FxglLevelView implements LevelView {
 
     private static final int  CELL    = 52;
     private static final int  WALL    = 5;
-    // how long (ns) to animate one tile step - slightly above GameController's 75ms interval
-    private static final long STEP_NS = 82_000_000L;
+    // how long (ns) to animate one tile step - slightly above GameController's 120ms interval
+    private static final long STEP_NS = 130_000_000L;
 
     // salto spritesheet: 13 frames × 70×70 px, horizontal strip
     private static final int  ANIM_FRAMES   = 13;

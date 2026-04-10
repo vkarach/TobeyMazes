@@ -11,7 +11,7 @@
 }
 
 body {
-    background-color: #442361;
+    background-color: #000;
     overflow: hidden;
     width: 100vw;
     height: 100vh;
@@ -30,7 +30,7 @@ body {
     font-family: 'Press Start 2P', monospace;
     color: #fff;
     cursor: default;
-    background-color: #442361;
+    background-color: #000;
 }
 
 .bg {
@@ -98,14 +98,39 @@ body.on-game #bg-game { opacity: 1; }
     cursor: pointer;
     transition: transform 150ms ease, color 150ms ease, text-shadow 150ms ease;
     user-select: none;
+    position: relative;
 }
 .menu-btn:last-child { margin-bottom: 0; }
+
+.menu-btn::before {
+    content: '>';
+    position: absolute;
+    left: -28px;
+    color: #F5C518;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 150ms ease, transform 150ms ease;
+}
 
 .menu-btn:hover,
 .menu-btn.active {
     color: #FFD700;
     text-shadow: 2px 2px 0 #000;
-    transform: translateY(-1px);
+    transform: translateX(4px);
+}
+
+.menu-btn:hover::before,
+.menu-btn.active::before {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+body.kb-mode .menu-btn:hover:not(.active) {
+    color: #91CDFF;
+    transform: none;
+}
+body.kb-mode .menu-btn:hover:not(.active)::before {
+    opacity: 0;
 }
 
 .modal-overlay {

@@ -2,6 +2,8 @@ package sk.tuke.gamestudio.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -20,6 +22,9 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "added_at")
+    private LocalDateTime createdAt;
+
     protected User() {}
 
     public User(int id, String name) {
@@ -31,6 +36,7 @@ public class User {
         this.name = name;
         this.passwordHash = passwordHash;
         this.email = email;
+        this.createdAt = LocalDateTime.now();
     }
 
     public Integer getId() {
@@ -51,5 +57,9 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

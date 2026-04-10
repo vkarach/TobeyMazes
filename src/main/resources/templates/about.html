@@ -3,19 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <title>About</title>
+    <link rel="preload" th:href="@{/ui/fxgl/fonts/PressStart2P-Regular.ttf}" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" th:href="@{/css/menu.css}"   as="style">
+    <link rel="preload" th:href="@{/css/levels.css}" as="style">
+    <link rel="preload" th:href="@{/css/game.css}"   as="style">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/1.png}"             as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/2.png}"             as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/3.png}"             as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png}"  as="image">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/about.css}">
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
+    <script defer th:src="@{/js/scale.js}"></script>
 </head>
 <body>
-<div class="bg" id="bg-main" data-turbo-permanent></div>
+<div class="game-root">
+    <div class="bg" id="bg-main" data-turbo-permanent>
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png"></div>
+    </div>
+    <div class="bg" id="bg-profile" data-turbo-permanent>
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/profilePageParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/profilePageParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/profilePageParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/profilePageParallax/4.png"></div>
+    </div>
+    <div class="bg" id="bg-game" data-turbo-permanent>
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4.png"></div>
+    </div>
 
-<h1>About</h1>
+    <div class="menu-wrap" style="margin-top: -55px">
+        <div class="title-line title-line-1" style="font-size:56px">ABOUT</div>
+        <div class="title-line title-line-2" style="font-size:56px; margin-bottom:36px">THE GAME</div>
 
-<p>TobeyMazes <span th:text="${version}"></span></p>
-<p>An improved version of the terminal-based maze game built with Java and Spring.</p>
-<p>Made by <span th:text="${author}"></span> - this is my fourth game.</p>
-<p>Thanks for participating in beta testing :)</p>
+        <div class="about-card">
+            <div class="about-name">Tobey Mazes</div>
+            <div class="about-version" th:text="'v' + ${version}">v0.0.0</div>
 
-<br/><a th:href="@{/menu}">Back to menu</a>
+            <div class="about-separator"></div>
 
+            <div class="about-how">HOW TO PLAY</div>
+            <ul class="about-list">
+                <li>Move with <span class="about-key">Arrows</span> or <span class="about-key">WASD</span></li>
+                <li>You slide until you hit a wall</li>
+                <li>Collect all flowers to clear the level</li>
+                <li>Fewer steps &amp; faster time = higher score</li>
+            </ul>
+
+
+            <div class="about-separator"></div>
+
+            <div class="about-credit">
+                <span class="about-label">Made by</span>
+                <span class="about-author" th:text="${author}">Author</span>
+            </div>
+
+            <p class="about-thanks">Thanks for playing!</p>
+
+            <p class="about-copyright">&copy; 2025-2026 Valentyn Karachevtsev</p>
+        </div>
+
+        <a th:href="@{/menu}" class="menu-btn" style="margin-top:24px">BACK</a>
+    </div>
+</div>
+
+<script th:src="@{/js/parallax-shared.js}"></script>
+<script th:src="@{/js/transitions.js}"></script>
+<script th:src="@{/js/nav-shared.js}"></script>
+<script th:src="@{/js/about.js}"></script>
 </body>
 </html>

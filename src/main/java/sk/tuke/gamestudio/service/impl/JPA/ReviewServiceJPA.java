@@ -7,6 +7,7 @@ import sk.tuke.gamestudio.repository.ReviewRepository;
 import sk.tuke.gamestudio.service.ReviewService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Profile("server")
@@ -31,8 +32,14 @@ public class ReviewServiceJPA implements ReviewService {
     }
 
     @Override
+    public List<Review> getAllReviews() {
+        return reviewRepository.findAllByOrderByRatingDescUpdatedAtDesc();
+    }
+
+    @Override
     public Float getOverallRating() {
         Double avg = reviewRepository.getOverallRating();
         return avg != null ? avg.floatValue() : 0f;
     }
+
 }

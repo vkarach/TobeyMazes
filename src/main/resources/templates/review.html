@@ -2,43 +2,107 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Review</title>
+    <title>Rate</title>
+    <link rel="preload" th:href="@{/ui/fxgl/fonts/PressStart2P-Regular.ttf}" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" th:href="@{/css/menu.css}"   as="style">
+    <link rel="preload" th:href="@{/css/levels.css}" as="style">
+    <link rel="preload" th:href="@{/css/game.css}"   as="style">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/1.png}"             as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/2.png}"             as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/3.png}"             as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png}"  as="image">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/review.css}">
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
+    <script defer th:src="@{/js/scale.js}"></script>
 </head>
 <body>
-<div class="bg" id="bg-main" data-turbo-permanent></div>
-
-<h1>Review</h1>
-
-<p>Overall rating: <strong th:text="${overallRating} + ' / 5'"></strong></p>
-
-<div th:if="${user != null}">
-    <h2 th:text="${review != null} ? 'Your review' : 'Leave a review'"></h2>
-
-    <div th:if="${review != null}">
-        <p>Rating: <span th:text="${review.rating}"></span> / 5</p>
-        <p>Comment: <span th:text="${review.comment}"></span></p>
-        <p>Updated: <span th:text="${review.updatedAt}"></span></p>
+<div class="game-root">
+    <div class="bg" id="bg-main" data-turbo-permanent>
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png"></div>
+    </div>
+    <div class="bg" id="bg-profile" data-turbo-permanent>
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/profilePageParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/profilePageParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/profilePageParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/profilePageParallax/4.png"></div>
+    </div>
+    <div class="bg" id="bg-game" data-turbo-permanent>
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4.png"></div>
     </div>
 
-    <form th:action="@{/review/submit}" method="get">
-        <label>Rating (1–5):
-            <input type="number" name="rating" min="1" max="5"
-                   th:value="${review != null} ? ${review.rating} : 5" required/>
-        </label><br/>
-        <label>Comment:
-            <textarea name="review" rows="3" cols="40"
-                      th:text="${review != null} ? ${review.comment} : ''"></textarea>
-        </label><br/>
-        <button type="submit" th:text="${review != null} ? 'Update' : 'Submit'"></button>
-    </form>
+    <div class="menu-wrap" style="margin-top: -140px">
+        <div class="title-line title-line-1" style="font-size:56px">RATE</div>
+        <div class="title-line title-line-2" style="font-size:56px; margin-bottom:32px">THE GAME</div>
+
+        <div class="rv-card">
+            <!-- Overall rating -->
+            <div class="rv-overall">
+                <span class="rv-overall-label">OVERALL</span>
+                <span class="rv-overall-stars"
+                      th:text="${overallRating > 0} ? ${#numbers.formatDecimal(overallRating, 1, 2)} + ' / 5' : 'no ratings yet'">
+                    0.00 / 5
+                </span>
+            </div>
+
+            <div class="rv-separator"></div>
+
+            <!-- Logged in -->
+            <div th:if="${user != null}" id="rv-form-wrap">
+                <!-- Star selector -->
+                <div class="rv-stars" id="rv-stars">
+                    <span class="rv-star" th:each="i : ${#numbers.sequence(1, 5)}"
+                          th:data-value="${i}"
+                          th:classappend="${review != null and review.rating >= i} ? ' filled' : ''"><img th:src="@{/img/star.png}" alt="*" draggable="false"/></span>
+                </div>
+                <input type="hidden" id="rv-rating"
+                       th:value="${review != null} ? ${review.rating} : 0" />
+
+                <!-- Comment -->
+                <textarea class="rv-comment" id="rv-comment"
+                          placeholder="comment (optional)"
+                          maxlength="100"
+                          th:text="${review != null} ? ${review.comment} : ''"></textarea>
+
+                <!-- Submit / Thanks — same element to avoid layout shift -->
+                <div class="rv-submit-row">
+                    <button class="rv-submit pf-nav" id="rv-submit"
+                            th:text="${review != null} ? 'UPDATE' : 'SUBMIT'">SUBMIT</button>
+                    <span class="rv-thanks" id="rv-thanks">Thank you for your feedback!</span>
+                </div>
+            </div>
+
+            <!-- Guest -->
+            <div th:if="${user == null}" class="rv-guest">
+                <a th:href="@{/profile}" class="rv-login-link">Sign in to rate the game</a>
+            </div>
+        </div>
+
+        <button class="menu-btn pf-nav" id="rv-all-btn" style="margin-top:24px">ALL REVIEWS</button>
+        <a th:href="@{/menu}" class="menu-btn pf-nav">BACK</a>
+    </div>
+
+    <!-- All reviews modal -->
+    <div class="modal-overlay" id="rv-modal">
+        <div class="rv-modal-box">
+            <div class="rv-modal-title">ALL REVIEWS</div>
+            <div class="rv-modal-list" id="rv-modal-list">
+                <div class="rv-modal-loading">Loading...</div>
+            </div>
+            <button class="rv-submit rv-modal-close-btn" id="rv-modal-close">CLOSE</button>
+        </div>
+    </div>
 </div>
 
-<div th:if="${user == null}">
-    <p>Please <a th:href="@{/profile}">log in</a> to leave a review.</p>
-</div>
-
-<br/><a th:href="@{/menu}">Back to menu</a>
-
+<script th:src="@{/js/parallax-shared.js}"></script>
+<script th:src="@{/js/transitions.js}"></script>
+<script th:src="@{/js/nav-shared.js}"></script>
+<script th:src="@{/js/review.js}"></script>
 </body>
 </html>

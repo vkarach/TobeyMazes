@@ -63,26 +63,26 @@ public class LevelManager {
         long playedTimeMs   =  playedTimeNs / 1_000_000;
         float playedTimeSec =  (float) playedTimeMs / 1000;
 
-        switch (difficulty) { // todo: balance this shit
+        switch (difficulty) {
             case EASY   -> {
                 maxPoints = 500;
-                kTime = 30;
-                kStep = 10;
+                kTime = 12;
+                kStep = 8;
             }
             case NORMAL -> {
                 maxPoints = 1000;
-                kTime = 60;
-                kStep = 20;
+                kTime = 25;
+                kStep = 15;
             }
             case MEDIUM -> {
                 maxPoints = 2000;
-                kTime = 100;
-                kStep = 30;
+                kTime = 44;
+                kStep = 20;
             }
             case HARD   -> {
                 maxPoints = 5000;
-                kTime = 150;
-                kStep = 50;
+                kTime = 69;
+                kStep = 35;
             }
             default -> {
                 return 0;
@@ -127,7 +127,7 @@ public class LevelManager {
                     gameInput.wakeUp();
                 }
             }
-        }, 0, 75, TimeUnit.MILLISECONDS);
+        }, 0, 120, TimeUnit.MILLISECONDS);
 
         while (stateRef.get() == LevelState.PLAYING) {
             InputType inputType = gameInput.getInput();

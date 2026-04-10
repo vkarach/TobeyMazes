@@ -7,6 +7,10 @@
     <link rel="preload" th:href="@{/css/menu.css}"   as="style">
     <link rel="preload" th:href="@{/css/levels.css}" as="style">
     <link rel="preload" th:href="@{/css/game.css}"   as="style">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/profilePageParallax/1.png}" as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/profilePageParallax/2.png}" as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/profilePageParallax/3.png}" as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/profilePageParallax/4.png}" as="image">
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
@@ -35,18 +39,46 @@
 
     <!-- ===== AUTHORIZED ===== -->
     <div th:if="${user != null}">
-        <div class="menu-wrap">
-            <div class="title-line title-line-1" style="transform:translateX(-50px)">YOUR</div>
-            <div class="title-line title-line-2" style="transform:translateX(150px)">PROFILE</div>
-            <div class="profile-info">
-                <div class="info-text" th:text="${user.name}">username</div>
-                <div class="info-text" th:text="'Score: ' + ${overallScore}">Score: 0</div>
+        <div class="menu-wrap" style="margin-top: -160px">
+            <div class="title-line title-line-1" style="font-size:56px">YOUR</div>
+            <div class="title-line title-line-2" style="font-size:56px; margin-bottom:32px">PROFILE</div>
+
+            <div class="profile-card">
+                <div class="pf-username" th:text="${user.name}">username</div>
+
+                <div class="pf-separator"></div>
+
+                <div class="pf-stats">
+                    <div class="pf-stat">
+                        <span class="pf-stat-label">SCORE</span>
+                        <span class="pf-stat-value" th:text="${overallScore}">0</span>
+                    </div>
+                    <div class="pf-stat" th:if="${rank != null}">
+                        <span class="pf-stat-label">RANK</span>
+                        <span class="pf-stat-value"
+                              th:classappend="${rank == 1 ? ' pf-rank-gold' : (rank == 2 ? ' pf-rank-silver' : (rank == 3 ? ' pf-rank-bronze' : ' pf-rank'))}"
+                              th:text="'#' + ${rank}">#?</span>
+                    </div>
+                    <div class="pf-stat" th:if="${levelsCompleted != null}">
+                        <span class="pf-stat-label">LEVELS</span>
+                        <span class="pf-stat-value" th:text="${levelsCompleted} + ' / ' + ${levelsTotal}">0 / 0</span>
+                    </div>
+                </div>
+
+                <div class="pf-member" th:if="${memberSince != null}"
+                     th:text="'Member since ' + ${#temporals.format(memberSince, 'MMM yyyy', new java.util.Locale('en'))}">
+                    Member since Jan 2025
+                </div>
+
+                <div class="pf-separator"></div>
+
+                <div class="pf-actions">
+                    <button class="pf-btn pf-nav" onclick="openChangePassword()">CHANGE PASSWORD</button>
+                    <button class="pf-btn pf-btn-danger pf-nav" onclick="submitLogout()">LOGOUT</button>
+                </div>
             </div>
-            <div class="profile-actions">
-                <button class="menu-btn" onclick="openChangePassword()">CHANGE PASSWORD</button>
-                <button class="menu-btn" onclick="submitLogout()">LOGOUT</button>
-                <a th:href="@{/menu}" class="menu-btn">BACK</a>
-            </div>
+
+            <a th:href="@{/menu}" class="menu-btn pf-nav" style="margin-top:24px">BACK</a>
         </div>
 
         <!-- Change password modal -->
@@ -78,9 +110,9 @@
 
     <!-- ===== GUEST ===== -->
     <div th:if="${user == null}">
-        <div class="menu-wrap">
-            <div class="title-line title-line-1" style="transform:translateX(-50px)">LOGIN</div>
-            <div class="title-line title-line-2" style="transform:translateX(50px)">REGISTER</div>
+        <div class="menu-wrap" style="margin-top: -140px">
+            <div class="title-line title-line-1" style="font-size:56px">LOGIN</div>
+            <div class="title-line title-line-2" style="font-size:56px; margin-bottom:32px">REGISTER</div>
             <div class="profile-content">
                 <button class="menu-btn" onclick="openModal('login-modal')">LOGIN</button>
                 <button class="menu-btn" onclick="openModal('register-modal')">REGISTER</button>
@@ -134,6 +166,7 @@
 
 <script th:src="@{/js/parallax-shared.js}"></script>
 <script th:src="@{/js/transitions.js}"></script>
+<script th:src="@{/js/nav-shared.js}"></script>
 <script th:src="@{/js/profile.js}"></script>
 </body>
 </html>

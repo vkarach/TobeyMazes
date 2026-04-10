@@ -13,6 +13,7 @@ public interface BestResultService {
     Long getBestTime(int userId, int levelId) throws BestResultException;
     Integer getBestScore(int userId, int levelId) throws BestResultException;
     Integer getBestOverallScore(int userId) throws BestResultException;
+    default Integer getUserLeaderboardPosition(int userId) throws BestResultException { return null; }
     List<UserScore> getTopByScore() throws BestResultException;
-    List<BestLevelResult> getBestResultsByUserId(int userId) throws BestResultException; // levelId -> timeMs
+    List<BestLevelResult> getBestResultsByUserId(int userId) throws BestResultException;
 }

@@ -6,6 +6,11 @@
     const sig = { signal: ac.signal };
     document.addEventListener('turbo:before-visit', () => ac.abort(), { once: true });
 
+    // Clean up stuck state from Turbo cache
+    document.body.classList.remove('modal-open');
+    document.getElementById('level-modal')?.classList.remove('open');
+    document.getElementById('modal-overlay')?.classList.remove('open');
+
     let mouseMode = false;
     let selected = 0;
     let selectedForm = null;
@@ -82,9 +87,7 @@
         if (['EASY', 'NORMAL', 'MEDIUM', 'HARD'].includes(difficulty)) {
             difficultyEl.classList.add('diff-' + difficulty);
         }
-        difficultyEl.innerHTML =
-          '<span class="difficulty-label">Difficulty: </span>' +
-          '<span class="difficulty-value">' + difficulty + '</span>';
+        difficultyEl.textContent = difficulty;
     }
 
     let submitting = false;
@@ -101,6 +104,8 @@
             Turbo.visit(r.url, { action: 'replace' });
         } catch (_) {
             selectedForm.submit();
+        } finally {
+            submitting = false;
         }
     }
 
@@ -119,18 +124,27 @@
 
         setModalDifficulty(card);
 
-        document.getElementById('modal-time').innerHTML =
-          '<span class="stat-label">Best time: </span>' +
-          '<span class="stat-value">' + formatTimeMs(result?.bestTimeMs) + '</span>';
-
-        document.getElementById('modal-score').innerHTML =
-          '<span class="stat-label">Best score: </span>' +
-          '<span class="stat-value">' + (result?.bestScore ?? '—') + '</span>';
+        document.getElementById('modal-time').textContent = formatTimeMs(result?.bestTimeMs);
+        document.getElementById('modal-score').textContent = result?.bestScore ?? '—';
 
         clearSelected(levelCards);
         document.body.classList.add('modal-open');
         document.getElementById('level-modal').classList.add('open');
         document.getElementById('modal-overlay').classList.add('open');
+
+        // Reset modal nav — START is index 1 (after BACK)
+        modalSel = 1;
+        modalMouse = false;
+        updateModalNav();
+    }
+
+    const modalBtns = Array.from(document.querySelectorAll('.lm-nav'));
+    let modalSel = 1;
+    let modalMouse = false;
+
+    function updateModalNav() {
+        modalBtns.forEach(b => b.classList.remove('active'));
+        if (!modalMouse && modalBtns[modalSel]) modalBtns[modalSel].classList.add('active');
     }
 
     function isModalOpen() {
@@ -155,14 +169,22 @@
 
         const modalOpen = isModalOpen();
         if (modalOpen) {
-            if (e.key === 'Enter' && selectedForm) {
+            if (modalMouse) { modalMouse = false; document.body.classList.add('kb-mode'); updateModalNav(); }
+
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                 e.preventDefault();
-                submitSelected();
+                modalSel = (modalSel + 1) % modalBtns.length;
+                updateModalNav();
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                modalBtns[modalSel].click();
             }
             return;
         }
 
         mouseMode = false;
+        document.body.classList.add('kb-mode');
         updateSelected(levelCards, selected);
 
         if (e.key === 'ArrowRight') {
@@ -201,15 +223,26 @@
     document.addEventListener('mousemove', () => {
         if (!mouseMode) {
             mouseMode = true;
+            document.body.classList.remove('kb-mode');
             clearSelected(levelCards);
+        }
+        if (!modalMouse) {
+            modalMouse = true;
+            document.body.classList.remove('kb-mode');
+            modalBtns.forEach(b => b.classList.remove('active'));
         }
     }, sig);
 
-    levelCards.forEach(card => {
+    levelCards.forEach((card, i) => {
+        card.addEventListener('mouseenter', () => { selected = i; }, sig);
         card.addEventListener('click', () => {
             if (document.body.classList.contains('modal-open')) return;
             openModal(card);
         }, sig);
+    });
+
+    modalBtns.forEach((btn, i) => {
+        btn.addEventListener('mouseenter', () => { modalSel = i; }, sig);
     });
 
     document.addEventListener('click', e => {

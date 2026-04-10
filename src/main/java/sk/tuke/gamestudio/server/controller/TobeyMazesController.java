@@ -82,6 +82,7 @@ public class TobeyMazesController {
         model.addAttribute("lastTimeMs", null);
         model.addAttribute("timeRecord", false);
         model.addAttribute("scoreRecord", false);
+        model.addAttribute("difficulty", session.getCurrentLevel().getDifficulty().name());
         return "game";
     }
 
@@ -132,17 +133,35 @@ public class TobeyMazesController {
             session.setLastTimeMs(timeMs);
             session.setLastScore(score);
 
+            long timeImproveMs = 0;
+            int scoreImprove = 0;
+
             if (session.getCurrentUser() != null) {
                 int userId = session.getCurrentUser().getId();
                 int levelId = session.getCurrentLevel().getId();
-                session.setTimeRecord(checkAndUpdateBestTime(userId, levelId, timeMs));
-                session.setScoreRecord(checkAndUpdateBestScore(userId, levelId, score));
+
+                Long prevBestTime = bestResultService.getBestTime(userId, levelId);
+                Integer prevBestScore = bestResultService.getBestScore(userId, levelId);
+
+                session.setTimeRecord(prevBestTime == null || timeMs < prevBestTime);
+                session.setScoreRecord(prevBestScore == null || score > prevBestScore);
+
+                if (session.isTimeRecord()) {
+                    timeImproveMs = prevBestTime != null ? prevBestTime - timeMs : 0;
+                    bestResultService.updateBestTime(userId, levelId, timeMs);
+                }
+                if (session.isScoreRecord()) {
+                    scoreImprove = prevBestScore != null ? score - prevBestScore : 0;
+                    bestResultService.updateBestScore(userId, levelId, score);
+                }
             }
 
             result.put("lastScore", session.getLastScore());
             result.put("lastTimeMs", session.getLastTimeMs());
             result.put("timeRecord", session.isTimeRecord());
             result.put("scoreRecord", session.isScoreRecord());
+            result.put("timeImproveMs", timeImproveMs);
+            result.put("scoreImprove", scoreImprove);
         }
 
         result.put("path", path);
@@ -156,32 +175,15 @@ public class TobeyMazesController {
         int maxPoints, kTime, kStep;
         float timeSec = timeMs / 1000f;
         switch (difficulty) {
-            case EASY   -> { maxPoints = 500;  kTime = 30;  kStep = 10; }
-            case NORMAL -> { maxPoints = 1000; kTime = 60;  kStep = 20; }
-            case MEDIUM -> { maxPoints = 2000; kTime = 100; kStep = 30; }
-            case HARD   -> { maxPoints = 5000; kTime = 150; kStep = 50; }
+            case EASY   -> { maxPoints = 500;  kTime = 12;  kStep = 8; }
+            case NORMAL -> { maxPoints = 1000; kTime = 25;  kStep = 15; }
+            case MEDIUM -> { maxPoints = 2000; kTime = 44;  kStep = 20; }
+            case HARD   -> { maxPoints = 5000; kTime = 69;  kStep = 35; }
             default     -> { return 0; }
         }
         return Math.max(0, maxPoints - stepCount * kStep - (int)(timeSec * kTime));
     }
 
-    private boolean checkAndUpdateBestTime(int userId, int levelId, long timeMs) {
-        Long best = bestResultService.getBestTime(userId, levelId);
-        if (best == null || timeMs < best) {
-            bestResultService.updateBestTime(userId, levelId, timeMs);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean checkAndUpdateBestScore(int userId, int levelId, int score) {
-        Integer best = bestResultService.getBestScore(userId, levelId);
-        if (best == null || score > best) {
-            bestResultService.updateBestScore(userId, levelId, score);
-            return true;
-        }
-        return false;
-    }
 
     // Each cell carries its 4 wall flags and content symbol
     public record CellView(boolean top, boolean bottom, boolean left, boolean right, String content) {}

@@ -6,6 +6,7 @@ import sk.tuke.gamestudio.entity.User;
 import sk.tuke.gamestudio.repository.UserRepository;
 import sk.tuke.gamestudio.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Profile("server")
@@ -66,5 +67,11 @@ public class UserServiceJPA implements UserService {
     @Override
     public void changePassword(int userId, String newPassword) {
         userRepository.updatePassword(userId, newPassword);
+    }
+
+    @Override
+    public LocalDateTime getCreatedAt(int userId) {
+        Optional<User> user = userRepository.getUserById(userId);
+        return user.map(User::getCreatedAt).orElse(null);
     }
 }

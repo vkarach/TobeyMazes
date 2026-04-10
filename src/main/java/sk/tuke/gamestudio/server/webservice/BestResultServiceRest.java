@@ -70,6 +70,11 @@ public class BestResultServiceRest {
         return bestResultService.getBestOverallScore(userId);
     }
 
+@GetMapping("/{userId}/leaderboard-position")
+    public Integer getLeaderboardPosition(@PathVariable int userId) {
+        return bestResultService.getUserLeaderboardPosition(userId);
+    }
+
     @GetMapping("/leaderboard")
     public List<UserScore> getTopResults() {
         return bestResultService.getTopByScore();

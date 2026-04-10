@@ -24,6 +24,11 @@ public class LeaderboardController {
     public String leaderboard(Model model) {
         model.addAttribute("user", session.getCurrentUser());
         model.addAttribute("topPlayers", bestResultService.getTopByScore());
+        if (session.getCurrentUser() != null) {
+            int userId = session.getCurrentUser().getId();
+            model.addAttribute("userRank", bestResultService.getUserLeaderboardPosition(userId));
+            model.addAttribute("userScore", bestResultService.getBestOverallScore(userId));
+        }
         return "leaderboard";
     }
 }

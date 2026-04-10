@@ -8,7 +8,20 @@
 
     const { playerX: initX, playerY: initY,
             gameWon: initWon, lastTimeMs: initTimeMs, lastScore: initScore,
-            timeRecord: initTimeRec, scoreRecord: initScoreRec } = window.GAME_INIT;
+            timeRecord: initTimeRec, scoreRecord: initScoreRec,
+            difficulty } = window.GAME_INIT;
+
+    const BALANCE = {
+        EASY:   { max: 500,  kTime: 12, kStep: 8  },
+        NORMAL: { max: 1000, kTime: 25, kStep: 15 },
+        MEDIUM: { max: 2000, kTime: 44, kStep: 20 },
+        HARD:   { max: 5000, kTime: 69, kStep: 35 }
+    };
+
+    function computeScore(timeMs, steps) {
+        const b = BALANCE[difficulty] || BALANCE.EASY;
+        return Math.max(0, b.max - steps * b.kStep - Math.floor(timeMs / 1000 * b.kTime));
+    }
 
     let animating      = false;
     let pendingDir     = null;
@@ -24,6 +37,42 @@
     const timerEl     = document.getElementById('timer');
     const targetsEl   = document.getElementById('targets-left');
     const winOverlay  = document.getElementById('win-overlay');
+
+    // build wall + target matrix from rendered DOM once for client-side prediction
+    const mazeRows = Array.from(document.querySelectorAll('.maze-row'));
+    const H = mazeRows.length;
+    const W = H > 0 ? mazeRows[0].children.length : 0;
+    const cells = mazeRows.map(row => Array.from(row.children).map(c => ({
+        top:    c.classList.contains('wall-top'),
+        bottom: c.classList.contains('wall-bottom'),
+        left:   c.classList.contains('wall-left'),
+        right:  c.classList.contains('wall-right'),
+        target: !!c.querySelector('.target-gem')
+    })));
+
+    function slide(sx, sy, dir) {
+        const path = [];
+        const targets = [];
+        let x = sx, y = sy;
+        while (true) {
+            const cell = cells[y]?.[x];
+            if (!cell) break;
+            let nx = x, ny = y, blocked = false;
+            if (dir === 'UP')    { if (cell.top)    blocked = true; else ny--; }
+            if (dir === 'DOWN')  { if (cell.bottom) blocked = true; else ny++; }
+            if (dir === 'LEFT')  { if (cell.left)   blocked = true; else nx--; }
+            if (dir === 'RIGHT') { if (cell.right)  blocked = true; else nx++; }
+            if (blocked) break;
+            if (ny < 0 || ny >= H || nx < 0 || nx >= W) break;
+            x = nx; y = ny;
+            path.push([x, y]);
+            if (cells[y][x].target) {
+                cells[y][x].target = false;
+                targets.push([x, y]);
+            }
+        }
+        return { path, targets };
+    }
 
     const ac = new AbortController();
     const sig = { signal: ac.signal };
@@ -53,8 +102,9 @@
         if (lastVertDir !== 0) finishVertReturn();
     }
 
+    let targetsLeft = document.querySelectorAll('.target-gem').length;
     function refreshTargets() {
-        targetsEl.textContent = document.querySelectorAll('.target-gem').length;
+        targetsEl.textContent = targetsLeft;
     }
     refreshTargets();
 
@@ -75,7 +125,11 @@
         return s + ':' + String(cs).padStart(2, '0');
     }
 
-    if (initWon) showWin(initTimeMs, initScore, initTimeRec, initScoreRec);
+    let winInputLocked = false;
+
+    if (initWon) showWin(initTimeMs, initScore, initTimeRec, initScoreRec, 0, 0);
+
+    let localStepCount = 0;
 
     window.sendMove = function sendMove(direction) {
         if (animating) {
@@ -83,40 +137,90 @@
             pendingSavedMs = Date.now();
             return;
         }
+
+        const { path, targets } = slide(lastX, lastY, direction);
+        if (path.length === 0) return;
+
         animating = true;
         startTimer();
+        localStepCount++;
+        stepCountEl.textContent = localStepCount;
 
-        fetch('/game/move', {
+        // Decrement counter immediately and use it to detect win
+        targetsLeft -= targets.length;
+        const willWin = targetsLeft <= 0;
+
+        // server roundtrip in parallel
+        const serverPromise = fetch('/game/move', {
             method:  'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body:    'direction=' + direction
-        })
-        .then(r => r.json())
-        .then(data => {
-            animatePath(data.path, data.collectedTargets, () => {
-                stepCountEl.textContent = data.stepCount;
-                refreshTargets();
-                animating = false;
+        }).then(r => r.json()).catch(() => null);
 
-                if (data.gameWon) {
-                    pendingDir = null;
-                    stopTimer();
-                    if (data.lastTimeMs != null) timerEl.textContent = fmtTime(data.lastTimeMs);
-                    showWin(data.lastTimeMs, data.lastScore, data.timeRecord, data.scoreRecord);
-                    return;
-                }
+        animatePath(path, targets, () => {
+            refreshTargets();
+            animating = false;
 
-                const next = pendingDir;
-                const age  = Date.now() - pendingSavedMs;
-                pendingDir = null; pendingSavedMs = 0;
-                if (next !== null && age < PENDING_SAFE_BOUND) {
-                    sendMove(next);
-                } else {
-                    stopMoveAnim();
+            if (willWin) {
+                pendingDir = null;
+                stopMoveAnim();
+                stopTimer();
+                const localTimeMs = Date.now() - timerStartMs;
+                const localScore = computeScore(localTimeMs, localStepCount);
+                timerEl.textContent = fmtTime(localTimeMs);
+                showWin(localTimeMs, localScore, false, false, 0, 0);
+
+                serverPromise.then(data => {
+                    if (!data) return;
+                    if (data.lastTimeMs != null) {
+                        timerEl.textContent = fmtTime(data.lastTimeMs);
+                        document.getElementById('win-time').textContent = fmtTime(data.lastTimeMs);
+                    }
+                    if (data.lastScore != null) {
+                        document.getElementById('win-score').textContent = data.lastScore;
+                    }
+                    stepCountEl.textContent = data.stepCount;
+                    localStepCount = data.stepCount;
+
+                    const timeImpEl = document.getElementById('win-time-improve');
+                    const scoreImpEl = document.getElementById('win-score-improve');
+                    if (data.timeRecord && data.timeImproveMs > 0) {
+                        timeImpEl.textContent = '★ -' + fmtTime(data.timeImproveMs);
+                    } else if (data.timeRecord) {
+                        timeImpEl.textContent = '★ NEW RECORD';
+                    }
+                    if (data.scoreRecord && data.scoreImprove > 0) {
+                        scoreImpEl.textContent = '★ +' + data.scoreImprove;
+                    } else if (data.scoreRecord) {
+                        scoreImpEl.textContent = '★ NEW RECORD';
+                    }
+                });
+                return;
+            }
+
+            const next = pendingDir;
+            const age  = Date.now() - pendingSavedMs;
+            pendingDir = null; pendingSavedMs = 0;
+            stopMoveAnim();
+            if (next !== null && age < PENDING_SAFE_BOUND) {
+                sendMove(next);
+            }
+
+            // Defensive: if server reports win but we didn't detect it client-side, recover
+            serverPromise.then(data => {
+                if (!data || !data.gameWon || winOverlay.classList.contains('visible')) return;
+                pendingDir = null;
+                stopMoveAnim();
+                stopTimer();
+                if (data.lastTimeMs != null) timerEl.textContent = fmtTime(data.lastTimeMs);
+                if (data.stepCount != null) {
+                    stepCountEl.textContent = data.stepCount;
+                    localStepCount = data.stepCount;
                 }
-            });
-        })
-        .catch(() => { animating = false; });
+                showWin(data.lastTimeMs, data.lastScore, data.timeRecord, data.scoreRecord,
+                        data.timeImproveMs || 0, data.scoreImprove || 0);
+            }).catch(() => null);
+        });
     };
 
     function animatePath(path, collectedTargets, onDone) {
@@ -181,16 +285,90 @@
         nextStep();
     }
 
-    function showWin(timeMs, score, timeRecord, scoreRecord) {
+    function showWin(timeMs, score, timeRecord, scoreRecord, timeImproveMs, scoreImprove) {
         stopMoveAnim();
         winOverlay.classList.add('visible');
         if (timeMs != null) {
             document.getElementById('win-time').textContent  = fmtTime(timeMs);
             document.getElementById('win-score').textContent = score;
-            const badges = [];
-            if (timeRecord)  badges.push('★ New time record!');
-            if (scoreRecord) badges.push('★ New score record!');
-            document.getElementById('record-msg').textContent = badges.join('   ');
+
+            const timeImpEl = document.getElementById('win-time-improve');
+            const scoreImpEl = document.getElementById('win-score-improve');
+
+            if (timeRecord && timeImproveMs > 0) {
+                timeImpEl.textContent = '★ -' + fmtTime(timeImproveMs);
+            } else if (timeRecord) {
+                timeImpEl.textContent = '★ NEW RECORD';
+            }
+
+            if (scoreRecord && scoreImprove > 0) {
+                scoreImpEl.textContent = '★ +' + scoreImprove;
+            } else if (scoreRecord) {
+                scoreImpEl.textContent = '★ NEW RECORD';
+            }
+        }
+
+        // Win navigation — focus PLAY AGAIN by default
+        const winBtns = Array.from(document.querySelectorAll('.win-nav'));
+        const replayIdx = winBtns.findIndex(b => b.id === 'win-replay');
+        let winSel = replayIdx >= 0 ? replayIdx : 0;
+        let winMouse = false;
+        winInputLocked = true;
+        setTimeout(() => { winInputLocked = false; }, 80);
+
+        function updateWinNav() {
+            winBtns.forEach(b => b.classList.remove('active'));
+            if (!winMouse && winBtns[winSel]) winBtns[winSel].classList.add('active');
+        }
+        document.body.classList.add('kb-mode');
+        updateWinNav();
+
+        winBtns.forEach((btn, i) => {
+            btn.addEventListener('mouseenter', () => { winSel = i; }, sig);
+        });
+
+        document.addEventListener('mousemove', () => {
+            if (!winMouse) {
+                winMouse = true;
+                document.body.classList.remove('kb-mode');
+                winBtns.forEach(b => b.classList.remove('active'));
+            }
+        }, sig);
+
+        document.addEventListener('keydown', winHandler, sig);
+        function winHandler(e) {
+            if (winInputLocked) { e.preventDefault(); return; }
+            if (winMouse) {
+                winMouse = false;
+                document.body.classList.add('kb-mode');
+                updateWinNav();
+            }
+
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                winSel = (winSel - 1 + winBtns.length) % winBtns.length;
+                updateWinNav();
+                return;
+            }
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                winSel = (winSel + 1) % winBtns.length;
+                updateWinNav();
+                return;
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                winBtns[winSel].click();
+                return;
+            }
+        }
+
+        const replayBtn = document.getElementById('win-replay');
+        if (replayBtn) {
+            replayBtn.addEventListener('click', e => {
+                e.preventDefault();
+                document.getElementById('win-restart-form').requestSubmit();
+            }, sig);
         }
     }
 
@@ -200,21 +378,18 @@
 
     document.addEventListener('keydown', e => {
         if (winOverlay.classList.contains('visible')) {
-            // Esc = soft exit (close win → levels), Q = hard exit (same here, no nesting)
-            if (e.key === 'Enter' || e.key === 'Escape' || quitKeys.includes(e.key)) {
+            if (winInputLocked) { e.preventDefault(); return; }
+            if (e.key === 'Escape' || quitKeys.includes(e.key)) {
                 e.preventDefault();
                 Turbo.visit('/game/levels');
-                return;
-            }
-            if (restartKeys.includes(e.key)) {
+            } else if (restartKeys.includes(e.key)) {
                 e.preventDefault();
-                document.getElementById('restart-form').requestSubmit();
-                return;
-            }
-            if (menuKeys.includes(e.key)) {
+                document.getElementById('win-restart-form').requestSubmit();
+            } else if (menuKeys.includes(e.key)) {
                 e.preventDefault();
                 Turbo.visit('/menu');
-                return;
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Enter') {
+                // handled by winHandler
             }
             return;
         }

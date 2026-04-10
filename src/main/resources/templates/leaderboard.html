@@ -3,38 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <title>Leaderboard</title>
+    <link rel="preload" th:href="@{/ui/fxgl/fonts/PressStart2P-Regular.ttf}" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" th:href="@{/css/menu.css}"   as="style">
+    <link rel="preload" th:href="@{/css/levels.css}" as="style">
+    <link rel="preload" th:href="@{/css/game.css}"   as="style">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/1.png}"             as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/2.png}"             as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/3.png}"             as="image">
+    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png}"  as="image">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/leaderboard.css}">
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
+    <script defer th:src="@{/js/scale.js}"></script>
 </head>
 <body>
-<div class="bg" id="bg-main" data-turbo-permanent></div>
+<div class="game-root">
+    <div class="bg" id="bg-main" data-turbo-permanent>
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png"></div>
+    </div>
+    <div class="bg" id="bg-profile" data-turbo-permanent>
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/profilePageParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/profilePageParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/profilePageParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/profilePageParallax/4.png"></div>
+    </div>
+    <div class="bg" id="bg-game" data-turbo-permanent>
+        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
+        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
+        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
+        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4.png"></div>
+    </div>
 
-<h1>Leaderboard</h1>
+    <div class="menu-wrap" style="margin-top: -180px">
+        <div class="title-line title-line-1" style="font-size:56px">LEADER</div>
+        <div class="title-line title-line-2" style="font-size:56px; margin-bottom:32px">BOARD</div>
 
-<div th:if="${user != null}">
-    <p>Logged in as: <strong th:text="${user.name}"></strong></p>
+        <div class="lb-card">
+            <div class="lb-table" th:if="${!#lists.isEmpty(topPlayers)}">
+                <div class="lb-header">
+                    <span class="lb-col-rank">#</span>
+                    <span class="lb-col-name">PLAYER</span>
+                    <span class="lb-col-score">SCORE</span>
+                </div>
+                <div class="lb-separator"></div>
+                <div th:each="entry, stat : ${topPlayers}"
+                     class="lb-row"
+                     th:classappend="${(user != null and entry.userId == user.id ? ' lb-me' : '') + (stat.count == 1 ? ' lb-gold' : (stat.count == 2 ? ' lb-silver' : (stat.count == 3 ? ' lb-bronze' : '')))}">
+                    <span class="lb-col-rank" th:text="${stat.count}">1</span>
+                    <span class="lb-col-name" th:text="${entry.userName}">Player</span>
+                    <span class="lb-col-score" th:text="${entry.totalScore}">0</span>
+                </div>
+            </div>
+            <div th:if="${#lists.isEmpty(topPlayers)}" class="lb-empty">
+                No scores yet...
+            </div>
+
+            <!-- Current user outside top 10 -->
+            <th:block th:if="${userRank != null and userRank > 10}">
+                <div class="lb-gap">...</div>
+                <div class="lb-row lb-me">
+                    <span class="lb-col-rank" th:text="${userRank}">11</span>
+                    <span class="lb-col-name" th:text="${user.name}">You</span>
+                    <span class="lb-col-score" th:text="${userScore}">0</span>
+                </div>
+            </th:block>
+        </div>
+
+        <a th:href="@{/menu}" class="menu-btn" style="margin-top:24px">BACK</a>
+    </div>
 </div>
 
-<table border="1" cellpadding="8">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Player</th>
-            <th>Score</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr th:each="entry, stat : ${topPlayers}">
-            <td th:text="${stat.count}"></td>
-            <td th:text="${entry.userName}"></td>
-            <td th:text="${entry.totalScore}"></td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(topPlayers)}">
-            <td colspan="3">No results yet</td>
-        </tr>
-    </tbody>
-</table>
-
-<br/><a th:href="@{/menu}">Back to menu</a>
-
+<script th:src="@{/js/parallax-shared.js}"></script>
+<script th:src="@{/js/transitions.js}"></script>
+<script th:src="@{/js/nav-shared.js}"></script>
+<script th:src="@{/js/leaderboard.js}"></script>
 </body>
 </html>

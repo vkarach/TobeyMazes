@@ -32,7 +32,7 @@ html, body {
   font-family: 'Press Start 2P', monospace;
   color: var(--text);
   user-select: none;
-  background-color: #442361;
+  background-color: #000;
 }
 
 .game-root {
@@ -41,7 +41,7 @@ html, body {
   height: 720px;
   overflow: hidden;
   transform-origin: center center;
-  background-color: #6B9FCC;
+  background-color: #000;
 }
 
 .bg {
@@ -138,6 +138,12 @@ html, body {
   transform: translateY(-2px);
 }
 
+body.kb-mode .level-card:hover:not(.hover) {
+  border-color: rgb(255 255 255 / 0.23);
+  background: var(--panel);
+  transform: none;
+}
+
 body.modal-open .level-grid {
   pointer-events: none;
 }
@@ -192,20 +198,14 @@ body.modal-open .level-card.hover {
   opacity: 0;
   transform: translateY(25px) scale(0.70);
   transition: opacity 0.30s ease, transform 0.30s ease;
-
   pointer-events: none;
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  background: rgba(20, 10, 5, 0.95);
-  border: 2px solid #F5C518;
-  padding: 28px 40px;
-  min-width: 450px;
+  background: rgba(20, 10, 5, 0.92);
+  border: 2px solid rgba(245, 197, 24, 0.5);
+  border-radius: 4px;
+  padding: 24px 28px;
   margin-top: -50px;
   font-family: 'Press Start 2P', monospace;
-  color: rgba(255, 255, 255, 0.5);
 }
 
 .level-modal.open {
@@ -214,103 +214,139 @@ body.modal-open .level-card.hover {
   transform: translateY(0) scale(1);
 }
 
-.level-preview {
-  max-width: 250px;
-  max-height: 250px;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-
 .level-modal-body {
   display: flex;
   align-items: center;
   gap: 24px;
 }
 
+.level-preview {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  /*border: 2px solid rgba(245, 197, 24, 0.25);*/
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.level-modal-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  min-width: 180px;
+}
+
+.level-modal-right .lm-separator {
+  width: 80%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(245, 197, 24, 0.4) 20%,
+    rgba(245, 197, 24, 0.4) 80%,
+    transparent 100%
+  );
+  margin: 12px 0;
+}
+
+.level-modal-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
 .info-label {
-  font-size: 16px;
+  font-size: 14px;
   color: #F5C518;
   text-shadow: 2px 2px 0 #000;
   -webkit-text-stroke: 1px #000;
-  text-align: center;
-  margin-bottom: 10px;
-  margin-top: -20px;
 }
 
-.level-info {
+.info-diff {
+  font-size: 9px;
+  color: var(--card-color, var(--dim));
+  text-shadow: 1px 1px 0 #000;
+  letter-spacing: 1px;
+}
+
+.level-modal-stats {
+  display: flex;
+  gap: 24px;
+}
+
+.modal-stat {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  align-items: center;
+  gap: 4px;
 }
 
-.info-text {
-  font-size: 11px;
-  color: var(--dim);
-  line-height: 1.8;
-  word-spacing: -4px;
-  white-space: nowrap;
-}
-
-#modal-difficulty .difficulty-label {
-  color: var(--dim);
-}
-
-#modal-difficulty .difficulty-value {
-  color: var(--card-color, var(--wall));
+.modal-stat-label {
+  font-size: 7px;
+  color: rgba(255, 255, 255, 0.4);
   text-shadow: 1px 1px 0 #000;
 }
 
-#modal-time .stat-label,
-#modal-score .stat-label {
-  color: var(--dim);
-}
-
-#modal-time .stat-value,
-#modal-score .stat-value {
+.modal-stat-value {
+  font-size: 11px;
   color: #F5C518;
   text-shadow: 1px 1px 0 #000;
 }
 
 .level-modal-actions {
   display: flex;
-  justify-content: center;
   gap: 16px;
-  margin-top: 12px;
 }
 
-.level-btn {
-  width: 100%;
-  padding: 8px 2px;
-  background: none;
-  border: 2px solid #91CDFF;
-  color: #91CDFF;
+.lm-btn {
   font-family: 'Press Start 2P', monospace;
-  font-size: 12px;
+  font-size: 10px;
+  color: #91CDFF;
+  text-shadow: 1px 1px 0 #000;
+  background: none;
+  border: none;
   cursor: pointer;
-  transition: transform 150ms, background 80ms, border-color 80ms;
+  padding: 0;
+  outline: none;
+  transition: color 150ms ease, transform 150ms ease;
+  position: relative;
+  padding-left: 16px;
 }
 
-.level-btn.ghost {
-  color: #555;
-  border: 2px solid #555;
-}
-
-.level-btn.ghost:hover {
-  color: #aaa;
-  border: 2px solid #aaa;
-  background: rgb(170 170 170 / 0.05);
-}
-
-.level-btn.primary:hover {
-  border-color: #FFD700;
+.lm-btn::before {
+  content: '>';
+  position: absolute;
+  left: 0;
   color: #F5C518;
-  background: rgb(245 197 24 / 0.05);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 150ms ease, transform 150ms ease;
 }
 
-.level-btn:hover {
-  transform: translateY(-1px);
+.lm-btn:hover,
+.lm-nav.active {
+  color: #FFD700;
+  transform: translateX(4px);
 }
+
+.lm-btn:hover::before,
+.lm-nav.active::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.lm-btn-dim { color: rgba(255, 255, 255, 0.4); }
+.lm-btn-dim:hover,
+.lm-btn-dim.active { color: #FFD700; }
+
+body.kb-mode .lm-btn:hover:not(.active) {
+  color: #91CDFF;
+  transform: none;
+}
+body.kb-mode .lm-btn:hover:not(.active)::before { opacity: 0; }
+body.kb-mode .lm-btn-dim:hover:not(.active) { color: rgba(255, 255, 255, 0.4); }
 
 /* -----------------
     BACK LINK

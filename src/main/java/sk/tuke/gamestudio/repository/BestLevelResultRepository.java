@@ -24,6 +24,17 @@ public interface BestLevelResultRepository extends JpaRepository<BestLevelResult
     )
     Optional<Integer> getBestOverallScoreByUserId(int userId);
 
+    @Query(value =
+            "SELECT pos FROM (" +
+            "  SELECT u.user_id, ROW_NUMBER() OVER (ORDER BY SUM(br.best_score) DESC) AS pos " +
+            "  FROM best_level_results br " +
+            "  JOIN users u ON u.user_id = br.user_id " +
+            "  GROUP BY u.user_id" +
+            ") ranked WHERE user_id = :userId",
+            nativeQuery = true
+    )
+    Optional<Integer> getUserLeaderboardPosition(@Param("userId") int userId);
+
     @Query(
         "SELECT new sk.tuke.gamestudio.entity.UserScore(u.id, u.name, CAST(SUM(br.bestScore) AS integer)) " +
         "FROM BestLevelResult br, User u " +

@@ -1,5 +1,5 @@
 (function () {
-    const root = document.querySelector('.profile-actions, .profile-content');
+    const root = document.querySelector('.pf-actions, .profile-content');
     if (!root) return;
 
     const ac = new AbortController();
@@ -106,7 +106,6 @@
         document.getElementById('cp-title').textContent = 'DONE';
     }
 
-    // expose for inline onclick handlers in template
     window.openModal = openModal;
     window.closeModal = closeModal;
     window.submitLogout = submitLogout;
@@ -119,24 +118,33 @@
     document.querySelectorAll('.modal-overlay').forEach(o =>
         o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }, sig)
     );
-    document.addEventListener('keydown', e => {
-        if (e.key !== 'Escape') return;
-        const open = document.querySelectorAll('.modal-overlay.open');
-        if (open.length > 0) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            open.forEach(m => m.classList.remove('open'));
-            return;
-        }
-        e.preventDefault();
-        Turbo.visit('/menu');
-    }, sig);
 
+    // Modal enter handler — focus next input or submit if last
     document.addEventListener('keydown', e => {
         if (e.key !== 'Enter' || e.repeat) return;
-        if (document.getElementById('login-modal')?.classList.contains('open')) {
-            submitLogin();
+        if (!document.querySelector('.modal-overlay.open')) return;
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        const active = document.activeElement;
+        if (!active || !active.closest('.modal-overlay.open')) return;
+
+        // Find visible inputs in the current modal step
+        const modal = active.closest('.modal-overlay');
+        const inputs = Array.from(modal.querySelectorAll('.pixel-input'))
+            .filter(el => el.offsetParent !== null);
+        const idx = inputs.indexOf(active);
+
+        // If focused on an input and there's a next one, focus it
+        if (idx >= 0 && idx < inputs.length - 1) {
+            inputs[idx + 1].focus();
             return;
+        }
+
+        // Otherwise submit
+        if (document.getElementById('login-modal')?.classList.contains('open')) {
+            submitLogin(); return;
         }
         if (document.getElementById('register-modal')?.classList.contains('open')) {
             if (document.getElementById('reg-step2').style.display !== 'none') submitConfirm();
@@ -148,50 +156,23 @@
         }
     }, sig);
 
-    const btns = Array.from(document.querySelectorAll('.menu-wrap .menu-btn'));
-    let selected = 0;
-    let mouseMode = false;
-
-    function updateSelected(buttons, index) {
-        buttons.forEach(b => b.classList.remove('active'));
-        if (buttons[index]) buttons[index].classList.add('active');
+    function isModalOpen() {
+        return !!document.querySelector('.modal-overlay.open');
     }
-    updateSelected(btns, selected);
 
-    document.addEventListener('keydown', e => {
-        if (document.querySelector('.modal-overlay.open')) return;
-        updateSelected(btns, selected);
-        if (mouseMode) {
-            mouseMode = false;
-            return;
-        }
-
-        if (e.key === 'q' || e.key === 'Q' || e.key === 'й' || e.key === 'Й') {
-            e.preventDefault();
-            Turbo.visit('/menu');
-            return;
-        }
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            selected = (selected + 1) % btns.length;
-            updateSelected(btns, selected);
-        }
-        else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            selected = (selected - 1 + btns.length) % btns.length;
-            updateSelected(btns, selected);
-        }
-        else if (e.key === 'Enter' && selected >= 0) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            btns[selected].click();
-        }
-    }, sig);
-
-    document.addEventListener('mousemove', () => {
-        if (!mouseMode) {
-            mouseMode = true;
-            btns.forEach(b => b.classList.remove('active'));
-        }
-    }, sig);
+    const selector = document.querySelector('.pf-nav') ? '.pf-nav' : '.menu-wrap .menu-btn';
+    initNav(selector, {
+        signal: ac.signal,
+        onExit: () => Turbo.visit('/menu'),
+        onEsc: () => {
+            const open = document.querySelectorAll('.modal-overlay.open');
+            if (open.length > 0) {
+                open.forEach(m => m.classList.remove('open'));
+            } else {
+                Turbo.visit('/menu');
+            }
+        },
+        skipNav: () => isModalOpen(),
+        skipQ: () => isModalOpen()
+    });
 })();
