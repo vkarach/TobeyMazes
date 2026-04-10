@@ -15,6 +15,9 @@
     let selected = 0;
     let selectedForm = null;
     let bestResults = [];
+    let lastMouseX = null, lastMouseY = null;
+    // Sync body class with locally-tracked mouse mode (page starts in kb)
+    document.body.classList.add('kb-mode');
 
     function getPerRow(cards) {
         if (cards.length === 0) return 0;
@@ -42,7 +45,12 @@
         const modal = document.getElementById('level-modal');
         if (modal) modal.classList.remove('open');
         document.body.classList.remove('modal-open');
-        document.getElementById('modal-overlay').classList.remove('open');
+        document.getElementById('modal-overlay')?.classList.remove('open');
+        // Restore the level grid selection in keyboard mode
+        if (!mouseMode) {
+            document.body.classList.add('kb-mode');
+            updateSelected(levelCards, selected);
+        }
     }
 
     function formatTimeMs(ms) {
@@ -110,7 +118,10 @@
     }
 
     function openModal(card) {
-        if (document.body.classList.contains('modal-open')) return;
+        // Use the actual modal element state, not body class — body class may be
+        // stuck after a half-aborted Turbo navigation while the modal is invisible
+        if (isModalOpen()) return;
+        if (!card) return;
         selectedForm = card.closest('form');
 
         const levelId = card.dataset.levelId;
@@ -171,7 +182,12 @@
         if (modalOpen) {
             if (modalMouse) { modalMouse = false; document.body.classList.add('kb-mode'); updateModalNav(); }
 
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                modalSel = (modalSel - 1 + modalBtns.length) % modalBtns.length;
+                updateModalNav();
+            }
+            if (e.key === 'ArrowRight') {
                 e.preventDefault();
                 modalSel = (modalSel + 1) % modalBtns.length;
                 updateModalNav();
@@ -220,7 +236,16 @@
         }
     }, { ...sig, capture: true });
 
-    document.addEventListener('mousemove', () => {
+    document.addEventListener('mousemove', e => {
+        // Ignore stale cursor reports right after Turbo navigation —
+        // require an actual position change before switching out of kb mode
+        if (lastMouseX === null) {
+            lastMouseX = e.clientX; lastMouseY = e.clientY;
+            return;
+        }
+        if (e.clientX === lastMouseX && e.clientY === lastMouseY) return;
+        lastMouseX = e.clientX; lastMouseY = e.clientY;
+
         if (!mouseMode) {
             mouseMode = true;
             document.body.classList.remove('kb-mode');
@@ -234,15 +259,19 @@
     }, sig);
 
     levelCards.forEach((card, i) => {
-        card.addEventListener('mouseenter', () => { selected = i; }, sig);
+        card.addEventListener('mouseenter', () => {
+            if (mouseMode) selected = i;
+        }, sig);
         card.addEventListener('click', () => {
-            if (document.body.classList.contains('modal-open')) return;
+            if (isModalOpen()) return;
             openModal(card);
         }, sig);
     });
 
     modalBtns.forEach((btn, i) => {
-        btn.addEventListener('mouseenter', () => { modalSel = i; }, sig);
+        btn.addEventListener('mouseenter', () => {
+            if (modalMouse) modalSel = i;
+        }, sig);
     });
 
     document.addEventListener('click', e => {

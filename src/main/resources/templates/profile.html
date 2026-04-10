@@ -7,10 +7,7 @@
     <link rel="preload" th:href="@{/css/menu.css}"   as="style">
     <link rel="preload" th:href="@{/css/levels.css}" as="style">
     <link rel="preload" th:href="@{/css/game.css}"   as="style">
-    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/profilePageParallax/1.png}" as="image">
-    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/profilePageParallax/2.png}" as="image">
-    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/profilePageParallax/3.png}" as="image">
-    <link rel="preload" th:href="@{/ui/fxgl/backgrounds/profilePageParallax/4.png}" as="image">
+    <th:block th:replace="~{fragments/bg-preloads :: preloads}"></th:block>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>

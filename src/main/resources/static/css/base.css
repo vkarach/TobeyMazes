@@ -133,6 +133,19 @@ body.kb-mode .menu-btn:hover:not(.active)::before {
     opacity: 0;
 }
 
+/* Suppress nav button transitions during the very first paint so the
+   active highlight doesn't visibly animate in on every page load */
+body.nav-no-anim .menu-btn,
+body.nav-no-anim .menu-btn::before,
+body.nav-no-anim .pf-nav,
+body.nav-no-anim .pf-nav::before,
+body.nav-no-anim .lm-nav,
+body.nav-no-anim .lm-nav::before,
+body.nav-no-anim .rv-submit,
+body.nav-no-anim .rv-submit::before {
+    transition: none !important;
+}
+
 .modal-overlay {
     pointer-events: none;
     opacity: 0;

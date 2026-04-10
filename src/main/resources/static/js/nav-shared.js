@@ -9,7 +9,27 @@ function initNav(selector, opts = {}) {
     if (btns.length === 0) return null;
 
     const sig = opts.signal ? { signal: opts.signal } : {};
-    let selected = 0;
+
+    // Per-page memory of last selected button — survives Turbo navigations.
+    // Falls back to opts.initialSelected on first visit, then 0.
+    const storageKey = 'nav:' + window.location.pathname + ':' + selector;
+    const stored = sessionStorage.getItem(storageKey);
+    let selected;
+    if (stored !== null && Number.isFinite(+stored)) {
+        selected = +stored;
+    } else if (typeof opts.initialSelected === 'function') {
+        selected = opts.initialSelected(btns);
+    } else if (typeof opts.initialSelected === 'number') {
+        selected = opts.initialSelected;
+    } else {
+        selected = 0;
+    }
+    if (selected < 0 || selected >= btns.length) selected = 0;
+
+    function saveSelected() {
+        sessionStorage.setItem(storageKey, String(selected));
+    }
+
     let mouseMode = false;
     // Track real mouse position to distinguish stale cursor (after Turbo nav)
     // from genuine new movement
@@ -22,7 +42,16 @@ function initNav(selector, opts = {}) {
     // Page starts in keyboard mode — sync body class so CSS hover overrides apply
     // even if previous page (Turbo) left it removed
     document.body.classList.add('kb-mode');
+    // Suppress nav button transitions until the user actually interacts.
+    // This prevents the .active highlight from animating in on every page load
+    // (even one stray frame is visible as a micro-twitch).
+    document.body.classList.add('nav-no-anim');
     updateNav();
+    function enableAnim() { document.body.classList.remove('nav-no-anim'); }
+    const animOpts = { capture: true, once: true, signal: opts.signal };
+    document.addEventListener('keydown',     enableAnim, animOpts);
+    document.addEventListener('mousemove',   enableAnim, animOpts);
+    document.addEventListener('pointerdown', enableAnim, animOpts);
 
     document.addEventListener('keydown', e => {
         if (mouseMode) {
@@ -62,17 +91,20 @@ function initNav(selector, opts = {}) {
             e.preventDefault();
             selected = (selected + 1) % btns.length;
             updateNav();
+            saveSelected();
             if (opts.onSelect) opts.onSelect(selected);
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
             selected = (selected - 1 + btns.length) % btns.length;
             updateNav();
+            saveSelected();
             if (opts.onSelect) opts.onSelect(selected);
         }
 
         if (e.key === 'Enter') {
             e.preventDefault();
             e.stopImmediatePropagation();
+            saveSelected();
             btns[selected].click();
         }
     }, sig);
@@ -81,8 +113,9 @@ function initNav(selector, opts = {}) {
     // not on stale cursor from Turbo navigation
     btns.forEach((btn, i) => {
         btn.addEventListener('mouseenter', () => {
-            if (mouseMode) selected = i;
+            if (mouseMode) { selected = i; saveSelected(); }
         }, sig);
+        btn.addEventListener('click', () => saveSelected(), sig);
     });
 
     document.addEventListener('mousemove', e => {
@@ -101,16 +134,16 @@ function initNav(selector, opts = {}) {
             btns.forEach(b => b.classList.remove('active'));
             // Pick up whichever button cursor is currently over
             const hovered = btns.findIndex(b => b.matches(':hover'));
-            if (hovered >= 0) selected = hovered;
+            if (hovered >= 0) { selected = hovered; saveSelected(); }
         }
     }, sig);
 
     return {
         btns,
         get selected() { return selected; },
-        set selected(v) { selected = v; },
+        set selected(v) { selected = v; saveSelected(); },
         updateNav,
-        setSelected(i) { selected = i; updateNav(); },
+        setSelected(i) { selected = i; updateNav(); saveSelected(); },
         get isMouseMode() { return mouseMode; }
     };
 }

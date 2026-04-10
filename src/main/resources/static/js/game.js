@@ -149,6 +149,8 @@
         // Decrement counter immediately and use it to detect win
         targetsLeft -= targets.length;
         const willWin = targetsLeft <= 0;
+        // If this slide wins, stop the player as soon as the final gem is touched
+        const stopAt = willWin && targets.length > 0 ? targets[targets.length - 1] : null;
 
         // server roundtrip in parallel
         const serverPromise = fetch('/game/move', {
@@ -157,7 +159,7 @@
             body:    'direction=' + direction
         }).then(r => r.json()).catch(() => null);
 
-        animatePath(path, targets, () => {
+        animatePath(path, targets, stopAt, () => {
             refreshTargets();
             animating = false;
 
@@ -223,10 +225,11 @@
         });
     };
 
-    function animatePath(path, collectedTargets, onDone) {
+    function animatePath(path, collectedTargets, stopAt, onDone) {
         if (!path || path.length === 0) { onDone(); return; }
 
         const collected = new Set((collectedTargets || []).map(p => p[0] + ',' + p[1]));
+        const stopKey = stopAt ? (stopAt[0] + ',' + stopAt[1]) : null;
 
         let moveDir    = 0;
         let vertDir    = 0;
@@ -272,13 +275,17 @@
             playerEl.style.top  = (y * CELL_SIZE) + 'px';
             lastX = x; lastY = y;
 
-            if (collected.has(x + ',' + y)) {
+            const key = x + ',' + y;
+            if (collected.has(key)) {
                 const gem = document.getElementById('target-' + y + '-' + x);
                 if (gem) {
                     gem.classList.add('collecting');
                     setTimeout(() => gem.remove(), 200);
                 }
             }
+
+            // If this step touched the winning gem, stop the slide here
+            if (stopKey && key === stopKey) { onDone(); return; }
 
             setTimeout(nextStep, STEP_DELAY_MS);
         }

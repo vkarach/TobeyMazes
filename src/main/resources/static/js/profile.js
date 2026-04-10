@@ -163,6 +163,8 @@
     const selector = document.querySelector('.pf-nav') ? '.pf-nav' : '.menu-wrap .menu-btn';
     initNav(selector, {
         signal: ac.signal,
+        // BACK is the last button — focus it so Enter exits the page
+        initialSelected: btns => btns.length - 1,
         onExit: () => Turbo.visit('/menu'),
         onEsc: () => {
             const open = document.querySelectorAll('.modal-overlay.open');
