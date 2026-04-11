@@ -7,13 +7,15 @@
   <link rel="preload" th:href="@{/css/menu.css}"    as="style">
   <link rel="preload" th:href="@{/css/profile.css}" as="style">
   <link rel="preload" th:href="@{/css/game.css}"    as="style">
+  <link rel="preload" th:href="@{/js/parallax-shared.js}" as="script">
+  <link rel="preload" th:href="@{/js/levels.js}"          as="script">
   <th:block th:replace="~{fragments/bg-preloads :: preloads}"></th:block>
   <link rel="stylesheet" th:href="@{/css/base.css}">
   <link rel="stylesheet" th:href="@{/css/levels.css}">
   <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
   <script defer th:src="@{/js/scale.js}"></script>
 </head>
-<body th:attr="data-user-id=${currentUserId}">
+<body class="nav-no-anim kb-mode" th:attr="data-user-id=${currentUserId}">
 
 <div class="game-root">
 <div class="bg" id="bg-main" data-turbo-permanent>

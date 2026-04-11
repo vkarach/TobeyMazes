@@ -7,13 +7,16 @@
     <link rel="preload" th:href="@{/css/menu.css}"   as="style">
     <link rel="preload" th:href="@{/css/levels.css}" as="style">
     <link rel="preload" th:href="@{/css/game.css}"   as="style">
+    <link rel="preload" th:href="@{/js/parallax-shared.js}" as="script">
+    <link rel="preload" th:href="@{/js/nav-shared.js}"      as="script">
+    <link rel="preload" th:href="@{/js/leaderboard.js}"     as="script">
     <th:block th:replace="~{fragments/bg-preloads :: preloads}"></th:block>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/leaderboard.css}">
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
     <script defer th:src="@{/js/scale.js}"></script>
 </head>
-<body>
+<body class="nav-no-anim kb-mode">
 <div class="game-root">
     <div class="bg" id="bg-main" data-turbo-permanent>
         <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
@@ -74,7 +77,6 @@
 </div>
 
 <script th:src="@{/js/parallax-shared.js}"></script>
-<script th:src="@{/js/transitions.js}"></script>
 <script th:src="@{/js/nav-shared.js}"></script>
 <script th:src="@{/js/leaderboard.js}"></script>
 </body>

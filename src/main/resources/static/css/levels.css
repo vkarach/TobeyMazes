@@ -352,10 +352,13 @@ body.kb-mode .lm-btn-dim:hover:not(.active) { color: rgba(255, 255, 255, 0.4); }
     BACK LINK
    ----------------- */
 .back-link {
-  font-size: 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
   color: var(--dim);
   text-decoration: none;
-  transition:  transform 150ms ease, color 150ms;
+  transition: transform 150ms ease, color 150ms;
   text-shadow: 1px 1px 0 #000;
 }
 
@@ -364,4 +367,7 @@ body.kb-mode .lm-btn-dim:hover:not(.active) { color: rgba(255, 255, 255, 0.4); }
   transform: translateY(-1px);
 }
 
-.back-link .key { color: var(--wall); }
+.back-link .key {
+  font-size: 7px;
+  color: var(--wall);
+}

@@ -72,6 +72,8 @@ public class TobeyMazesController {
         session.setTimeRecord(false);
         session.setScoreRecord(false);
 
+        Integer currentUserId = session.getCurrentUser() != null ? session.getCurrentUser().getId() : null;
+        model.addAttribute("currentUserId", currentUserId);
         model.addAttribute("cells", buildCells());
         model.addAttribute("playerX", session.getPlayer().getX());
         model.addAttribute("playerY", session.getPlayer().getY());

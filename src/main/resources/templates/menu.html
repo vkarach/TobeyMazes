@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Tobey Mazes</title>
-    <link rel="icon" type="image/png" th:href="@{/img/avatar.png}"> <!--todo: avatar-->
     <link rel="preload" th:href="@{/ui/fxgl/fonts/PressStart2P-Regular.ttf}" as="font" type="font/ttf" crossorigin>
     <link rel="preload" th:href="@{/css/levels.css}" as="style">
     <link rel="preload" th:href="@{/css/profile.css}" as="style">
     <link rel="preload" th:href="@{/css/game.css}"   as="style">
+    <link rel="preload" th:href="@{/js/parallax-shared.js}" as="script">
+    <link rel="preload" th:href="@{/js/nav-shared.js}"      as="script">
+    <link rel="preload" th:href="@{/js/menu.js}"            as="script">
     <th:block th:replace="~{fragments/bg-preloads :: preloads}"></th:block>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/menu.css}">
+    <link rel="icon" class="icon" type="image/png" th:href="@{/img/logo.png}">
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
     <script defer th:src="@{/js/scale.js}"></script>
 </head>
-<body>
+<body class="nav-no-anim kb-mode">
 
 <div class="game-root">
     <div class="bg" id="bg-main" data-turbo-permanent>
@@ -51,7 +54,6 @@
 <div class="version-tag" th:text="'Beta (late) v' + ${version}">Beta v0.0.0</div>
 
 <script th:src="@{/js/parallax-shared.js}"></script>
-<script th:src="@{/js/transitions.js}"></script>
 <script th:src="@{/js/nav-shared.js}"></script>
 <script th:src="@{/js/menu.js}"></script>
 </body>

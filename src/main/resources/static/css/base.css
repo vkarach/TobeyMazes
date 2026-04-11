@@ -20,13 +20,16 @@ body {
     justify-content: center;
 }
 
+.icon {
+    border-radius: 100px;
+}
+
 .game-root {
     position: relative;
     width: 1280px;
     height: 720px;
     overflow: hidden;
     transform-origin: center center;
-    transition: opacity 0.2s;
     font-family: 'Press Start 2P', monospace;
     color: #fff;
     cursor: default;

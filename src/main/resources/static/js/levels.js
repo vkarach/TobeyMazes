@@ -4,9 +4,25 @@
 
     const ac = new AbortController();
     const sig = { signal: ac.signal };
-    document.addEventListener('turbo:before-visit', () => ac.abort(), { once: true });
+    const abort = () => ac.abort();
+    // Kill previous run's listeners — Turbo cached-preview runs scripts twice
+    if (typeof window.__levelsAbort === 'function') {
+        try { window.__levelsAbort(); } catch (_) {}
+    }
+    window.__levelsAbort = abort;
+    document.addEventListener('turbo:before-visit',  abort, { once: true });
+    document.addEventListener('turbo:before-render', abort, { once: true });
 
-    // Clean up stuck state from Turbo cache
+    // { once: true } not sig — before-cache fires after before-visit aborts sig
+    document.addEventListener('turbo:before-cache', () => {
+        document.body.classList.remove('modal-open');
+        document.getElementById('level-modal')?.classList.remove('open');
+        document.getElementById('modal-overlay')?.classList.remove('open');
+        document.querySelectorAll('.level-card.hover').forEach(c => c.classList.remove('hover'));
+        document.querySelectorAll('.lm-nav.active').forEach(b => b.classList.remove('active'));
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    }, { once: true });
+
     document.body.classList.remove('modal-open');
     document.getElementById('level-modal')?.classList.remove('open');
     document.getElementById('modal-overlay')?.classList.remove('open');
@@ -16,7 +32,9 @@
     let selectedForm = null;
     let bestResults = [];
     let lastMouseX = null, lastMouseY = null;
-    // Sync body class with locally-tracked mouse mode (page starts in kb)
+    let modalClosedAt = 0;
+    const scriptStartedAt = performance.now();
+    const NAV_ARRIVAL_ENTER_LOCK_MS = 120;
     document.body.classList.add('kb-mode');
 
     function getPerRow(cards) {
@@ -46,7 +64,7 @@
         if (modal) modal.classList.remove('open');
         document.body.classList.remove('modal-open');
         document.getElementById('modal-overlay')?.classList.remove('open');
-        // Restore the level grid selection in keyboard mode
+        modalClosedAt = performance.now();
         if (!mouseMode) {
             document.body.classList.add('kb-mode');
             updateSelected(levelCards, selected);
@@ -107,10 +125,13 @@
                 method: 'POST',
                 body: new FormData(selectedForm),
                 redirect: 'follow',
-                credentials: 'same-origin'
+                credentials: 'same-origin',
+                signal: ac.signal
             });
+            if (ac.signal.aborted) return;
             Turbo.visit(r.url, { action: 'replace' });
-        } catch (_) {
+        } catch (e) {
+            if (e && e.name === 'AbortError') return;
             selectedForm.submit();
         } finally {
             submitting = false;
@@ -118,8 +139,6 @@
     }
 
     function openModal(card) {
-        // Use the actual modal element state, not body class — body class may be
-        // stuck after a half-aborted Turbo navigation while the modal is invisible
         if (isModalOpen()) return;
         if (!card) return;
         selectedForm = card.closest('form');
@@ -143,7 +162,6 @@
         document.getElementById('level-modal').classList.add('open');
         document.getElementById('modal-overlay').classList.add('open');
 
-        // Reset modal nav — START is index 1 (after BACK)
         modalSel = 1;
         modalMouse = false;
         updateModalNav();
@@ -174,6 +192,7 @@
 
         if (e.key === 'Q' || e.key === 'q' || e.key === 'й' || e.key === 'Й') {
             e.preventDefault();
+            if (isModalOpen()) closeModal();
             Turbo.visit('/menu');
             return;
         }
@@ -194,6 +213,8 @@
             }
             if (e.key === 'Enter') {
                 e.preventDefault();
+                if (e.repeat) return;
+                if (performance.now() - scriptStartedAt < NAV_ARRIVAL_ENTER_LOCK_MS) return;
                 modalBtns[modalSel].click();
             }
             return;
@@ -232,13 +253,14 @@
         }
         if (e.key === 'Enter') {
             e.preventDefault();
+            if (e.repeat) return;
+            if (performance.now() - modalClosedAt < 150) return;
+            if (performance.now() - scriptStartedAt < NAV_ARRIVAL_ENTER_LOCK_MS) return;
             if (levelCards[selected]) openModal(levelCards[selected]);
         }
     }, { ...sig, capture: true });
 
     document.addEventListener('mousemove', e => {
-        // Ignore stale cursor reports right after Turbo navigation —
-        // require an actual position change before switching out of kb mode
         if (lastMouseX === null) {
             lastMouseX = e.clientX; lastMouseY = e.clientY;
             return;

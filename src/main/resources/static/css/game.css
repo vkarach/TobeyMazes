@@ -154,8 +154,8 @@ html, body {
 }
 
 @keyframes gem-pulse { /*todo*/
-  /*0%, 100% { transform: scale(1);    filter: brightness(1); }*/
-  /*50%       { transform: scale(1.25); filter: brightness(1.2); }*/
+  0%, 100% { transform: scale(1);    filter: brightness(1); }
+  50%       { transform: scale(1.25); filter: brightness(1.2); }
 }
 
 .target-gem.collecting {
@@ -422,9 +422,61 @@ html, body {
 
 .win-improve {
   font-size: 8px;
-  color: #5dce6e;
-  text-shadow: 1px 1px 0 #000;
+  color: var(--wall);
+  text-shadow: 0 0 6px rgba(245, 197, 24, 0.45), 1px 1px 0 #000;
+  letter-spacing: 1px;
   min-height: 14px;
+}
+
+/* Guest hint under the stats: minimal — just a thin gradient rule above the
+   text to tie it into the layout, no panel / no border / no background. */
+.win-guest-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-top: 11px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  text-shadow: 1px 1px 0 #000;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+  margin-top: -16px;
+  white-space: nowrap;
+}
+
+.win-guest-hint::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 180px;
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(245, 197, 24, 0.65) 50%,
+    transparent 100%
+  );
+}
+
+.win-guest-line {
+  white-space: nowrap;
+}
+
+.win-guest-link {
+  color: var(--wall);
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.win-guest-link:hover {
+  color: #FFD700;
 }
 
 .win-actions {

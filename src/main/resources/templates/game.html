@@ -7,13 +7,15 @@
   <link rel="preload" th:href="@{/css/menu.css}"    as="style">
   <link rel="preload" th:href="@{/css/levels.css}"  as="style">
   <link rel="preload" th:href="@{/css/profile.css}" as="style">
+  <link rel="preload" th:href="@{/js/parallax-shared.js}" as="script">
+  <link rel="preload" th:href="@{/js/game.js}"            as="script">
   <th:block th:replace="~{fragments/bg-preloads :: preloads}"></th:block>
   <link rel="stylesheet" th:href="@{/css/base.css}">
   <link rel="stylesheet" th:href="@{/css/game.css}">
   <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
   <script defer th:src="@{/js/scale.js}"></script>
 </head>
-<body class="on-game">
+<body class="on-game nav-no-anim kb-mode" th:attr="data-user-id=${currentUserId}">
 
 <div class="game-root">
 
@@ -51,6 +53,13 @@
       <div class="win-stat-value" id="win-score">-</div>
       <div class="win-improve" id="win-score-improve"></div>
     </div>
+  </div>
+  <!-- Guest hint: only shown for visitors without an account -->
+  <div class="win-guest-hint" id="win-guest-hint" th:if="${currentUserId == null}">
+    <div class="win-guest-line">
+      <a th:href="@{/profile}" class="win-guest-link">Sign in</a> to save your records
+    </div>
+    <div class="win-guest-line">and climb the leaderboard</div>
   </div>
   <div class="win-actions">
     <a th:href="@{/game/levels}" class="win-nav win-btn">LEVELS</a>

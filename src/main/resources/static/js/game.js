@@ -76,9 +76,20 @@
 
     const ac = new AbortController();
     const sig = { signal: ac.signal };
-    document.addEventListener('turbo:before-visit', () => {
+    const cleanup = () => {
         if (timerInterval) clearInterval(timerInterval);
         ac.abort();
+    };
+    document.addEventListener('turbo:before-visit',  cleanup, { once: true });
+    document.addEventListener('turbo:before-render', cleanup, { once: true });
+
+    // { once: true } not sig — before-cache fires after before-visit aborts sig
+    document.addEventListener('turbo:before-cache', () => {
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+        document.querySelectorAll('.win-nav.active, .ctrl-btn:focus').forEach(b => {
+            b.classList.remove('active');
+            if (b instanceof HTMLElement) b.blur();
+        });
     }, { once: true });
 
     let saltoId = 0;
