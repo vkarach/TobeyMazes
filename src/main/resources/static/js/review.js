@@ -1,11 +1,5 @@
 (function () {
-    const ac = new AbortController();
-    const sig = { signal: ac.signal };
-    const abort = () => ac.abort();
-    // Abort on either the next visit OR the next render — the second handles
-    // Turbo's cached-preview flow where scripts re-run twice per visit.
-    document.addEventListener('turbo:before-visit',  abort, { once: true });
-    document.addEventListener('turbo:before-render', abort, { once: true });
+    const { ac, sig } = initAbort();
 
     const stars = Array.from(document.querySelectorAll('.rv-star'));
     const ratingInput = document.getElementById('rv-rating');
@@ -158,10 +152,10 @@
                 }
                 rvModalList.innerHTML = reviews.map(r => {
                     const stars = Array.from({length: 5}, (_, i) =>
-                        '<span class="' + (i < r.rating ? 'rv-star-on' : '') + '">*</span>'
+                        '<span class="' + (i < r.rating ? 'rv-star-on' : '') + '">★</span>'
                     ).join('');
                     const comment = r.comment ? '<div class="rv-review-comment">' + escHtml(r.comment) + '</div>' : '';
-                    const date = r.date ? r.date.substring(0, 10) : '';
+                    const date = r.date ? timeAgo(r.date) : '';
                     return '<div class="rv-review-item">' +
                         '<div class="rv-review-header">' +
                             '<span class="rv-review-name">' + escHtml(r.userName) + '</span>' +
@@ -175,12 +169,6 @@
             .catch(() => {
                 rvModalList.innerHTML = '<div class="rv-modal-empty">Failed to load</div>';
             });
-    }
-
-    function escHtml(s) {
-        const d = document.createElement('div');
-        d.textContent = s;
-        return d.innerHTML;
     }
 
     function closeReviewsModal() {
@@ -205,7 +193,7 @@
     let scrollRaf = null;
     let scrollPrev = 0;
     let holdTimer = null;
-    const HOLD_DELAY = 220; // ms before continuous scroll kicks in
+    const HOLD_DELAY = 100; // ms before continuous scroll kicks in
 
     let jumpFrom = 0, jumpTo = 0, jumpStart = 0, jumpDur = 0, jumpRaf = null;
 
@@ -257,8 +245,8 @@
         }
 
         let jump = 0;
-        if (e.key === 'ArrowDown')       { scrollDir = 1;  scrollMin = 200; scrollMax = 350; scrollAccel = 400; jump = 60; }
-        else if (e.key === 'ArrowUp')    { scrollDir = -1; scrollMin = 200; scrollMax = 350; scrollAccel = 400; jump = -60; }
+        if (e.key === 'ArrowDown')       { scrollDir = 1;  scrollMin = 200; scrollMax = 450; scrollAccel = 400; jump = 85; }
+        else if (e.key === 'ArrowUp')    { scrollDir = -1; scrollMin = 200; scrollMax = 450; scrollAccel = 400; jump = -85; }
         else if (e.key === 'PageDown')   { scrollDir = 1;  scrollMin = 600; scrollMax = 900; scrollAccel = 600; jump = 160; }
         else if (e.key === 'PageUp')     { scrollDir = -1; scrollMin = 600; scrollMax = 900; scrollAccel = 600; jump = -160; }
         else return;

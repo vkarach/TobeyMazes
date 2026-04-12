@@ -1,71 +1,9 @@
 .hidden-submit { position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; }
 
-@font-face {
-  font-family: 'Press Start 2P';
-  src: url('/ui/fxgl/fonts/PressStart2P-Regular.ttf') format('truetype');
-  font-display: block;
-}
-
-/* -----------------
-    BASE
-   ----------------- */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --wall:   #F5C518;
-  --text:   #ffffff;
-  --dim:    rgba(255, 255, 255, 0.5);
-  --panel:  rgba(20, 10, 5, 0.82);
-
-  --easy:   #5dce6e;
-  --normal: #91cdff;
-  --medium: #f5a623;
-  --hard:   #ff5c5c;
-}
-
-html, body {
-  width: 100vw; height: 100vh;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Press Start 2P', monospace;
-  color: var(--text);
-  user-select: none;
-  background-color: #000;
-}
-
-.game-root {
-  position: relative;
-  width: 1280px;
-  height: 720px;
-  overflow: hidden;
-  transform-origin: center center;
-  background-color: #000;
-}
-
-.bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.bg-layer {
-  position: absolute;
-  inset: 0;
-  background-repeat: repeat-x;
-  background-position-x: 0;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
+/* levels.css overrides the base modal-overlay for in-page positioning */
 .modal-overlay {
   position: absolute;
-  inset: 0;
   z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   pointer-events: none;
 }
 
@@ -73,15 +11,12 @@ html, body {
   pointer-events: auto;
 }
 
-.page {
-  position: relative;
-  z-index: 1;
-}
-
 /* -----------------
     PAGE
    ----------------- */
 .page {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -301,51 +236,13 @@ body.modal-open .level-card.hover {
 }
 
 .lm-btn {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
-  color: #91CDFF;
-  text-shadow: 1px 1px 0 #000;
-  background: none;
-  border: none;
-  cursor: pointer;
   padding: 0;
   outline: none;
-  transition: color 150ms ease, transform 150ms ease;
-  position: relative;
-  padding-left: 16px;
-}
-
-.lm-btn::before {
-  content: '>';
-  position: absolute;
-  left: 0;
-  color: #F5C518;
-  opacity: 0;
-  transform: translateX(-6px);
-  transition: opacity 150ms ease, transform 150ms ease;
-}
-
-.lm-btn:hover,
-.lm-nav.active {
-  color: #FFD700;
-  transform: translateX(4px);
-}
-
-.lm-btn:hover::before,
-.lm-nav.active::before {
-  opacity: 1;
-  transform: translateX(0);
 }
 
 .lm-btn-dim { color: rgba(255, 255, 255, 0.4); }
 .lm-btn-dim:hover,
 .lm-btn-dim.active { color: #FFD700; }
-
-body.kb-mode .lm-btn:hover:not(.active) {
-  color: #91CDFF;
-  transform: none;
-}
-body.kb-mode .lm-btn:hover:not(.active)::before { opacity: 0; }
 body.kb-mode .lm-btn-dim:hover:not(.active) { color: rgba(255, 255, 255, 0.4); }
 
 /* -----------------

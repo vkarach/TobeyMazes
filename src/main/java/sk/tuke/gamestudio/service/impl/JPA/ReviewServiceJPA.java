@@ -7,6 +7,7 @@ import sk.tuke.gamestudio.repository.ReviewRepository;
 import sk.tuke.gamestudio.service.ReviewService;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +34,12 @@ public class ReviewServiceJPA implements ReviewService {
 
     @Override
     public List<Review> getAllReviews() {
-        return reviewRepository.findAllByOrderByRatingDescUpdatedAtDesc();
+        List<Review> reviews = reviewRepository.findAll();
+        reviews.sort(Comparator
+                .comparingInt(Review::getRating).reversed()
+                .thenComparing(r -> r.getUpdatedAt() == null ? LocalDateTime.MIN : r.getUpdatedAt(), Comparator.reverseOrder())
+                .thenComparing(r -> r.getComment() != null && !r.getComment().isEmpty() ? 0 : 1));
+        return reviews;
     }
 
     @Override

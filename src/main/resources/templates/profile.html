@@ -13,29 +13,13 @@
     <th:block th:replace="~{fragments/bg-preloads :: preloads}"></th:block>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <link rel="icon" class="icon" type="image/png" th:href="@{/img/logo.png}">
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
     <script defer th:src="@{/js/scale.js}"></script>
 </head>
 <body class="on-profile nav-no-anim kb-mode">
 <div class="game-root">
-    <div class="bg" id="bg-main" data-turbo-permanent>
-        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
-        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
-        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
-        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png"></div>
-    </div>
-    <div class="bg" id="bg-profile" data-turbo-permanent>
-        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/profilePageParallax/1.png"></div>
-        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/profilePageParallax/2.png"></div>
-        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/profilePageParallax/3.png"></div>
-        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/profilePageParallax/4.png"></div>
-    </div>
-    <div class="bg" id="bg-game" data-turbo-permanent>
-        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
-        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
-        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
-        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4.png"></div>
-    </div>
+    <th:block th:replace="~{fragments/bg-parallax :: parallax-bg}"></th:block>
 
     <!-- ===== AUTHORIZED ===== -->
     <div th:if="${user != null}">
@@ -43,10 +27,10 @@
             <div class="title-line title-line-1" style="font-size:56px">YOUR</div>
             <div class="title-line title-line-2" style="font-size:56px; margin-bottom:32px">PROFILE</div>
 
-            <div class="profile-card">
+            <div class="profile-card card-panel">
                 <div class="pf-username" th:text="${user.name}">username</div>
 
-                <div class="pf-separator"></div>
+                <div class="gradient-sep"></div>
 
                 <div class="pf-stats">
                     <div class="pf-stat">
@@ -70,11 +54,11 @@
                     Member since Jan 2025
                 </div>
 
-                <div class="pf-separator"></div>
+                <div class="gradient-sep"></div>
 
                 <div class="pf-actions">
-                    <button class="pf-btn pf-nav" onclick="openChangePassword()">CHANGE PASSWORD</button>
-                    <button class="pf-btn pf-btn-danger pf-nav" onclick="submitLogout()">LOGOUT</button>
+                    <button class="nav-btn pf-nav" onclick="openChangePassword()">CHANGE PASSWORD</button>
+                    <button class="nav-btn pf-btn-danger pf-nav" onclick="submitLogout()">LOGOUT</button>
                 </div>
             </div>
 
@@ -166,6 +150,7 @@
 
 <script th:src="@{/js/parallax-shared.js}"></script>
 <script th:src="@{/js/nav-shared.js}"></script>
+<script th:src="@{/js/utils.js}"></script>
 <script th:src="@{/js/profile.js}"></script>
 </body>
 </html>

@@ -74,14 +74,7 @@
         return { path, targets };
     }
 
-    const ac = new AbortController();
-    const sig = { signal: ac.signal };
-    const cleanup = () => {
-        if (timerInterval) clearInterval(timerInterval);
-        ac.abort();
-    };
-    document.addEventListener('turbo:before-visit',  cleanup, { once: true });
-    document.addEventListener('turbo:before-render', cleanup, { once: true });
+    const { ac, sig } = initAbort(() => { if (timerInterval) clearInterval(timerInterval); });
 
     // { once: true } not sig — before-cache fires after before-visit aborts sig
     document.addEventListener('turbo:before-cache', () => {
@@ -418,7 +411,11 @@
             return;
         }
 
-        const dirs = { ArrowUp:'UP', ArrowDown:'DOWN', ArrowLeft:'LEFT', ArrowRight:'RIGHT' };
+        const dirs = { ArrowUp:'UP', ArrowDown:'DOWN', ArrowLeft:'LEFT', ArrowRight:'RIGHT',
+                       w:'UP', W:'UP', ц:'UP', Ц:'UP',
+                       a:'LEFT', A:'LEFT', ф:'LEFT', Ф:'LEFT',
+                       s:'DOWN', S:'DOWN', ы:'DOWN', Ы:'DOWN', і:'DOWN', І:'DOWN',
+                       d:'RIGHT', D:'RIGHT', в:'RIGHT', В:'RIGHT' };
         const dir = dirs[e.key];
         if (dir) {
             e.preventDefault();

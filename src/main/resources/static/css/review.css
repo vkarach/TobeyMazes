@@ -1,13 +1,7 @@
 .rv-card {
-    background: rgba(20, 10, 5, 0.82);
-    border: 2px solid rgba(245, 197, 24, 0.5);
-    border-radius: 4px;
     padding: 28px 40px;
     min-width: 400px;
     max-width: 520px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     gap: 8px;
 }
 
@@ -28,19 +22,6 @@
     font-size: 14px;
     color: #F5C518;
     text-shadow: 2px 2px 0 #000;
-}
-
-.rv-separator {
-    width: 60%;
-    height: 2px;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(245, 197, 24, 0.55) 30%,
-        rgba(245, 197, 24, 0.55) 70%,
-        transparent 100%
-    );
-    margin: 8px 0;
 }
 
 #rv-form-wrap {
@@ -105,49 +86,6 @@
 .rv-comment::placeholder {
     color: rgba(255, 255, 255, 0.25);
 }
-
-/* Submit button */
-.rv-submit {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
-    color: #91CDFF;
-    text-shadow: 1px 1px 0 #000;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: color 150ms ease, transform 150ms ease;
-    position: relative;
-    padding-left: 16px;
-    margin-top: 4px;
-}
-
-.rv-submit::before {
-    content: '>';
-    position: absolute;
-    left: 0;
-    color: #F5C518;
-    opacity: 0;
-    transform: translateX(-6px);
-    transition: opacity 150ms ease, transform 150ms ease;
-}
-
-.rv-submit:hover,
-.rv-submit.active {
-    color: #FFD700;
-    transform: translateX(4px);
-}
-
-.rv-submit:hover::before,
-.rv-submit.active::before {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-body.kb-mode .rv-submit:hover:not(.active) {
-    color: #91CDFF;
-    transform: none;
-}
-body.kb-mode .rv-submit:hover:not(.active)::before { opacity: 0; }
 
 /* Submit row — fixed height to prevent layout shift */
 .rv-submit-row {
@@ -219,8 +157,7 @@ body.kb-mode .rv-submit:hover:not(.active)::before { opacity: 0; }
     width: 100%;
     overflow-y: auto;
     max-height: 340px;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(245, 197, 24, 0.3) transparent;
+
 }
 
 .rv-modal-list > .rv-review-item {

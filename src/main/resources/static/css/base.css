@@ -4,10 +4,39 @@
   font-display: block;
 }
 
+:root {
+    --wall:    #F5C518;
+    --text:    #ffffff;
+    --dim:     rgba(255, 255, 255, 0.5);
+    --panel:   rgba(20, 10, 5, 0.82);
+    --cell:    56px;
+    --easy:    #5dce6e;
+    --normal:  #91cdff;
+    --medium:  #f5a623;
+    --hard:    #ff5c5c;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(245, 197, 24, 0.3) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+    background: rgba(245, 197, 24, 0.3);
+    border-radius: 3px;
+}
+*::-webkit-scrollbar-thumb:hover {
+    background: rgba(245, 197, 24, 0.5);
 }
 
 body {
@@ -136,16 +165,96 @@ body.kb-mode .menu-btn:hover:not(.active)::before {
     opacity: 0;
 }
 
+/* Shared nav-button: small caret-style button used across pages */
+.nav-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: #91CDFF;
+    text-shadow: 1px 1px 0 #000;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 150ms ease, transform 150ms ease;
+    position: relative;
+    padding-left: 16px;
+}
+.nav-btn::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: #F5C518;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 150ms ease, transform 150ms ease;
+}
+.nav-btn:hover,
+.nav-btn.active {
+    color: #FFD700;
+    transform: translateX(4px);
+}
+.nav-btn:hover::before,
+.nav-btn.active::before {
+    opacity: 1;
+    transform: translateX(0);
+}
+body.kb-mode .nav-btn:hover:not(.active) {
+    color: #91CDFF;
+    transform: none;
+}
+body.kb-mode .nav-btn:hover:not(.active)::before { opacity: 0; }
+
+/* Shared card panel background */
+.card-panel {
+    background: var(--panel);
+    border: 2px solid rgba(245, 197, 24, 0.5);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Shared gradient separator */
+.gradient-sep {
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(245, 197, 24, 0.55) 30%,
+        rgba(245, 197, 24, 0.55) 70%,
+        transparent 100%
+    );
+    margin: 10px 0;
+}
+
+.error-sep {
+    width: 180px;
+    height: 2px;
+    margin-bottom: 12px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(245, 197, 24, 0.9) 30%,
+        rgba(245, 197, 24, 0.9) 70%,
+        transparent 100%
+    );
+}
+
+.error-message {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    text-shadow: 1px 1px 0 #000;
+    text-align: center;
+    line-height: 1.8;
+    margin-bottom: 10px;
+}
+
 /* Suppress nav button transitions during the very first paint so the
    active highlight doesn't visibly animate in on every page load */
 body.nav-no-anim .menu-btn,
 body.nav-no-anim .menu-btn::before,
-body.nav-no-anim .pf-nav,
-body.nav-no-anim .pf-nav::before,
-body.nav-no-anim .lm-nav,
-body.nav-no-anim .lm-nav::before,
-body.nav-no-anim .rv-submit,
-body.nav-no-anim .rv-submit::before {
+body.nav-no-anim .nav-btn,
+body.nav-no-anim .nav-btn::before {
     transition: none !important;
 }
 

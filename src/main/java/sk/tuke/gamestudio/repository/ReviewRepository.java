@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
     Optional<Review> findByUserId(int userId);
 
-    List<Review> findAllByOrderByRatingDescUpdatedAtDesc();
+    List<Review> findAll();
 
     @Query("SELECT AVG(r.rating) FROM Review r")
     Double getOverallRating();

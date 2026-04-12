@@ -4,14 +4,8 @@
 .bg-layer-4 { background-image: url('/ui/fxgl/backgrounds/profilePageParallax/4.png'); }
 
 .profile-card {
-    background: rgba(20, 10, 5, 0.82);
-    border: 2px solid rgba(245, 197, 24, 0.5);
-    border-radius: 4px;
     padding: 28px 40px;
     min-width: 380px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     gap: 6px;
 }
 
@@ -20,19 +14,6 @@
     color: #F5C518;
     text-shadow: 2px 2px 0 #000;
     -webkit-text-stroke: 1px #000;
-}
-
-.pf-separator {
-    width: 60%;
-    height: 2px;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(245, 197, 24, 0.55) 30%,
-        rgba(245, 197, 24, 0.55) 70%,
-        transparent 100%
-    );
-    margin: 10px 0;
 }
 
 .pf-stats {
@@ -87,50 +68,9 @@
     gap: 10px;
 }
 
-.pf-btn {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
-    color: #91CDFF;
-    text-shadow: 1px 1px 0 #000;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: color 150ms ease, transform 150ms ease;
-    position: relative;
-    padding-left: 16px;
-}
-
-.pf-btn::before {
-    content: '>';
-    position: absolute;
-    left: 0;
-    color: #F5C518;
-    opacity: 0;
-    transform: translateX(-6px);
-    transition: opacity 150ms ease, transform 150ms ease;
-}
-
-.pf-btn:hover,
-.pf-nav.active {
-    color: #FFD700;
-    transform: translateX(4px);
-}
-
-.pf-btn:hover::before,
-.pf-nav.active::before {
-    opacity: 1;
-    transform: translateX(0);
-}
-
 .pf-btn-danger { color: rgba(255, 107, 107, 0.7); }
 .pf-btn-danger:hover,
 .pf-btn-danger.active { color: #ff6b6b; }
-
-body.kb-mode .pf-btn:hover:not(.active) {
-    color: #91CDFF;
-    transform: none;
-}
-body.kb-mode .pf-btn:hover:not(.active)::before { opacity: 0; }
 body.kb-mode .pf-btn-danger:hover:not(.active) { color: rgba(255, 107, 107, 0.7); }
 
 .confirm-btn {

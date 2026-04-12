@@ -13,35 +13,19 @@
     <th:block th:replace="~{fragments/bg-preloads :: preloads}"></th:block>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/leaderboard.css}">
+    <link rel="icon" class="icon" type="image/png" th:href="@{/img/logo.png}">
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
     <script defer th:src="@{/js/scale.js}"></script>
 </head>
 <body class="nav-no-anim kb-mode">
 <div class="game-root">
-    <div class="bg" id="bg-main" data-turbo-permanent>
-        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
-        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
-        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
-        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png"></div>
-    </div>
-    <div class="bg" id="bg-profile" data-turbo-permanent>
-        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/profilePageParallax/1.png"></div>
-        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/profilePageParallax/2.png"></div>
-        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/profilePageParallax/3.png"></div>
-        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/profilePageParallax/4.png"></div>
-    </div>
-    <div class="bg" id="bg-game" data-turbo-permanent>
-        <div class="bg-layer" data-speed="12" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/1.png"></div>
-        <div class="bg-layer" data-speed="32" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/2.png"></div>
-        <div class="bg-layer" data-speed="48" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/3.png"></div>
-        <div class="bg-layer" data-speed="80" data-bg="/ui/fxgl/backgrounds/mainMenuParallax/4.png"></div>
-    </div>
+    <th:block th:replace="~{fragments/bg-parallax :: parallax-bg}"></th:block>
 
     <div class="menu-wrap" style="margin-top: -180px">
         <div class="title-line title-line-1" style="font-size:56px">LEADER</div>
         <div class="title-line title-line-2" style="font-size:56px; margin-bottom:32px">BOARD</div>
 
-        <div class="lb-card">
+        <div class="lb-card card-panel">
             <div class="lb-table" th:if="${!#lists.isEmpty(topPlayers)}">
                 <div class="lb-header">
                     <span class="lb-col-rank">#</span>
@@ -78,6 +62,7 @@
 
 <script th:src="@{/js/parallax-shared.js}"></script>
 <script th:src="@{/js/nav-shared.js}"></script>
+<script th:src="@{/js/utils.js}"></script>
 <script th:src="@{/js/leaderboard.js}"></script>
 </body>
 </html>

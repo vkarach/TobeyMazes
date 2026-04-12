@@ -2,16 +2,11 @@
     const levelCards = Array.from(document.querySelectorAll('.level-card'));
     if (levelCards.length === 0) return;
 
-    const ac = new AbortController();
-    const sig = { signal: ac.signal };
-    const abort = () => ac.abort();
-    // Kill previous run's listeners — Turbo cached-preview runs scripts twice
     if (typeof window.__levelsAbort === 'function') {
         try { window.__levelsAbort(); } catch (_) {}
     }
+    const { ac, sig, abort } = initAbort();
     window.__levelsAbort = abort;
-    document.addEventListener('turbo:before-visit',  abort, { once: true });
-    document.addEventListener('turbo:before-render', abort, { once: true });
 
     // { once: true } not sig — before-cache fires after before-visit aborts sig
     document.addEventListener('turbo:before-cache', () => {
