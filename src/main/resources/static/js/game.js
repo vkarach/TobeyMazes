@@ -374,13 +374,6 @@
             }
         }
 
-        const replayBtn = document.getElementById('win-replay');
-        if (replayBtn) {
-            replayBtn.addEventListener('click', e => {
-                e.preventDefault();
-                document.getElementById('win-restart-form').requestSubmit();
-            }, sig);
-        }
     }
 
     const restartKeys = ['r', 'R', 'к', 'К'];
@@ -395,7 +388,7 @@
                 Turbo.visit('/game/levels');
             } else if (restartKeys.includes(e.key)) {
                 e.preventDefault();
-                document.getElementById('win-restart-form').requestSubmit();
+                document.getElementById('win-replay').click();
             } else if (menuKeys.includes(e.key)) {
                 e.preventDefault();
                 Turbo.visit('/menu');

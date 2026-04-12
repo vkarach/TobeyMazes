@@ -22,6 +22,12 @@
     document.getElementById('level-modal')?.classList.remove('open');
     document.getElementById('modal-overlay')?.classList.remove('open');
 
+    function enableAnim() { document.body.classList.remove('nav-no-anim'); }
+    const animOpts = { capture: true, once: true, signal: ac.signal };
+    document.addEventListener('keydown',     enableAnim, animOpts);
+    document.addEventListener('mousemove',   enableAnim, animOpts);
+    document.addEventListener('pointerdown', enableAnim, animOpts);
+
     let mouseMode = false;
     let selected = 0;
     let selectedForm = null;

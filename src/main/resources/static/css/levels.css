@@ -237,6 +237,7 @@ body.modal-open .level-card.hover {
 
 .lm-btn {
   padding: 0;
+  padding-left: 16px;
   outline: none;
 }
 
