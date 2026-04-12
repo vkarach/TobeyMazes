@@ -47,7 +47,7 @@
   </div>
   <div class="win-actions">
     <a th:href="@{/game/levels}" class="win-nav win-btn">LEVELS</a>
-    <a th:href="@{/game/restart}" class="win-nav win-btn" id="win-replay" data-turbo-method="post">PLAY AGAIN</a>
+    <a th:href="@{/game}" class="win-nav win-btn" id="win-replay">PLAY AGAIN</a>
   </div>
 </div>
 
@@ -118,9 +118,7 @@
 
   <!-- Bottom bar -->
   <div class="bottom-bar">
-    <form id="restart-form" method="post" th:action="@{/game/restart}" style="display:flex;align-items:center;">
-      <button type="submit" class="action-link"><span class="key">[R]</span> Restart</button>
-    </form>
+    <a th:href="@{/game}" class="action-link"><span class="key">[R]</span> Restart</a>
     <div class="bar-sep"></div>
     <a th:href="@{/game/levels}" class="action-link"><span class="key">[Q]</span> Levels</a>
     <div class="bar-sep"></div>

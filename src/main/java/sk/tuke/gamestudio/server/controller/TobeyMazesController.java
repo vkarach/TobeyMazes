@@ -49,7 +49,7 @@ public class TobeyMazesController {
         return "redirect:/game/levels";
     }
 
-    @PostMapping("/game/restart")
+    @RequestMapping(value = "/game/restart", method = {RequestMethod.GET, RequestMethod.POST})
     public String restartGame() {
         if (session.getCurrentLevel() == null) return "redirect:/game/levels";
         return "redirect:/game";

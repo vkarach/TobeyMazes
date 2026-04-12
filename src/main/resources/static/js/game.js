@@ -388,7 +388,7 @@
                 Turbo.visit('/game/levels');
             } else if (restartKeys.includes(e.key)) {
                 e.preventDefault();
-                document.getElementById('win-replay').click();
+                Turbo.visit('/game');
             } else if (menuKeys.includes(e.key)) {
                 e.preventDefault();
                 Turbo.visit('/menu');
@@ -417,7 +417,7 @@
         }
         if (restartKeys.includes(e.key)) {
             e.preventDefault();
-            document.getElementById('restart-form').requestSubmit();
+            Turbo.visit('/game');
         }
         if (quitKeys.includes(e.key)) {
             e.preventDefault();
