@@ -1,14 +1,40 @@
 // Scale .game-root to fill the viewport.
-function scaleGameRoot() {
-    const root = document.querySelector('.game-root');
+// Portrait phones get a narrower virtual canvas (600x1066) so UI stays readable.
+function scaleGameRoot(rootEl, bodyEl) {
+    const root = rootEl || document.querySelector('.game-root');
     if (!root) return;
-    const scale = Math.max(window.innerWidth / 1280, window.innerHeight / 720);
-    root.style.transform = `scale(${scale})`;
+    const body = bodyEl || document.body;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const mobile = vh > vw * 1.2;
+
+    body.classList.toggle('mobile', mobile);
+    if (mobile) body.classList.remove('kb-mode');
+
+    if (mobile) {
+        const W = 600;
+        const H = Math.round(W * vh / vw);
+        root.style.width = W + 'px';
+        root.style.height = H + 'px';
+        root.style.position = 'fixed';
+        root.style.left = '0';
+        root.style.top = '0';
+        root.style.transformOrigin = 'top left';
+        root.style.transform = `scale(${vw / W})`;
+    } else {
+        root.style.width = '1280px';
+        root.style.height = '720px';
+        root.style.position = '';
+        root.style.left = '';
+        root.style.top = '';
+        root.style.transformOrigin = 'center center';
+        root.style.transform = `scale(${Math.max(vw / 1280, vh / 720)})`;
+    }
 }
 
 scaleGameRoot();
-window.addEventListener('resize', scaleGameRoot);
-document.addEventListener('turbo:load', scaleGameRoot);
+window.addEventListener('resize', () => scaleGameRoot());
+document.addEventListener('turbo:load', () => scaleGameRoot());
 
 // ---------------------------------------------------------------------------
 // Smooth Turbo navigation — kill flicker / button jitter / style flash.
@@ -38,10 +64,10 @@ function getNavSelectorFor(bodyEl) {
 }
 
 function preselectNavInBody(bodyEl, pathname) {
-    // Always suppress first-frame transitions and start in kb-mode, even on
-    // pages that don't use initNav (game win overlay, level modal still use
-    // kb-mode logic via their own code).
-    bodyEl.classList.add('nav-no-anim', 'kb-mode');
+    bodyEl.classList.add('nav-no-anim');
+    if (!(window.innerHeight > window.innerWidth * 1.2)) {
+        bodyEl.classList.add('kb-mode');
+    }
 
     const sel = getNavSelectorFor(bodyEl);
     if (!sel) return;
@@ -96,6 +122,8 @@ document.addEventListener('turbo:before-render', event => {
     const newBody = event.detail.newBody;
     if (newBody) {
         preselectNavInBody(newBody, _pendingVisitPath || location.pathname);
+        const root = newBody.querySelector('.game-root');
+        if (root) scaleGameRoot(root, newBody);
     }
 
     const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));

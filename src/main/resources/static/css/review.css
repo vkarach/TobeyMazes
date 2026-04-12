@@ -233,3 +233,73 @@
 .rv-modal-close-btn {
     margin-top: 4px;
 }
+
+/* ============================
+   MOBILE PORTRAIT — REVIEW
+   ============================ */
+body.mobile .rv-card {
+    min-width: auto;
+    max-width: 540px;
+    width: calc(100% - 32px);
+    padding: 28px 24px;
+    gap: 10px;
+}
+
+body.mobile .rv-overall-label {
+    font-size: 12px;
+}
+
+body.mobile .rv-overall-stars {
+    font-size: 20px;
+}
+
+body.mobile .rv-modal-box {
+    min-width: auto;
+    max-width: 540px;
+    width: 92%;
+    padding: 24px 20px;
+    gap: 14px;
+}
+
+body.mobile .rv-modal-title {
+    font-size: 20px;
+}
+
+body.mobile .rv-comment {
+    font-size: 12px;
+    height: 80px;
+    padding: 12px 14px;
+}
+
+body.mobile .rv-star img {
+    width: 40px;
+    height: 40px;
+}
+
+body.mobile .rv-review-name {
+    font-size: 12px;
+}
+
+body.mobile .rv-review-stars {
+    font-size: 11px;
+}
+
+body.mobile .rv-review-comment {
+    font-size: 11px;
+}
+
+body.mobile .rv-review-date {
+    font-size: 9px;
+}
+
+body.mobile .rv-guest {
+    font-size: 14px;
+}
+
+body.mobile .rv-login-link {
+    font-size: 14px;
+}
+
+body.mobile .rv-thanks {
+    font-size: 12px;
+}

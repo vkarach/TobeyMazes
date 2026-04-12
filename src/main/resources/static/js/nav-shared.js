@@ -30,7 +30,8 @@ function initNav(selector, opts = {}) {
         sessionStorage.setItem(storageKey, String(selected));
     }
 
-    let mouseMode = false;
+    const _isMobile = window.innerHeight > window.innerWidth * 1.2;
+    let mouseMode = _isMobile;
     // Track real mouse position to distinguish stale cursor (after Turbo nav)
     // from genuine new movement
     let lastMouseX = null, lastMouseY = null;
@@ -39,12 +40,11 @@ function initNav(selector, opts = {}) {
         btns.forEach(b => b.classList.remove('active'));
         if (!mouseMode && btns[selected]) btns[selected].classList.add('active');
     }
-    // Page starts in keyboard mode — sync body class so CSS hover overrides apply
-    // even if previous page (Turbo) left it removed
-    document.body.classList.add('kb-mode');
-    // Suppress nav button transitions until the user actually interacts.
-    // This prevents the .active highlight from animating in on every page load
-    // (even one stray frame is visible as a micro-twitch).
+    if (!_isMobile) {
+        document.body.classList.add('kb-mode');
+    } else {
+        document.body.classList.remove('kb-mode');
+    }
     document.body.classList.add('nav-no-anim');
     updateNav();
     function enableAnim() { document.body.classList.remove('nav-no-anim'); }
@@ -116,6 +116,18 @@ function initNav(selector, opts = {}) {
             if (mouseMode) { selected = i; saveSelected(); }
         }, sig);
         btn.addEventListener('click', () => saveSelected(), sig);
+
+        // Touch: show active state on press for immediate feedback
+        if (_isMobile) {
+            btn.addEventListener('touchstart', () => {
+                btns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selected = i; saveSelected();
+            }, { ...sig, passive: true });
+            btn.addEventListener('touchend', () => {
+                setTimeout(() => btn.classList.remove('active'), 120);
+            }, { ...sig, passive: true });
+        }
     });
 
     document.addEventListener('mousemove', e => {

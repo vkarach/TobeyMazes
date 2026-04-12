@@ -459,3 +459,144 @@ body.kb-mode .win-btn:hover:not(.active) {
   background: rgba(245, 197, 24, 0.06);
   transform: none;
 }
+
+/* ============================
+   MOBILE PORTRAIT — GAME
+   ============================ */
+body.mobile .page {
+  gap: 10px;
+  padding: 14px 0;
+}
+
+body.mobile .game-area {
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+body.mobile .maze-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+body.mobile .level-title {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+body.mobile .maze-panel {
+  padding: 10px;
+}
+
+body.mobile .sidebar {
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 14px;
+}
+
+body.mobile .hud {
+  flex-direction: row;
+  width: fit-content !important;
+  padding: 14px 20px;
+  gap: 0;
+  justify-content: center;
+  align-self: center;
+}
+
+body.mobile .hud-row {
+  padding: 0 18px;
+  gap: 6px;
+  align-items: center;
+  text-align: center;
+}
+
+body.mobile .hud-row + .hud-row {
+  border-top: none;
+  border-left: 1px solid rgba(245, 197, 24, 0.25);
+}
+
+body.mobile .hud-label {
+  font-size: 10px;
+}
+
+body.mobile .hud-value {
+  font-size: 22px;
+}
+
+body.mobile .controls {
+  gap: 3px;
+}
+
+body.mobile .ctrl-row {
+  gap: 3px;
+}
+
+body.mobile .ctrl-btn {
+  width: 72px;
+  height: 72px;
+  font-size: 22px;
+}
+
+body.mobile .ctrl-spacer {
+  width: 72px;
+  height: 72px;
+}
+
+body.mobile .bottom-bar {
+  gap: 20px;
+}
+
+body.mobile .action-link {
+  font-size: 14px;
+  padding: 8px 0;
+}
+
+body.mobile .action-link .key {
+  display: none;
+}
+
+body.mobile .bar-sep {
+  height: 18px;
+}
+
+/* Win overlay */
+body.mobile #win-overlay {
+  gap: 28px;
+}
+
+body.mobile .win-title {
+  font-size: 42px;
+}
+
+body.mobile .win-stats {
+  gap: 36px;
+}
+
+body.mobile .win-stat-label {
+  font-size: 12px;
+}
+
+body.mobile .win-stat-value {
+  font-size: 28px;
+}
+
+body.mobile .win-improve {
+  font-size: 12px;
+}
+
+body.mobile .win-guest-hint {
+  white-space: normal;
+  max-width: 480px;
+  font-size: 12px;
+}
+
+body.mobile .win-guest-line {
+  white-space: normal;
+}
+
+body.mobile .win-btn {
+  font-size: 16px;
+  padding: 16px 28px;
+}

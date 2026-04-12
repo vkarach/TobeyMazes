@@ -327,15 +327,29 @@
         winInputLocked = true;
         setTimeout(() => { winInputLocked = false; }, 80);
 
+        const _isMobile = window.innerHeight > window.innerWidth * 1.2;
+
         function updateWinNav() {
             winBtns.forEach(b => b.classList.remove('active'));
             if (!winMouse && winBtns[winSel]) winBtns[winSel].classList.add('active');
         }
-        document.body.classList.add('kb-mode');
+        if (!_isMobile) document.body.classList.add('kb-mode');
+        winMouse = _isMobile;
         updateWinNav();
 
         winBtns.forEach((btn, i) => {
             btn.addEventListener('mouseenter', () => { winSel = i; }, sig);
+
+            if (_isMobile) {
+                btn.addEventListener('touchstart', () => {
+                    winBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    winSel = i;
+                }, { passive: true });
+                btn.addEventListener('touchend', () => {
+                    setTimeout(() => btn.classList.remove('active'), 120);
+                }, { passive: true });
+            }
         });
 
         document.addEventListener('mousemove', () => {

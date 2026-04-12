@@ -96,3 +96,55 @@
     padding-top: 20px;
     margin-bottom: -12px;
 }
+
+/* ============================
+   MOBILE PORTRAIT — ABOUT
+   ============================ */
+body.mobile .about-card {
+    max-width: 540px;
+    width: calc(100% - 32px);
+    padding: 28px 24px;
+    gap: 8px;
+}
+
+body.mobile .about-name {
+    font-size: 26px;
+}
+
+body.mobile .about-version {
+    font-size: 14px;
+}
+
+body.mobile .about-how {
+    font-size: 16px;
+}
+
+body.mobile .about-list li {
+    font-size: 12px;
+    padding: 6px 0 6px 22px;
+}
+
+body.mobile .about-key {
+    font-size: 12px;
+}
+
+body.mobile .about-text {
+    font-size: 13px;
+    max-width: 100%;
+}
+
+body.mobile .about-label {
+    font-size: 13px;
+}
+
+body.mobile .about-author {
+    font-size: 18px;
+}
+
+body.mobile .about-thanks {
+    font-size: 14px;
+}
+
+body.mobile .about-copyright {
+    font-size: 8px;
+}

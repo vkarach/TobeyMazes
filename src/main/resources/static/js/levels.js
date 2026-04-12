@@ -28,7 +28,8 @@
     document.addEventListener('mousemove',   enableAnim, animOpts);
     document.addEventListener('pointerdown', enableAnim, animOpts);
 
-    let mouseMode = false;
+    const _isMobile = window.innerHeight > window.innerWidth * 1.2;
+    let mouseMode = _isMobile;
     let selected = 0;
     let selectedForm = null;
     let bestResults = [];
@@ -36,7 +37,11 @@
     let modalClosedAt = 0;
     const scriptStartedAt = performance.now();
     const NAV_ARRIVAL_ENTER_LOCK_MS = 120;
-    document.body.classList.add('kb-mode');
+    if (!_isMobile) {
+        document.body.classList.add('kb-mode');
+    } else {
+        document.body.classList.remove('kb-mode');
+    }
 
     function getPerRow(cards) {
         if (cards.length === 0) return 0;
@@ -164,7 +169,7 @@
         document.getElementById('modal-overlay').classList.add('open');
 
         modalSel = 1;
-        modalMouse = false;
+        modalMouse = _isMobile;
         updateModalNav();
     }
 
@@ -289,12 +294,33 @@
             if (isModalOpen()) return;
             openModal(card);
         }, sig);
+
+        if (_isMobile) {
+            card.addEventListener('touchstart', () => {
+                selected = i;
+                updateSelected(levelCards, selected);
+            }, { ...sig, passive: true });
+            card.addEventListener('touchend', () => {
+                setTimeout(() => clearSelected(levelCards), 150);
+            }, { ...sig, passive: true });
+        }
     });
 
     modalBtns.forEach((btn, i) => {
         btn.addEventListener('mouseenter', () => {
             if (modalMouse) modalSel = i;
         }, sig);
+
+        if (_isMobile) {
+            btn.addEventListener('touchstart', () => {
+                modalBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                modalSel = i;
+            }, { ...sig, passive: true });
+            btn.addEventListener('touchend', () => {
+                setTimeout(() => btn.classList.remove('active'), 120);
+            }, { ...sig, passive: true });
+        }
     });
 
     document.addEventListener('click', e => {

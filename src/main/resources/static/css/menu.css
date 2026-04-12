@@ -15,3 +15,12 @@
   pointer-events: none;
   user-select: none;
 }
+
+/* ============================
+   MOBILE PORTRAIT — MENU
+   ============================ */
+body.mobile .version-tag {
+  font-size: 8px;
+  right: 6px;
+  bottom: 4px;
+}

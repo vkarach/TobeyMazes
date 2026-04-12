@@ -192,3 +192,37 @@ input[type="number"] { -moz-appearance: textfield; }
     margin-top: 4px;
 }
 .modal-close:hover { color: #aaa; }
+
+/* ============================
+   MOBILE PORTRAIT — PROFILE
+   ============================ */
+body.mobile .profile-card {
+  min-width: auto;
+  width: calc(100% - 32px);
+  max-width: 540px;
+  padding: 28px 24px;
+}
+
+body.mobile .pf-username {
+  font-size: 26px;
+}
+
+body.mobile .pf-stats {
+  gap: 28px;
+}
+
+body.mobile .pf-stat-label {
+  font-size: 11px;
+}
+
+body.mobile .pf-stat-value {
+  font-size: 18px;
+}
+
+body.mobile .pf-member {
+  font-size: 10px;
+}
+
+body.mobile .error-text {
+  font-size: 14px;
+}

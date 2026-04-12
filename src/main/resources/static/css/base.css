@@ -278,3 +278,104 @@ body.nav-no-anim .nav-btn::before {
     pointer-events: auto;
     opacity: 1;
 }
+
+/* ============================
+   MOBILE PORTRAIT
+   ============================ */
+body.mobile {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.mobile .menu-wrap {
+    margin-top: 0 !important;
+    padding: 100px 20px 40px;
+    justify-content: flex-start;
+}
+
+body.mobile .title-line-1,
+body.mobile .title-line-2 {
+    font-size: 64px !important;
+}
+
+body.mobile .title-line-2 {
+    margin-bottom: 48px !important;
+}
+
+body.mobile .menu-btn {
+    font-size: 28px;
+    margin-bottom: 32px;
+    padding: 10px 0;
+}
+
+body.mobile .menu-btn::before {
+    left: -44px;
+    font-size: 28px;
+}
+
+body.mobile .nav-btn {
+    font-size: 18px;
+    padding: 8px 0 8px 28px;
+}
+
+body.mobile .nav-btn::before {
+    font-size: 18px;
+}
+
+body.mobile .card-panel {
+    max-width: 520px;
+    width: calc(100% - 32px);
+}
+
+body.mobile .modal-overlay {
+    position: absolute;
+}
+
+body.mobile .modal-title {
+    font-size: 24px !important;
+}
+
+body.mobile .modal-box {
+    min-width: auto !important;
+    width: 92%;
+    max-width: 540px;
+    padding: 30px 24px;
+    gap: 16px;
+}
+
+body.mobile .pixel-input {
+    width: 100%;
+    max-width: 400px;
+    font-size: 16px;
+    padding: 14px 16px;
+}
+
+body.mobile .confirm-btn {
+    font-size: 20px;
+    padding: 12px 0;
+}
+
+body.mobile .modal-hint {
+    font-size: 14px;
+}
+
+body.mobile .modal-error {
+    font-size: 14px;
+}
+
+body.mobile .modal-close {
+    font-size: 14px !important;
+    padding: 10px 0;
+}
+
+body.mobile .gradient-sep {
+    width: 80%;
+}
+
+body.mobile .error-sep {
+    width: 280px;
+}
+
+body.mobile .error-message {
+    font-size: 14px;
+}
