@@ -1,5 +1,6 @@
 .version-tag {
   position: fixed;
+  /* right/bottom set by repositionVersionTag() in scale.js */
   right: 10px;
   bottom: 6px;
   z-index: 9999;
@@ -16,6 +17,5 @@
    ============================ */
 body.mobile .version-tag {
   font-size: 8px;
-  right: 6px;
-  bottom: 4px;
+  /* right/bottom overridden by JS */
 }

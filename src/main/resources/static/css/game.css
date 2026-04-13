@@ -557,6 +557,15 @@ body.mobile .action-link .key {
   display: none;
 }
 
+body.mobile-land .action-link {
+  font-size: 18px;
+  padding: 6px 0;
+}
+
+body.mobile-land .action-link .key {
+  display: none;
+}
+
 body.mobile .bar-sep {
   height: 18px;
 }

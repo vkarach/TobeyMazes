@@ -1,0 +1,208 @@
+<style>
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('/fonts/PressStart2P') format('truetype');
+}
+:root {
+  --gold: #F5C518;
+  --gold-dim: rgba(245,197,24,0.5);
+  --panel: rgba(20,10,5,0.88);
+}
+.demo-scene {
+  position: relative;
+  background: #000;
+  border: 2px solid rgba(245,197,24,0.15);
+  border-radius: 6px;
+  height: 60px;
+}
+.demo-fs-btn {
+  position: absolute;
+  top: 50%; right: 10px;
+  transform: translateY(-50%);
+  width: 32px; height: 32px;
+  color: rgba(245,197,24,0.4);
+  display: flex; align-items: center; justify-content: center;
+}
+.hint-base {
+  position: absolute;
+  top: 50%; right: 50px;
+  transform: translateY(-50%);
+  display: flex; align-items: center;
+  font-family: 'Press Start 2P', monospace;
+}
+.bubble {
+  font-size: 7px; color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  background: var(--panel);
+  border: 2px solid var(--gold-dim);
+  border-radius: 4px;
+  padding: 7px 11px;
+  white-space: nowrap; line-height: 1;
+}
+.card-wrapper { display: flex; flex-direction: column; gap: 10px; }
+.design-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: rgba(245,197,24,0.45);
+  letter-spacing: 1px;
+}
+.cards-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 560px) { .cards-2x2 { grid-template-columns: 1fr; } }
+
+/* ---- Anim 1: оба шеврона скользят вместе ---- */
+.h1 { gap: 4px; }
+.h1-chevrons {
+  display: flex; gap: 1px; align-items: center;
+  animation: slide-right 0.9s ease-in-out infinite alternate;
+}
+.h1-ch { font-size: 12px; color: var(--gold); line-height: 1; opacity: 0.5; }
+.h1-ch:last-child { opacity: 0.9; }
+@keyframes slide-right {
+  from { transform: translateX(0); }
+  to   { transform: translateX(4px); }
+}
+
+/* ---- Anim 2: шевроны волной (cascade) ---- */
+.h2 { gap: 4px; }
+.h2-chevrons { display: flex; gap: 1px; align-items: center; }
+.h2-ch {
+  font-size: 12px; color: var(--gold); line-height: 1;
+  display: inline-block;
+  animation: cascade 1s ease-in-out infinite alternate;
+}
+.h2-ch:first-child { opacity: 0.4; animation-delay: 0s; }
+.h2-ch:last-child  { opacity: 0.85; animation-delay: 0.2s; }
+@keyframes cascade {
+  from { transform: translateX(0); opacity: 0.3; }
+  to   { transform: translateX(3px); opacity: 1; }
+}
+
+/* ---- Anim 3: fade-in волна (пульс непрозрачности) ---- */
+.h3 { gap: 4px; }
+.h3-chevrons { display: flex; gap: 1px; align-items: center; }
+.h3-ch {
+  font-size: 12px; color: var(--gold); line-height: 1;
+  display: inline-block;
+  animation: fade-pulse 1.2s ease-in-out infinite;
+}
+.h3-ch:first-child  { animation-delay: 0s; }
+.h3-ch:last-child   { animation-delay: 0.25s; }
+@keyframes fade-pulse {
+  0%,100% { opacity: 0.2; }
+  50%      { opacity: 0.9; }
+}
+
+/* ---- Anim 4: скользит + fade (комбо) ---- */
+.h4 { gap: 4px; }
+.h4-chevrons { display: flex; gap: 0px; align-items: center; }
+.h4-ch {
+  font-size: 12px; color: var(--gold); line-height: 1;
+  display: inline-block;
+  animation: combo 1s cubic-bezier(0.4,0,0.2,1) infinite alternate;
+}
+.h4-ch:first-child { animation-delay: 0s;    opacity: 0.35; }
+.h4-ch:last-child  { animation-delay: 0.15s; opacity: 0.8; }
+@keyframes combo {
+  from { transform: translateX(-1px); opacity: 0.2; }
+  to   { transform: translateX(2px);  opacity: 1;   }
+}
+</style>
+
+<h2>A3 — шевроны с анимацией</h2>
+<p class="subtitle">Тот же бабл + два шеврона ›, разные варианты движения. Кликни что нравится.</p>
+
+<div class="cards-2x2">
+
+  <div class="card-wrapper">
+    <div class="design-label">1 — скользят вместе</div>
+    <div class="card" data-choice="1" onclick="toggleSelect(this)">
+      <div class="card-image" style="padding:0;background:#000;">
+        <div class="demo-scene">
+          <div class="hint-base h1">
+            <span class="bubble">fullscreen</span>
+            <span class="h1-chevrons">
+              <span class="h1-ch">›</span>
+              <span class="h1-ch">›</span>
+            </span>
+          </div>
+          <div class="demo-fs-btn"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 1h5v2H3v3H1V1zm9 0h5v5h-2V3h-3V1zM1 10h2v3h3v2H1v-5zm12 3h-3v2h5v-5h-2v3z"/></svg></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>Скользят вместе</h3>
+        <p>Оба шеврона двигаются как одно целое — туда-обратно.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-wrapper">
+    <div class="design-label">2 — каскад (волна)</div>
+    <div class="card" data-choice="2" onclick="toggleSelect(this)">
+      <div class="card-image" style="padding:0;background:#000;">
+        <div class="demo-scene">
+          <div class="hint-base h2">
+            <span class="bubble">fullscreen</span>
+            <span class="h2-chevrons">
+              <span class="h2-ch">›</span>
+              <span class="h2-ch">›</span>
+            </span>
+          </div>
+          <div class="demo-fs-btn"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 1h5v2H3v3H1V1zm9 0h5v5h-2V3h-3V1zM1 10h2v3h3v2H1v-5zm12 3h-3v2h5v-5h-2v3z"/></svg></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>Каскад</h3>
+        <p>Шевроны двигаются со сдвигом — создаёт ощущение потока вправо.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-wrapper">
+    <div class="design-label">3 — пульс (fade)</div>
+    <div class="card" data-choice="3" onclick="toggleSelect(this)">
+      <div class="card-image" style="padding:0;background:#000;">
+        <div class="demo-scene">
+          <div class="hint-base h3">
+            <span class="bubble">fullscreen</span>
+            <span class="h3-chevrons">
+              <span class="h3-ch">›</span>
+              <span class="h3-ch">›</span>
+            </span>
+          </div>
+          <div class="demo-fs-btn"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 1h5v2H3v3H1V1zm9 0h5v5h-2V3h-3V1zM1 10h2v3h3v2H1v-5zm12 3h-3v2h5v-5h-2v3z"/></svg></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>Пульс</h3>
+        <p>Шевроны мигают по очереди — нет движения, только яркость.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-wrapper">
+    <div class="design-label">4 — скользят + fade (комбо)</div>
+    <div class="card" data-choice="4" onclick="toggleSelect(this)">
+      <div class="card-image" style="padding:0;background:#000;">
+        <div class="demo-scene">
+          <div class="hint-base h4">
+            <span class="bubble">fullscreen</span>
+            <span class="h4-chevrons">
+              <span class="h4-ch">›</span>
+              <span class="h4-ch">›</span>
+            </span>
+          </div>
+          <div class="demo-fs-btn"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 1h5v2H3v3H1V1zm9 0h5v5h-2V3h-3V1zM1 10h2v3h3v2H1v-5zm12 3h-3v2h5v-5h-2v3z"/></svg></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>Скользят + fade</h3>
+        <p>Движение + затухание по очереди — ощущение «зова» в сторону кнопки.</p>
+      </div>
+    </div>
+  </div>
+
+</div>

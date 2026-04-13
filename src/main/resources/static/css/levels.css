@@ -386,3 +386,33 @@ body.mobile .back-link {
 body.mobile .back-link .key {
   display: none;
 }
+
+/* ============================
+   MOBILE LANDSCAPE
+   ============================ */
+/* Canvas is 1280×720 at ~0.65x scale — bump up game-space sizes so
+   elements are readable on a small landscape phone screen.          */
+body.mobile-land .page-title {
+  font-size: 28px;
+}
+
+body.mobile-land .card-number {
+  font-size: 11px;
+}
+
+body.mobile-land .card-title {
+  font-size: 13px;
+}
+
+body.mobile-land .card-diff {
+  font-size: 9px;
+}
+
+body.mobile-land .back-link {
+  font-size: 18px;
+  padding: 6px 0;
+}
+
+body.mobile-land .back-link .key {
+  display: none;
+}

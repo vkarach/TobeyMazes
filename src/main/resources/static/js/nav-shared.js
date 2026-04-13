@@ -30,8 +30,8 @@ function initNav(selector, opts = {}) {
         sessionStorage.setItem(storageKey, String(selected));
     }
 
-    const _isMobile = window.innerHeight > window.innerWidth * 1.2;
-    let mouseMode = _isMobile;
+    const _isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    let mouseMode = _isTouch;
     // Track real mouse position to distinguish stale cursor (after Turbo nav)
     // from genuine new movement
     let lastMouseX = null, lastMouseY = null;
@@ -40,7 +40,7 @@ function initNav(selector, opts = {}) {
         btns.forEach(b => b.classList.remove('active'));
         if (!mouseMode && btns[selected]) btns[selected].classList.add('active');
     }
-    if (!_isMobile) {
+    if (!_isTouch) {
         document.body.classList.add('kb-mode');
     } else {
         document.body.classList.remove('kb-mode');
@@ -118,7 +118,7 @@ function initNav(selector, opts = {}) {
         btn.addEventListener('click', () => saveSelected(), sig);
 
         // Touch: show active state on press for immediate feedback
-        if (_isMobile) {
+        if (_isTouch) {
             btn.addEventListener('touchstart', () => {
                 btns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');

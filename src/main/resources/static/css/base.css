@@ -80,6 +80,7 @@ body.on-profile #bg-profile { opacity: 1; }
 body.on-about #bg-about { opacity: 1; }
 body.on-leaderboard #bg-leaderboard { opacity: 1; }
 body.on-game #bg-game { opacity: 1; }
+body.on-secret #bg-game { opacity: 1; }
 .bg-layer {
     position: absolute;
     inset: 0;
@@ -168,6 +169,19 @@ body.kb-mode .menu-btn:hover:not(.active)::before {
     opacity: 0;
 }
 
+/* On touch devices :hover is triggered by tap and sticks — suppress it so
+   buttons never flash gold when navigating between pages.
+   .active from touchstart feedback is NOT affected by this rule.          */
+@media (hover: none) {
+    .menu-btn:hover:not(.active) {
+        color: #91CDFF;
+        transform: none;
+    }
+    .menu-btn:hover:not(.active)::before {
+        opacity: 0;
+    }
+}
+
 /* Shared nav-button: small caret-style button used across pages */
 .nav-btn {
     font-family: 'Press Start 2P', monospace;
@@ -205,6 +219,14 @@ body.kb-mode .nav-btn:hover:not(.active) {
     transform: none;
 }
 body.kb-mode .nav-btn:hover:not(.active)::before { opacity: 0; }
+
+@media (hover: none) {
+    .nav-btn:hover:not(.active) {
+        color: #91CDFF;
+        transform: none;
+    }
+    .nav-btn:hover:not(.active)::before { opacity: 0; }
+}
 
 /* Shared card panel background */
 .card-panel {
@@ -373,6 +395,161 @@ body.mobile .modal-close {
 
 body.mobile .gradient-sep {
     width: 80%;
+}
+
+/* ============================
+   MOBILE LANDSCAPE
+   ============================ */
+body.mobile-land {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* In landscape the canvas stays at 1280×720 but scaled down (~0.6–0.85x).
+   Increase game-space sizes so elements are finger-friendly on screen. */
+body.mobile-land .menu-wrap {
+    margin-top: -80px !important;
+}
+
+body.mobile-land .title-line-1,
+body.mobile-land .title-line-2 {
+    font-size: 52px !important;
+}
+
+body.mobile-land .title-line-2 {
+    margin-bottom: 36px !important;
+}
+
+body.mobile-land .menu-btn {
+    font-size: 24px;
+    margin-bottom: 18px;
+    padding: 6px 0;
+}
+
+body.mobile-land .menu-btn::before {
+    left: -38px;
+    font-size: 24px;
+}
+
+body.mobile-land .nav-btn {
+    font-size: 14px;
+    padding: 6px 0 6px 22px;
+}
+
+body.mobile-land .nav-btn::before {
+    font-size: 14px;
+}
+
+body.mobile-land .modal-overlay {
+    position: absolute;
+}
+
+/* Fullscreen toggle button (touch devices) */
+.fs-toggle {
+    position: fixed;
+    top: 8px;   /* overridden by repositionFsOverlay() after scale */
+    right: 8px; /* overridden by repositionFsOverlay() after scale */
+    z-index: 99999;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    color: rgba(245, 197, 24, 0.38);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 300ms ease, filter 300ms ease;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fs-toggle.fs-on {
+    color: #FFD700;
+    filter: drop-shadow(0 0 4px rgba(245, 197, 24, 0.5));
+}
+
+.fs-toggle:active {
+    color: #FFD700;
+}
+
+.fs-toggle svg {
+    display: block;
+}
+
+/* First-visit hint */
+.fs-hint {
+    position: fixed;
+    top: 8px;    /* overridden by repositionFsOverlay() after scale */
+    right: 48px; /* overridden by repositionFsOverlay() after scale */
+    height: 32px;
+    z-index: 99998;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    transform: translateX(6px);
+    animation: fs-hint-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+
+.fs-hint-bubble {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+    background: var(--panel);
+    border: 2px solid rgba(245, 197, 24, 0.5);
+    border-radius: 4px;
+    padding: 6px 10px;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.fs-hint-arrow {
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    line-height: 1;
+}
+
+.fs-hint-arrow span {
+    font-size: 22px;
+    color: #F5C518;
+    line-height: 1;
+    display: inline-block;
+    position: relative;
+    top: -1px;
+    animation: fs-chevron-combo 1s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+}
+
+.fs-hint-arrow span:first-child {
+    opacity: 0.35;
+    animation-delay: 0s;
+}
+
+.fs-hint-arrow span:last-child {
+    opacity: 0.8;
+    animation-delay: 0.15s;
+}
+
+@keyframes fs-chevron-combo {
+    from { transform: translateX(-1px); opacity: 0.2; }
+    to   { transform: translateX(2px);  opacity: 1; }
+}
+
+@keyframes fs-hint-in {
+    from { opacity: 0; transform: translateX(6px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.fs-hint-hide {
+    animation: fs-hint-out 0.35s ease forwards;
+}
+
+@keyframes fs-hint-out {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(6px); }
 }
 
 body.mobile .error-sep {

@@ -28,8 +28,8 @@
     document.addEventListener('mousemove',   enableAnim, animOpts);
     document.addEventListener('pointerdown', enableAnim, animOpts);
 
-    const _isMobile = window.innerHeight > window.innerWidth * 1.2;
-    let mouseMode = _isMobile;
+    const _isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    let mouseMode = _isTouch;
     let selected = 0;
     let selectedForm = null;
     let bestResults = [];
@@ -37,7 +37,7 @@
     let modalClosedAt = 0;
     const scriptStartedAt = performance.now();
     const NAV_ARRIVAL_ENTER_LOCK_MS = 120;
-    if (!_isMobile) {
+    if (!_isTouch) {
         document.body.classList.add('kb-mode');
     } else {
         document.body.classList.remove('kb-mode');
@@ -169,7 +169,7 @@
         document.getElementById('modal-overlay').classList.add('open');
 
         modalSel = 1;
-        modalMouse = _isMobile;
+        modalMouse = _isTouch;
         updateModalNav();
     }
 
@@ -295,7 +295,7 @@
             openModal(card);
         }, sig);
 
-        if (_isMobile) {
+        if (_isTouch) {
             card.addEventListener('touchstart', () => {
                 selected = i;
                 updateSelected(levelCards, selected);
@@ -311,7 +311,7 @@
             if (modalMouse) modalSel = i;
         }, sig);
 
-        if (_isMobile) {
+        if (_isTouch) {
             btn.addEventListener('touchstart', () => {
                 modalBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');

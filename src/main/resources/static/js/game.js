@@ -327,20 +327,20 @@
         winInputLocked = true;
         setTimeout(() => { winInputLocked = false; }, 80);
 
-        const _isMobile = window.innerHeight > window.innerWidth * 1.2;
+        const _isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
         function updateWinNav() {
             winBtns.forEach(b => b.classList.remove('active'));
             if (!winMouse && winBtns[winSel]) winBtns[winSel].classList.add('active');
         }
-        if (!_isMobile) document.body.classList.add('kb-mode');
-        winMouse = _isMobile;
+        if (!_isTouch) document.body.classList.add('kb-mode');
+        winMouse = _isTouch;
         updateWinNav();
 
         winBtns.forEach((btn, i) => {
             btn.addEventListener('mouseenter', () => { winSel = i; }, sig);
 
-            if (_isMobile) {
+            if (_isTouch) {
                 btn.addEventListener('touchstart', () => {
                     winBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');

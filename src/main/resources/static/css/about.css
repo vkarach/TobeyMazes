@@ -80,6 +80,21 @@
     color: #F5C518;
     text-shadow: 2px 2px 0 #000;
     -webkit-text-stroke: 0.5px #000;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.15s, text-shadow 0.15s;
+}
+
+.about-author:hover {
+    color: #fff;
+    text-shadow: 0 0 8px #F5C518, 2px 2px 0 #000;
+}
+
+.about-author:active {
+    transform: scale(0.92);
 }
 
 .about-thanks {
