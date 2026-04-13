@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>About</title>
-    <link rel="preload" th:href="@{/ui/fxgl/fonts/PressStart2P-Regular.ttf}" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" th:href="@{/ui/shared/fonts/PressStart2P-Regular.ttf}" as="font" type="font/ttf" crossorigin>
     <link rel="preload" th:href="@{/css/menu.css}"   as="style">
     <link rel="preload" th:href="@{/css/levels.css}" as="style">
     <link rel="preload" th:href="@{/css/game.css}"   as="style">
@@ -18,7 +18,7 @@
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
     <script defer th:src="@{/js/scale.js}"></script>
 </head>
-<body class="nav-no-anim kb-mode">
+<body class="on-about nav-no-anim kb-mode">
 <div class="game-root">
     <th:block th:replace="~{fragments/bg-parallax :: parallax-bg}"></th:block>
 

@@ -9,48 +9,61 @@
 
     window._parallaxInited = window._parallaxInited || new WeakSet();
     const inited = window._parallaxInited;
-    // Cache decoded image dimensions across navigations so layers re-init instantly
     window._parallaxImgDims = window._parallaxImgDims || {};
     const imgDims = window._parallaxImgDims;
 
-    document.querySelectorAll('.bg-layer[data-bg]').forEach(layer => {
-        // skip if same DOM element already animated (data-turbo-permanent .bg).
-        // WeakSet keyed by element ref — survives across script re-executions but
-        // a fresh element from a Turbo snapshot restore will not be in it.
-        if (inited.has(layer)) return;
-        inited.add(layer);
+    // Resolve variant groups: within each group exactly one layer gets its alt image
+    const groups = {};
+    document.querySelectorAll('.bg-layer[data-variant-group]').forEach(layer => {
+        const g = layer.dataset.variantGroup;
+        (groups[g] = groups[g] || []).push(layer);
+    });
+    for (const members of Object.values(groups)) {
+        const pick = Math.floor(Math.random() * members.length);
+        members.forEach((layer, i) => {
+            layer._variantUrl = i === pick ? layer.dataset.bgAlt : layer.dataset.bg;
+        });
+    }
 
-        const url   = layer.dataset.bg;
-        const speed = parseFloat(layer.dataset.speed);
-
-        // Set background-image and opacity immediately so the layer is visible
-        // as soon as the image is in the browser cache (no waiting for onload)
+    function applyImage(layer, url) {
         layer.style.backgroundImage = `url('${url}')`;
         layer.style.backgroundRepeat = 'repeat-x';
         layer.style.opacity = '1';
 
-        let layerWidth = 0;
-        function applyDims(naturalW, naturalH) {
-            const h = layer.clientHeight || window.innerHeight || 720;
-            layerWidth = naturalW * (h / naturalH);
-            layer.style.backgroundSize = `${layerWidth}px 100%`;
-        }
-
         if (imgDims[url]) {
-            applyDims(imgDims[url].w, imgDims[url].h);
+            const h = layer.clientHeight || window.innerHeight || 720;
+            layer._layerWidth = imgDims[url].w * (h / imgDims[url].h);
+            layer.style.backgroundSize = `${layer._layerWidth}px 100%`;
         } else {
             const img = new Image();
             img.onload = () => {
                 imgDims[url] = { w: img.naturalWidth, h: img.naturalHeight };
-                applyDims(img.naturalWidth, img.naturalHeight);
+                const h = layer.clientHeight || window.innerHeight || 720;
+                layer._layerWidth = img.naturalWidth * (h / img.naturalHeight);
+                layer.style.backgroundSize = `${layer._layerWidth}px 100%`;
             };
             img.src = url;
         }
+    }
 
+    document.querySelectorAll('.bg-layer[data-bg]').forEach(layer => {
+        const url = layer._variantUrl || layer.dataset.bg;
+
+        const firstTime = !inited.has(layer);
+        if (firstTime) {
+            inited.add(layer);
+            layer._layerWidth = 0;
+        }
+
+        applyImage(layer, url);
+
+        if (!firstTime) return;
+
+        const speed = parseFloat(layer.dataset.speed);
         (function tick(ts) {
-            if (layerWidth > 0) {
+            if (layer._layerWidth > 0) {
                 const totalMs = baseMs + (ts - startTs);
-                const x = -((speed * totalMs / 1000) % layerWidth);
+                const x = -((speed * totalMs / 1000) % layer._layerWidth);
                 layer.style.backgroundPositionX = x + 'px';
             }
             requestAnimationFrame(tick);

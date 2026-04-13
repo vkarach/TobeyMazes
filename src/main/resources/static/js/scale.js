@@ -27,7 +27,7 @@ function scaleGameRoot(rootEl, bodyEl) {
         root.style.position = '';
         root.style.left = '';
         root.style.top = '';
-        root.style.transformOrigin = 'center center';
+        root.style.transformOrigin = 'center 60%';
         root.style.transform = `scale(${Math.max(vw / 1280, vh / 720)})`;
     }
 }

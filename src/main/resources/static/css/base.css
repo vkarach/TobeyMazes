@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Press Start 2P';
-  src: url('/ui/fxgl/fonts/PressStart2P-Regular.ttf') format('truetype');
+  src: url('/ui/shared/fonts/PressStart2P-Regular.ttf') format('truetype');
   font-display: block;
 }
 
@@ -71,12 +71,14 @@ body {
     z-index: 0;
 }
 
-#bg-profile, #bg-game {
+#bg-profile, #bg-about, #bg-game, #bg-leaderboard {
     opacity: 0;
     transition: opacity 0.4s ease;
     pointer-events: none;
 }
 body.on-profile #bg-profile { opacity: 1; }
+body.on-about #bg-about { opacity: 1; }
+body.on-leaderboard #bg-leaderboard { opacity: 1; }
 body.on-game #bg-game { opacity: 1; }
 .bg-layer {
     position: absolute;
@@ -85,6 +87,7 @@ body.on-game #bg-game { opacity: 1; }
     background-position-x: 0;
     opacity: 0;
     transition: opacity 0.2s;
+    image-rendering: pixelated;
 }
 
 .menu-wrap {

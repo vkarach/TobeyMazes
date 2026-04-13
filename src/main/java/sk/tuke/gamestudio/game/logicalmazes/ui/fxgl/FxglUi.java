@@ -28,7 +28,7 @@ public class FxglUi {
 
     public static Font createFont(int size) {
         return Font.loadFont(
-            FileReader.getInputStream("ui/fxgl/fonts/PressStart2P-Regular.ttf"),
+            FileReader.getInputStream("ui/shared/fonts/PressStart2P-Regular.ttf"),
             size
         );
     }

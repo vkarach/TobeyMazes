@@ -12,10 +12,10 @@ public class SharedBackgrounds {
     public ParallaxBackground profileBackground() {
         return new ParallaxBackground(
             new String[]{
-                "ui/fxgl/backgrounds/profilePageParallax/1.png",
-                "ui/fxgl/backgrounds/profilePageParallax/2.png",
-                "ui/fxgl/backgrounds/profilePageParallax/3.png",
-                "ui/fxgl/backgrounds/profilePageParallax/4.png"
+                "ui/shared/backgrounds/profile/1.png",
+                "ui/shared/backgrounds/profile/2.png",
+                "ui/shared/backgrounds/profile/3.png",
+                "ui/shared/backgrounds/profile/4.png"
             },
             new double[]{15, 40, 60, 100}
         );
@@ -25,10 +25,10 @@ public class SharedBackgrounds {
     public ParallaxBackground mainMenuBackground() {
         return new ParallaxBackground(
             new String[]{
-                "ui/fxgl/backgrounds/mainMenuParallax/1.png",
-                "ui/fxgl/backgrounds/mainMenuParallax/2.png",
-                "ui/fxgl/backgrounds/mainMenuParallax/3.png",
-                "ui/fxgl/backgrounds/mainMenuParallax/4_with_konek.png"
+                "ui/shared/backgrounds/main/1.png",
+                "ui/shared/backgrounds/main/2.png",
+                "ui/shared/backgrounds/main/3.png",
+                "ui/shared/backgrounds/main/4_with_konek.png"
             },
             new double[]{15, 40, 60, 100}
         );
@@ -38,10 +38,10 @@ public class SharedBackgrounds {
     public ParallaxBackground aboutBackground() {
         return new ParallaxBackground(
             new String[]{
-                "ui/fxgl/backgrounds/aboutPageParallax/1.png",
-                "ui/fxgl/backgrounds/aboutPageParallax/2.png",
-                "ui/fxgl/backgrounds/aboutPageParallax/3.png",
-                "ui/fxgl/backgrounds/aboutPageParallax/4.png"
+                "ui/shared/backgrounds/about/1.png",
+                "ui/shared/backgrounds/about/2.png",
+                "ui/shared/backgrounds/about/3.png",
+                "ui/shared/backgrounds/about/4.png"
             },
             new double[]{15, 40, 60, 100}
         );

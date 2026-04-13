@@ -1,8 +1,3 @@
-.bg-layer-1 { background-image: url('/ui/fxgl/backgrounds/profilePageParallax/1.png'); }
-.bg-layer-2 { background-image: url('/ui/fxgl/backgrounds/profilePageParallax/2.png'); }
-.bg-layer-3 { background-image: url('/ui/fxgl/backgrounds/profilePageParallax/3.png'); }
-.bg-layer-4 { background-image: url('/ui/fxgl/backgrounds/profilePageParallax/4.png'); }
-
 .profile-card {
     padding: 28px 40px;
     min-width: 380px;

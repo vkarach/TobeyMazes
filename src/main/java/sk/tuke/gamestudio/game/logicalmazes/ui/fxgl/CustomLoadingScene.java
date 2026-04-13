@@ -22,7 +22,7 @@ public class CustomLoadingScene extends LoadingScene {
     private final double barStartX;
 
     public CustomLoadingScene() {
-        ImageView bg = new ImageView(new Image(FileReader.getInputStream("ui/fxgl/backgrounds/mainMenuParallax/origbig.png")));
+        ImageView bg = new ImageView(new Image(FileReader.getInputStream("ui/shared/backgrounds/main/origbig.png")));
         bg.setFitWidth(FXGL.getAppWidth());
         bg.setFitHeight(FXGL.getAppHeight());
 
