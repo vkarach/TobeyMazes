@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 import sk.tuke.gamestudio.game.logicalmazes.core.*;
 import sk.tuke.gamestudio.service.BestResultService;
+import sk.tuke.gamestudio.service.ReviewService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,15 +19,22 @@ import java.util.Map;
 public class TobeyMazesController {
     private final WebGameSession session;
     private final BestResultService bestResultService;
+    private final ReviewService reviewService;
 
-    public TobeyMazesController(WebGameSession session, BestResultService bestResultService) {
+    public TobeyMazesController(WebGameSession session, BestResultService bestResultService, ReviewService reviewService) {
         this.session = session;
         this.bestResultService = bestResultService;
+        this.reviewService = reviewService;
     }
 
     @RequestMapping("/menu")
     public String menu(Model model) {
         model.addAttribute("version", Game.version);
+        Float overall = reviewService.getOverallRating();
+        List<sk.tuke.gamestudio.entity.Review> all = reviewService.getAllReviews();
+        int reviewCount = all != null ? all.size() : 0;
+        model.addAttribute("overallRating", overall != null ? overall : 0f);
+        model.addAttribute("reviewCount", reviewCount);
         return "menu";
     }
 
