@@ -13,9 +13,7 @@
   <th:block th:replace="~{fragments/bg-preloads :: preloads}"></th:block>
   <link rel="stylesheet" th:href="@{/css/base.css}">
   <link rel="stylesheet" th:href="@{/css/levels.css}">
-  <link rel="icon" type="image/png" sizes="32x32"   href="/img/logos/logo-round.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/img/logos/logo-square.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/img/logos/logo-square.png">
+  <th:block th:replace="~{fragments/head :: favicon}"></th:block>
   <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
   <script th:src="@{/js/scale.js}"></script>
 </head>
