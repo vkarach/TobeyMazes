@@ -169,9 +169,8 @@ body.kb-mode .menu-btn:hover:not(.active)::before {
     opacity: 0;
 }
 
-/* On touch devices :hover is triggered by tap and sticks — suppress it so
-   buttons never flash gold when navigating between pages.
-   .active from touchstart feedback is NOT affected by this rule.          */
+/* On touch, :hover sticks after a tap. Suppress it so buttons don't flash gold
+   on page transitions. .active (from touchstart) is not affected. */
 @media (hover: none) {
     .menu-btn:hover:not(.active) {
         color: #91CDFF;
@@ -274,8 +273,8 @@ body.kb-mode .nav-btn:hover:not(.active)::before { opacity: 0; }
     margin-bottom: 10px;
 }
 
-/* Suppress nav button transitions during the very first paint so the
-   active highlight doesn't visibly animate in on every page load */
+/* Suppress nav-button transitions on first paint so the active highlight
+   doesn't animate in. */
 body.nav-no-anim .menu-btn,
 body.nav-no-anim .menu-btn::before,
 body.nav-no-anim .nav-btn,
@@ -405,8 +404,8 @@ body.mobile-land {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* In landscape the canvas stays at 1280×720 but scaled down (~0.6–0.85x).
-   Increase game-space sizes so elements are finger-friendly on screen. */
+/* Landscape keeps the 1280x720 canvas but scales down (~0.6-0.85x).
+   Scale up game-space sizes so elements stay finger-friendly. */
 body.mobile-land .menu-wrap {
     margin-top: -80px !important;
 }

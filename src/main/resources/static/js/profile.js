@@ -117,7 +117,6 @@
         o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }, sig)
     );
 
-    // Modal enter handler — focus next input or submit if last
     document.addEventListener('keydown', e => {
         if (e.key !== 'Enter' || e.repeat) return;
         if (!document.querySelector('.modal-overlay.open')) return;
@@ -128,25 +127,26 @@
         const active = document.activeElement;
         if (!active || !active.closest('.modal-overlay.open')) return;
 
-        // Find visible inputs in the current modal step
         const modal = active.closest('.modal-overlay');
         const inputs = Array.from(modal.querySelectorAll('.pixel-input'))
             .filter(el => el.offsetParent !== null);
         const idx = inputs.indexOf(active);
 
-        // If focused on an input and there's a next one, focus it
         if (idx >= 0 && idx < inputs.length - 1) {
             inputs[idx + 1].focus();
             return;
         }
 
-        // Otherwise submit
         if (document.getElementById('login-modal')?.classList.contains('open')) {
             submitLogin(); return;
         }
         if (document.getElementById('register-modal')?.classList.contains('open')) {
-            if (document.getElementById('reg-step2').style.display !== 'none') submitConfirm();
-            else submitRegister();
+            if (document.getElementById('reg-step2').style.display !== 'none') {
+                submitConfirm();
+            }
+            else {
+                submitRegister();
+            }
             return;
         }
         if (document.getElementById('cp-modal')?.classList.contains('open')) {
@@ -161,14 +161,15 @@
     const selector = document.querySelector('.pf-nav') ? '.pf-nav' : '.menu-wrap .menu-btn';
     initNav(selector, {
         signal: ac.signal,
-        // BACK is the last button — focus it so Enter exits the page
+        // Focus BACK so Enter exits the page.
         initialSelected: btns => btns.length - 1,
         onExit: () => Turbo.visit('/menu'),
         onEsc: () => {
             const open = document.querySelectorAll('.modal-overlay.open');
             if (open.length > 0) {
                 open.forEach(m => m.classList.remove('open'));
-            } else {
+            }
+            else {
                 Turbo.visit('/menu');
             }
         },

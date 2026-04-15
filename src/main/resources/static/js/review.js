@@ -28,7 +28,6 @@
         fillStars(n, 'filled');
     }
 
-    // Mouse interaction on star container
     const starsWrap = document.getElementById('rv-stars');
     let hoverValue = -1;
     if (starsWrap) {
@@ -52,7 +51,6 @@
         }, sig);
     }
 
-    // Submit
     function doSubmit() {
         if (currentRating === 0) return;
         const comment = commentEl ? commentEl.value.trim() : '';
@@ -83,7 +81,7 @@
         submitBtn.addEventListener('click', doSubmit, sig);
     }
 
-    // All reviews modal refs (needed before nav init)
+    // Reviews-modal refs, needed before nav init.
     const rvModal = document.getElementById('rv-modal');
     const rvModalList = document.getElementById('rv-modal-list');
     const rvAllBtn = document.getElementById('rv-all-btn');
@@ -100,7 +98,8 @@
             if (isRvModalOpen()) { closeReviewsModal(); return; }
             if (commentEl && document.activeElement === commentEl) {
                 commentEl.blur();
-            } else {
+            }
+            else {
                 Turbo.visit('/menu');
             }
         },
@@ -132,9 +131,7 @@
         }
     });
 
-    // All reviews modal logic
     function openReviewsModal() {
-        // Deactivate nav buttons behind modal, check if was in kb-mode
         const wasKb = !nav.isMouseMode;
         nav.btns.forEach(b => b.classList.remove('active'));
         rvModal.classList.add('open');
@@ -174,7 +171,6 @@
     function closeReviewsModal() {
         rvModal.classList.remove('open');
         if (rvModalClose) rvModalClose.classList.remove('active');
-        // Restore nav button active state
         if (nav && document.body.classList.contains('kb-mode')) {
             nav.updateNav();
         }
@@ -184,23 +180,23 @@
     if (rvModalClose) rvModalClose.addEventListener('click', closeReviewsModal, sig);
     if (rvModal) rvModal.addEventListener('click', e => { if (e.target === rvModal) closeReviewsModal(); }, sig);
 
-    // Modal keyboard scroll: discrete eased jump on tap, continuous on hold
+    // Modal keyboard scroll: discrete eased jump on tap, continuous on hold.
     let scrollDir = 0;
-    let scrollCur = 0;   // current speed (px/s) for hold loop
+    let scrollCur = 0;
     let scrollMax = 0;
-    let scrollMin = 0;   // initial speed when hold begins
+    let scrollMin = 0;
     let scrollAccel = 0;
     let scrollRaf = null;
     let scrollPrev = 0;
     let holdTimer = null;
-    const HOLD_DELAY = 100; // ms before continuous scroll kicks in
+    const HOLD_DELAY = 100;
 
     let jumpFrom = 0, jumpTo = 0, jumpStart = 0, jumpDur = 0, jumpRaf = null;
 
     function jumpLoop(ts) {
         if (!jumpStart) jumpStart = ts;
         const t = Math.min((ts - jumpStart) / jumpDur, 1);
-        const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+        const eased = 1 - Math.pow(1 - t, 3);
         rvModalList.scrollTop = jumpFrom + (jumpTo - jumpFrom) * eased;
         if (t < 1 && isRvModalOpen()) jumpRaf = requestAnimationFrame(jumpLoop);
         else jumpRaf = null;
@@ -253,7 +249,8 @@
 
         e.preventDefault(); e.stopImmediatePropagation();
 
-        if (e.repeat) return; // OS auto-repeat ignored, we drive hold ourselves
+        // OS auto-repeat ignored, hold loop drives it instead.
+        if (e.repeat) return;
 
         startJump(jump);
         if (holdTimer) clearTimeout(holdTimer);
@@ -275,7 +272,6 @@
         }
     });
 
-    // Mouse in modal deactivates close btn
     if (rvModal) {
         rvModal.addEventListener('mousemove', () => {
             if (rvModalClose) rvModalClose.classList.remove('active');

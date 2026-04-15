@@ -5,9 +5,8 @@
         onExit: () => Turbo.visit('/menu')
     });
 
-    // Secret room Easter egg — click author 5 times
     const CLICKS_NEEDED = 5;
-    const RESET_DELAY   = 2000;
+    const RESET_DELAY   = 1000;
     let clickCount = 0;
     let resetTimer = null;
 

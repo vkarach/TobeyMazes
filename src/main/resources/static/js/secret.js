@@ -33,7 +33,8 @@
             horse.style.backgroundImage = "url('/img/konekTobeyRun80x80.png')";
             horse.style.backgroundSize = (W * RUN_N) + 'px ' + H + 'px';
             runFrame = runTimer = 0;
-        } else {
+        }
+        else {
             horse.style.backgroundImage = "url('/img/KonekTobeySalto80x80.png')";
             horse.style.backgroundSize = (W * SALTO_N) + 'px ' + H + 'px';
         }
@@ -172,14 +173,17 @@
                     flip(fleeDir < 0);
                     tickRun(dtMs);
                     if (far) fleeing = false;
-                } else if (Math.abs(vx) > 15) {
+                }
+                else if (Math.abs(vx) > 15) {
                     vx = lerp(vx, 0, LERP_D, dtS);
                     tickRun(dtMs);
                     flip(vx < 0);
-                } else {
+                }
+                else {
                     vx = 0; idle();
                 }
-            } else if (!onGround) {
+            }
+            else if (!onGround) {
                 fleeing = false;
             }
 
@@ -197,7 +201,8 @@
                     vy = 0;
                     if (!fleeing) vx *= 0.7;
                     if (thrown) { thrown = false; idle(); }
-                } else {
+                }
+                else {
                     vy = -Math.abs(vy) * BOUNCE;
                 }
             }

@@ -14,11 +14,11 @@
     <th:block th:replace="~{fragments/bg-preloads :: preloads}"></th:block>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/review.css}">
-    <link rel="icon" type="image/png" sizes="32x32" href="/img/logos/logo-round.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/img/logos/logo-round.png">
+    <link rel="icon" type="image/png" sizes="32x32"   href="/img/logos/logo-round.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/img/logos/logo-square.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/logos/logo-square.png">
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
-    <script>!function(){function a(r){var v=innerWidth,h=innerHeight,s,x,y;r.style.position='fixed';r.style.left='0';r.style.top='0';r.style.transformOrigin='top left';if(h>v*1.2){r.style.width='600px';r.style.height=Math.round(600*h/v)+'px';r.style.transform='scale('+(v/600)+')';}else{s=Math.max(v/1280,h/720);x=(v-1280*s)/2;y=(h-720*s)/2;r.style.width='1280px';r.style.height='720px';r.style.transform='translate('+x+'px,'+y+'px) scale('+s+')';}}var r=document.querySelector('.game-root');if(r){a(r);}else{var o=new MutationObserver(function(){var e=document.querySelector('.game-root');if(e){a(e);o.disconnect();}});o.observe(document.documentElement,{childList:true,subtree:true});}}();</script>
-    <script defer th:src="@{/js/scale.js}"></script>
+    <script th:src="@{/js/scale.js}"></script>
 </head>
 <body class="nav-no-anim kb-mode">
 <div class="game-root">
@@ -57,7 +57,7 @@
                           maxlength="100"
                           th:text="${review != null} ? ${review.comment} : ''"></textarea>
 
-                <!-- Submit / Thanks — same element to avoid layout shift -->
+                <!-- Submit / Thanks: same element to avoid layout shift -->
                 <div class="rv-submit-row">
                     <button class="nav-btn rv-submit pf-nav" id="rv-submit"
                             th:text="${review != null} ? 'UPDATE' : 'SUBMIT'">SUBMIT</button>

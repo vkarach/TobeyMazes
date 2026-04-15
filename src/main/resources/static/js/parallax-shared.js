@@ -12,9 +12,8 @@
     window._parallaxImgDims = window._parallaxImgDims || {};
     const imgDims = window._parallaxImgDims;
 
-    // Resolve variant groups: within each group exactly one layer gets its alt image.
-    // Skip groups where _variantUrl is already set — Turbo-permanent elements survive
-    // navigation, so re-picking would cause the background to flicker on each visit.
+    // One layer per group gets its alt image. Skip if already picked:
+    // Turbo-permanent elements survive navigation, so re-picking would flicker.
     const groups = {};
     document.querySelectorAll('.bg-layer[data-variant-group]').forEach(layer => {
         if (layer._variantUrl) return;
@@ -37,7 +36,8 @@
             const h = layer.clientHeight || window.innerHeight || 720;
             layer._layerWidth = imgDims[url].w * (h / imgDims[url].h);
             layer.style.backgroundSize = `${layer._layerWidth}px 100%`;
-        } else {
+        }
+        else {
             const img = new Image();
             img.onload = () => {
                 imgDims[url] = { w: img.naturalWidth, h: img.naturalHeight };
@@ -58,8 +58,7 @@
             layer._layerWidth = 0;
         }
 
-        // Skip applyImage if this layer already shows the correct URL (Turbo-permanent
-        // elements are reused across navigations — no need to re-apply the same image).
+        // Turbo-permanent layers are reused across navigations.
         if (layer._appliedUrl !== url) {
             layer._appliedUrl = url;
             applyImage(layer, url);

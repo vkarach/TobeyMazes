@@ -189,7 +189,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .modal-close:hover { color: #aaa; }
 
 /* ============================
-   MOBILE PORTRAIT — PROFILE
+   MOBILE PORTRAIT - PROFILE
    ============================ */
 body.mobile .profile-card {
   min-width: auto;

@@ -270,7 +270,7 @@ body.kb-mode .lm-btn-dim:hover:not(.active) { color: rgba(255, 255, 255, 0.4); }
 }
 
 /* ============================
-   MOBILE PORTRAIT — LEVELS
+   MOBILE PORTRAIT - LEVELS
    ============================ */
 body.mobile .page {
   gap: 24px;
@@ -390,8 +390,8 @@ body.mobile .back-link .key {
 /* ============================
    MOBILE LANDSCAPE
    ============================ */
-/* Canvas is 1280×720 at ~0.65x scale — bump up game-space sizes so
-   elements are readable on a small landscape phone screen.          */
+/* Canvas is 1280x720 at ~0.65x scale. Bump game-space sizes so elements
+   stay readable on small landscape phones. */
 body.mobile-land .page-title {
   font-size: 28px;
 }

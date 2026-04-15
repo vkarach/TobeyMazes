@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tobey Mazes — a small browser maze puzzle</title>
+    <title>Menu — Tobey Mazes</title>
     <meta name="description" content="A maze puzzle game. Your horse, Konek Tobey, slides until he bumps a wall — collect all the flowers and beat your own record.">
     <meta name="keywords" content="tobey mazes, maze, puzzle, browser game, sliding puzzle, student project">
     <meta name="robots" content="index, follow">
@@ -12,13 +12,13 @@
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Tobey Mazes">
-    <meta property="og:title" content="Tobey Mazes — a small browser maze puzzle">
+    <meta property="og:title" content="Tobey Mazes — a sliding maze puzzle game">
     <meta property="og:description" content="A maze puzzle game. Your horse, Konek Tobey, slides until he bumps a wall — collect all the flowers and beat your own record.">
     <meta property="og:image" content="https://tobeymazes.xyz/img/logo.png">
     <meta property="og:url" content="https://tobeymazes.xyz/">
 
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Tobey Mazes — a small browser maze puzzle">
+    <meta name="twitter:title" content="Tobey Mazes — a sliding maze puzzle game">
     <meta name="twitter:description" content="A maze puzzle game. Your horse, Konek Tobey, slides until he bumps a wall — collect all the flowers and beat your own record.">
     <meta name="twitter:image" content="https://tobeymazes.xyz/img/logo.png">
 
@@ -65,11 +65,11 @@
     <th:block th:replace="~{fragments/bg-preloads :: preloads}"></th:block>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/menu.css}">
-    <link rel="icon" type="image/png" sizes="32x32" href="/img/logos/logo-round.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/img/logos/logo-round.png">
+    <link rel="icon" type="image/png" sizes="32x32"   href="/img/logos/logo-round.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/img/logos/logo-square.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/logos/logo-square.png">
     <script type="module" src="https://unpkg.com/@hotwired/turbo@8/dist/turbo.es2017-esm.js"></script>
-    <script>!function(){function a(r){var v=innerWidth,h=innerHeight,s,x,y;r.style.position='fixed';r.style.left='0';r.style.top='0';r.style.transformOrigin='top left';if(h>v*1.2){r.style.width='600px';r.style.height=Math.round(600*h/v)+'px';r.style.transform='scale('+(v/600)+')';}else{s=Math.max(v/1280,h/720);x=(v-1280*s)/2;y=(h-720*s)/2;r.style.width='1280px';r.style.height='720px';r.style.transform='translate('+x+'px,'+y+'px) scale('+s+')';}}var r=document.querySelector('.game-root');if(r){a(r);}else{var o=new MutationObserver(function(){var e=document.querySelector('.game-root');if(e){a(e);o.disconnect();}});o.observe(document.documentElement,{childList:true,subtree:true});}}();</script>
-    <script defer th:src="@{/js/scale.js}"></script>
+    <script th:src="@{/js/scale.js}"></script>
 </head>
 <body class="nav-no-anim kb-mode">
 

@@ -1,27 +1,23 @@
-/**
- * Shared keyboard/mouse navigation for menu buttons.
- *
- * Usage: initNav(selector, { signal, onExit })
- * Returns { selected, updateNav, setSelected, isMouseMode }
- */
 function initNav(selector, opts = {}) {
     const btns = Array.from(document.querySelectorAll(selector));
     if (btns.length === 0) return null;
 
     const sig = opts.signal ? { signal: opts.signal } : {};
 
-    // Per-page memory of last selected button — survives Turbo navigations.
-    // Falls back to opts.initialSelected on first visit, then 0.
+    // Per-page memory of last selected button, survives Turbo navigations.
     const storageKey = 'nav:' + window.location.pathname + ':' + selector;
     const stored = sessionStorage.getItem(storageKey);
     let selected;
     if (stored !== null && Number.isFinite(+stored)) {
         selected = +stored;
-    } else if (typeof opts.initialSelected === 'function') {
+    }
+    else if (typeof opts.initialSelected === 'function') {
         selected = opts.initialSelected(btns);
-    } else if (typeof opts.initialSelected === 'number') {
+    }
+    else if (typeof opts.initialSelected === 'number') {
         selected = opts.initialSelected;
-    } else {
+    }
+    else {
         selected = 0;
     }
     if (selected < 0 || selected >= btns.length) selected = 0;
@@ -32,8 +28,7 @@ function initNav(selector, opts = {}) {
 
     const _isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     let mouseMode = _isTouch;
-    // Track real mouse position to distinguish stale cursor (after Turbo nav)
-    // from genuine new movement
+    // Distinguish stale cursor (after Turbo nav) from real movement.
     let lastMouseX = null, lastMouseY = null;
 
     function updateNav() {
@@ -42,7 +37,8 @@ function initNav(selector, opts = {}) {
     }
     if (!_isTouch) {
         document.body.classList.add('kb-mode');
-    } else {
+    }
+    else {
         document.body.classList.remove('kb-mode');
     }
     document.body.classList.add('nav-no-anim');
@@ -60,7 +56,7 @@ function initNav(selector, opts = {}) {
             if (!(opts.skipNav && opts.skipNav())) updateNav();
         }
 
-        // Q — hard exit
+        // Q: hard exit
         if (e.key === 'q' || e.key === 'Q' || e.key === 'й' || e.key === 'Й') {
             if (opts.skipQ && opts.skipQ()) return;
             e.preventDefault();
@@ -68,7 +64,7 @@ function initNav(selector, opts = {}) {
             return;
         }
 
-        // Esc — soft exit
+        // Esc: soft exit
         if (e.key === 'Escape') {
             if (opts.onEsc) { e.preventDefault(); opts.onEsc(); return; }
             e.preventDefault();
@@ -76,10 +72,8 @@ function initNav(selector, opts = {}) {
             return;
         }
 
-        // Skip navigation when custom check says so (e.g. textarea focused)
         if (opts.skipNav && opts.skipNav()) return;
 
-        // Custom left/right handler
         if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && opts.onLeftRight) {
             if (opts.onLeftRight(e.key, selected)) {
                 e.preventDefault();
@@ -93,7 +87,8 @@ function initNav(selector, opts = {}) {
             updateNav();
             saveSelected();
             if (opts.onSelect) opts.onSelect(selected);
-        } else if (e.key === 'ArrowUp') {
+        }
+        else if (e.key === 'ArrowUp') {
             e.preventDefault();
             selected = (selected - 1 + btns.length) % btns.length;
             updateNav();
@@ -109,15 +104,13 @@ function initNav(selector, opts = {}) {
         }
     }, sig);
 
-    // Track hovered button so kb-mode starts from it — only after real mouse motion,
-    // not on stale cursor from Turbo navigation
+    // Hovered button seeds kb-mode selection, but only after real mouse motion.
     btns.forEach((btn, i) => {
         btn.addEventListener('mouseenter', () => {
             if (mouseMode) { selected = i; saveSelected(); }
         }, sig);
         btn.addEventListener('click', () => saveSelected(), sig);
 
-        // Touch: show active state on press for immediate feedback
         if (_isTouch) {
             btn.addEventListener('touchstart', () => {
                 btns.forEach(b => b.classList.remove('active'));
@@ -131,8 +124,7 @@ function initNav(selector, opts = {}) {
     });
 
     document.addEventListener('mousemove', e => {
-        // First mousemove after init may be synthetic (cursor sitting still on new DOM).
-        // Require actual coordinate change to switch into mouse mode.
+        // First mousemove after init may be synthetic, require a real coord change.
         if (lastMouseX === null) {
             lastMouseX = e.clientX; lastMouseY = e.clientY;
             return;
@@ -144,7 +136,6 @@ function initNav(selector, opts = {}) {
             mouseMode = true;
             document.body.classList.remove('kb-mode');
             btns.forEach(b => b.classList.remove('active'));
-            // Pick up whichever button cursor is currently over
             const hovered = btns.findIndex(b => b.matches(':hover'));
             if (hovered >= 0) { selected = hovered; saveSelected(); }
         }

@@ -370,8 +370,7 @@
   min-height: 14px;
 }
 
-/* Guest hint under the stats: minimal — just a thin gradient rule above the
-   text to tie it into the layout, no panel / no border / no background. */
+/* Minimal guest hint: just a gradient rule above the text. */
 .win-guest-hint {
   display: flex;
   flex-direction: column;
@@ -461,7 +460,7 @@ body.kb-mode .win-btn:hover:not(.active) {
 }
 
 /* ============================
-   MOBILE PORTRAIT — GAME
+   MOBILE PORTRAIT - GAME
    ============================ */
 body.mobile .page {
   gap: 10px;

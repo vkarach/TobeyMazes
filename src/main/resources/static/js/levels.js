@@ -8,7 +8,7 @@
     const { ac, sig, abort } = initAbort();
     window.__levelsAbort = abort;
 
-    // { once: true } not sig — before-cache fires after before-visit aborts sig
+    // { once: true } not sig: before-cache fires after before-visit aborts sig.
     document.addEventListener('turbo:before-cache', () => {
         document.body.classList.remove('modal-open');
         document.getElementById('level-modal')?.classList.remove('open');
@@ -39,7 +39,8 @@
     const NAV_ARRIVAL_ENTER_LOCK_MS = 120;
     if (!_isTouch) {
         document.body.classList.add('kb-mode');
-    } else {
+    }
+    else {
         document.body.classList.remove('kb-mode');
     }
 
@@ -102,7 +103,8 @@
             if (!res.ok) { bestResults = []; return; }
             const data = await res.json();
             bestResults = Array.isArray(data) ? data : [];
-        } catch (_) {
+        }
+        catch (_) {
             bestResults = [];
         }
     }
@@ -136,10 +138,12 @@
             });
             if (ac.signal.aborted) return;
             Turbo.visit(r.url, { action: 'replace' });
-        } catch (e) {
+        }
+        catch (e) {
             if (e && e.name === 'AbortError') return;
             selectedForm.submit();
-        } finally {
+        }
+        finally {
             submitting = false;
         }
     }

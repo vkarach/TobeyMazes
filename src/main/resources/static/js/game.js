@@ -38,7 +38,7 @@
     const targetsEl   = document.getElementById('targets-left');
     const winOverlay  = document.getElementById('win-overlay');
 
-    // build wall + target matrix from rendered DOM once for client-side prediction
+    // Wall + target matrix snapshot for client-side prediction.
     const mazeRows = Array.from(document.querySelectorAll('.maze-row'));
     const H = mazeRows.length;
     const W = H > 0 ? mazeRows[0].children.length : 0;
@@ -76,7 +76,7 @@
 
     const { ac, sig } = initAbort(() => { if (timerInterval) clearInterval(timerInterval); });
 
-    // { once: true } not sig — before-cache fires after before-visit aborts sig
+    // { once: true } not sig: before-cache fires after before-visit aborts sig.
     document.addEventListener('turbo:before-cache', () => {
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         document.querySelectorAll('.win-nav.active, .ctrl-btn:focus').forEach(b => {
@@ -90,7 +90,8 @@
     playerEl.addEventListener('animationend', e => {
         if (e.animationName === 'konek-salto') {
             if (+playerEl.dataset.saltoId === saltoId) playerEl.classList.remove('running');
-        } else if (e.animationName === 'konek-run') {
+        }
+        else if (e.animationName === 'konek-run') {
             if (+playerEl.dataset.walkoId === walkoId) playerEl.classList.remove('walking');
         }
     });
@@ -150,13 +151,11 @@
         localStepCount++;
         stepCountEl.textContent = localStepCount;
 
-        // Decrement counter immediately and use it to detect win
         targetsLeft -= targets.length;
         const willWin = targetsLeft <= 0;
-        // If this slide wins, stop the player as soon as the final gem is touched
         const stopAt = willWin && targets.length > 0 ? targets[targets.length - 1] : null;
 
-        // server roundtrip in parallel
+        // Server roundtrip in parallel.
         const serverPromise = fetch('/game/move', {
             method:  'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -192,12 +191,14 @@
                     const scoreImpEl = document.getElementById('win-score-improve');
                     if (data.timeRecord && data.timeImproveMs > 0) {
                         timeImpEl.textContent = '★ -' + fmtTime(data.timeImproveMs);
-                    } else if (data.timeRecord) {
+                    }
+                    else if (data.timeRecord) {
                         timeImpEl.textContent = '★ NEW RECORD';
                     }
                     if (data.scoreRecord && data.scoreImprove > 0) {
                         scoreImpEl.textContent = '★ +' + data.scoreImprove;
-                    } else if (data.scoreRecord) {
+                    }
+                    else if (data.scoreRecord) {
                         scoreImpEl.textContent = '★ NEW RECORD';
                     }
                 });
@@ -258,9 +259,10 @@
                 playerEl.classList.add('walking');
             }
             playerEl.dataset.walkoId = String(++walkoId);
-        } else if (vertSteps > 0) {
+        }
+        else if (vertSteps > 0) {
             lastVertDir = vertDir;
-            // scaleX(-1) flips the rotation axis, so when facing left we invert the angle
+            // scaleX(-1) flips the rotation axis, invert angle when facing left.
             const angle = vertDir * facingDir * 90;
             playerEl.style.rotate = angle + 'deg';
             if (!playerEl.classList.contains('walking')) {
@@ -288,7 +290,6 @@
                 }
             }
 
-            // If this step touched the winning gem, stop the slide here
             if (stopKey && key === stopKey) { onDone(); return; }
 
             setTimeout(nextStep, STEP_DELAY_MS);
@@ -308,18 +309,20 @@
 
             if (timeRecord && timeImproveMs > 0) {
                 timeImpEl.textContent = '★ -' + fmtTime(timeImproveMs);
-            } else if (timeRecord) {
+            }
+            else if (timeRecord) {
                 timeImpEl.textContent = '★ NEW RECORD';
             }
 
             if (scoreRecord && scoreImprove > 0) {
                 scoreImpEl.textContent = '★ +' + scoreImprove;
-            } else if (scoreRecord) {
+            }
+            else if (scoreRecord) {
                 scoreImpEl.textContent = '★ NEW RECORD';
             }
         }
 
-        // Win navigation — focus PLAY AGAIN by default
+        // Default to PLAY AGAIN.
         const winBtns = Array.from(document.querySelectorAll('.win-nav'));
         const replayIdx = winBtns.findIndex(b => b.id === 'win-replay');
         let winSel = replayIdx >= 0 ? replayIdx : 0;
@@ -400,13 +403,16 @@
             if (e.key === 'Escape' || quitKeys.includes(e.key)) {
                 e.preventDefault();
                 Turbo.visit('/game/levels');
-            } else if (restartKeys.includes(e.key)) {
+            }
+            else if (restartKeys.includes(e.key)) {
                 e.preventDefault();
                 Turbo.visit('/game');
-            } else if (menuKeys.includes(e.key)) {
+            }
+            else if (menuKeys.includes(e.key)) {
                 e.preventDefault();
                 Turbo.visit('/menu');
-            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Enter') {
+            }
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Enter') {
                 // handled by winHandler
             }
             return;

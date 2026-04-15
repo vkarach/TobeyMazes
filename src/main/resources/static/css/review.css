@@ -87,7 +87,7 @@
     color: rgba(255, 255, 255, 0.25);
 }
 
-/* Submit row — fixed height to prevent layout shift */
+/* Fixed height to prevent layout shift on submit. */
 .rv-submit-row {
     display: flex;
     align-items: center;
@@ -235,7 +235,7 @@
 }
 
 /* ============================
-   MOBILE PORTRAIT — REVIEW
+   MOBILE PORTRAIT - REVIEW
    ============================ */
 body.mobile .rv-card {
     min-width: auto;

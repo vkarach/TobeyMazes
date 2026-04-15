@@ -1,8 +1,6 @@
-// Detect touch device once (survives orientation changes)
 var _isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
-// Inset of the game window from viewport edges — set by scaleGameRoot().
-// Used by overlay repositioning functions so they never need getBoundingClientRect().
+// Set by scaleGameRoot(), read by overlay reposition functions.
 var _gameInset  = { top: 0, right: 0, bottom: 0 };
 var _gameMobile = false;
 
@@ -29,7 +27,6 @@ function repositionVersionTag() {
     tag.style.right  = Math.max(rOff, _gameInset.right  + rOff) + 'px';
 }
 
-// Scale .game-root to fill the viewport.
 // Portrait phones get a narrower virtual canvas (600x1066) so UI stays readable.
 function scaleGameRoot(rootEl, bodyEl) {
     const root = rootEl || document.querySelector('.game-root');
@@ -60,7 +57,8 @@ function scaleGameRoot(rootEl, bodyEl) {
         root.style.transform = `scale(${vw / W})`;
         _gameMobile = true;
         _gameInset  = { top: 0, right: 0, bottom: 0 };
-    } else {
+    }
+    else {
         root.style.width = '1280px';
         root.style.height = '720px';
         const scale = Math.max(vw / 1280, vh / 720);
@@ -76,14 +74,24 @@ function scaleGameRoot(rootEl, bodyEl) {
     repositionVersionTag();
 }
 
-scaleGameRoot();
+if (document.querySelector('.game-root')) {
+    scaleGameRoot();
+}
+else {
+    const _initObs = new MutationObserver(() => {
+        if (document.querySelector('.game-root')) {
+            scaleGameRoot();
+            _initObs.disconnect();
+        }
+    });
+    _initObs.observe(document.documentElement, { childList: true, subtree: true });
+}
 window.addEventListener('resize', () => scaleGameRoot());
 window.addEventListener('orientationchange', () => {
     setTimeout(() => scaleGameRoot(), 100);
 });
 document.addEventListener('turbo:load', () => scaleGameRoot());
 
-// Fullscreen toggle button for touch devices.
 // Appended to <html> so Turbo body-swaps don't remove it.
 (function initFullscreenToggle() {
     if (!_isTouch) return;
@@ -121,7 +129,8 @@ document.addEventListener('turbo:load', () => scaleGameRoot());
         if (isFS()) {
             (document.exitFullscreen || document.webkitExitFullscreen).call(document)
                 .catch(function() {});
-        } else {
+        }
+        else {
             fsMethod.call(el).then(function() {
                 setTimeout(scaleGameRoot, 150);
             }).catch(function() {});
@@ -135,7 +144,6 @@ document.addEventListener('turbo:load', () => scaleGameRoot());
         updateIcon(); setTimeout(scaleGameRoot, 100);
     });
 
-    // First-visit hint
     var dismissHint = function() {};
     if (!localStorage.getItem('fs-hint-seen')) {
         var hint = document.createElement('div');
@@ -154,26 +162,8 @@ document.addEventListener('turbo:load', () => scaleGameRoot());
     }
 })();
 
-// ---------------------------------------------------------------------------
-// Smooth Turbo navigation — kill flicker / button jitter / style flash.
-//
-// Two separate things must happen before Turbo swaps the new body in:
-//   1. Any newly-added stylesheets must be fully loaded so the first paint of
-//      the new body is already styled (no FOUC on slow networks).
-//   2. Nav buttons must already have their stored .active class and the body
-//      must carry .nav-no-anim / .kb-mode so the first paint is identical to
-//      the post-JS steady state (no "jump" while JS runs initNav after paint).
-// ---------------------------------------------------------------------------
-// Pick the exact selector the target page's own initNav() uses, so the
-// sessionStorage key we read matches what nav-shared.js wrote. Must stay in
-// sync with the initNav() calls in menu.js / profile.js / review.js / etc.
-//
-//   profile.js logged-in  → '.pf-nav'                 (marker: .pf-nav exists)
-//   profile.js guest      → '.menu-wrap .menu-btn'    (marker: .profile-content)
-//   review.js             → '.pf-nav'                 (marker: .pf-nav exists)
-//   menu/leaderboard/about → '.menu-btn'              (fallback)
-//
-// levels.html and game.html don't use initNav at all and are skipped.
+// Must match the selector each page's own initNav() uses so we read the
+// same sessionStorage key nav-shared.js writes.
 function getNavSelectorFor(bodyEl) {
     if (bodyEl.querySelector('.pf-nav')) return '.pf-nav';
     if (bodyEl.querySelector('.profile-content')) return '.menu-wrap .menu-btn';
@@ -187,8 +177,8 @@ function preselectNavInBody(bodyEl, pathname) {
         bodyEl.classList.add('kb-mode');
     }
 
-    // On touch devices there is no keyboard navigation, so .active is never
-    // shown — skip pre-selection entirely to avoid a one-frame gold flash.
+    // On touch there's no kb nav, so .active is never shown.
+    // Skipping pre-selection avoids a one-frame gold flash.
     if (_isTouch) return;
 
     const sel = getNavSelectorFor(bodyEl);
@@ -201,24 +191,24 @@ function preselectNavInBody(bodyEl, pathname) {
     let idx;
     if (stored !== null && Number.isFinite(+stored)) {
         idx = +stored;
-    } else if (pathname === '/profile') {
-        // profile.js defaults to BACK (last button) on first visit —
-        // mirror that so the first paint matches initNav's post-run state.
+    }
+    else if (pathname === '/profile') {
+        // profile.js defaults to BACK on first visit; mirror it so first paint
+        // matches initNav's post-run state.
         idx = btns.length - 1;
-    } else {
+    }
+    else {
         idx = 0;
     }
     if (idx < 0 || idx >= btns.length) idx = 0;
     btns[idx].classList.add('active');
 }
 
-// Cold-load: body already has nav-no-anim/kb-mode from the template, but we
-// still need to apply .active before the scripts at the bottom of body would
-// otherwise do it post-paint. Runs synchronously as part of scale.js defer
-// execution, which happens before DOMContentLoaded / first paint.
+// Apply .active before body scripts run post-paint.
 if (document.body) {
     preselectNavInBody(document.body, location.pathname);
-} else {
+}
+else {
     document.addEventListener('readystatechange', function once() {
         if (document.body) {
             document.removeEventListener('readystatechange', once);
@@ -227,19 +217,14 @@ if (document.body) {
     });
 }
 
-// Remember the URL of the visit we're navigating to so turbo:before-render can
-// look up the right sessionStorage keys for the new page's nav buttons.
 let _pendingVisitPath = null;
 document.addEventListener('turbo:before-visit', e => {
     try { _pendingVisitPath = new URL(e.detail.url, location.href).pathname; }
     catch (_) { _pendingVisitPath = null; }
 });
 
-// Hold Turbo's body swap until:
-//   a) all stylesheets in the new <head> are actually loaded, and
-//   b) the incoming body has its nav state pre-applied.
-// Otherwise on slow networks the new page renders unstyled for a flash and
-// the active button visibly jumps into place a frame later.
+// Hold Turbo's body swap until new stylesheets are loaded and nav state
+// is pre-applied, otherwise slow networks show an unstyled flash.
 document.addEventListener('turbo:before-render', event => {
     const newBody = event.detail.newBody;
     if (newBody) {
@@ -257,11 +242,8 @@ document.addEventListener('turbo:before-render', event => {
         const done = () => res();
         l.addEventListener('load', done, { once: true });
         l.addEventListener('error', done, { once: true });
-        // safety timeout
         setTimeout(done, 1500);
     }))).then(() => event.detail.resume());
 });
 
-// After render, clear the pending path so back/forward/fallback loads
-// fall through to location.pathname.
 document.addEventListener('turbo:render', () => { _pendingVisitPath = null; });

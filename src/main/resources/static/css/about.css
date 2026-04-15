@@ -85,16 +85,18 @@
     padding: 0;
     cursor: pointer;
     font-family: inherit;
-    transition: color 0.15s, text-shadow 0.15s;
+    transition: text-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .about-author:hover {
-    color: #fff;
-    text-shadow: 0 0 8px #F5C518, 2px 2px 0 #000;
+    transform: translateY(-1px);
+    text-shadow: 2px 3px 0 #000;
 }
 
 .about-author:active {
-    transform: scale(0.92);
+    transform: translateY(1px);
+    text-shadow: 1px 1px 0 #000;
+    transition: text-shadow 0.05s ease, transform 0.05s ease;
 }
 
 .about-thanks {
@@ -113,7 +115,7 @@
 }
 
 /* ============================
-   MOBILE PORTRAIT — ABOUT
+   MOBILE PORTRAIT - ABOUT
    ============================ */
 body.mobile .about-card {
     max-width: 540px;
