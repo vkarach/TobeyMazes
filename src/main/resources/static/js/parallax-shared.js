@@ -12,11 +12,10 @@
     window._parallaxImgDims = window._parallaxImgDims || {};
     const imgDims = window._parallaxImgDims;
 
-    // One layer per group gets its alt image. Skip if already picked:
-    // Turbo-permanent elements survive navigation, so re-picking would flicker.
+    // One layer per group gets its alt image. Re-pick on every navigation
+    // so a new random variant is chosen each time the page is visited.
     const groups = {};
     document.querySelectorAll('.bg-layer[data-variant-group]').forEach(layer => {
-        if (layer._variantUrl) return;
         const g = layer.dataset.variantGroup;
         (groups[g] = groups[g] || []).push(layer);
     });
