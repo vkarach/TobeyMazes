@@ -1,13 +1,12 @@
 deploy:
   stage: deploy
-  image: ubuntu:22.04
+  image: alpine:latest
 
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
 
   before_script:
-    - apt-get update -y
-    - apt-get install -y openssh-client
+    - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - printf "%s\n" "$SSH_PRIVATE_KEY" > ~/.ssh/gitlab_deploy
