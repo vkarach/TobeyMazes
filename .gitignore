@@ -3,6 +3,7 @@ src/main/resources/application.properties
 *.log
 .claude
 .idea
+src/main/resources/http
 system
 target
 uiSounds

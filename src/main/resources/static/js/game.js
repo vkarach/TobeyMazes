@@ -74,6 +74,45 @@
         return { path, targets };
     }
 
+    (function drawMazeCanvas() {
+        const canvas = document.getElementById('maze-canvas');
+        if (!canvas || H === 0 || W === 0) return;
+
+        const WALL = 4;
+        const PAD  = WALL;
+        const cssW = W * CELL_SIZE + PAD * 2;
+        const cssH = H * CELL_SIZE + PAD * 2;
+        const dpr  = window.devicePixelRatio || 1;
+
+        canvas.style.width  = cssW + 'px';
+        canvas.style.height = cssH + 'px';
+        canvas.width  = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
+
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        ctx.fillStyle = '#F5C518';
+
+        for (let r = 0; r < H; r++) {
+            for (let c = 0; c < W; c++) {
+                const cell = cells[r][c];
+                const cx   = PAD + c * CELL_SIZE;
+                const cy   = PAD + r * CELL_SIZE;
+
+                if (cell.top)    ctx.fillRect(cx,                    cy - WALL,             CELL_SIZE, WALL * 2);
+                if (cell.bottom) ctx.fillRect(cx,                    cy + CELL_SIZE - WALL, CELL_SIZE, WALL * 2);
+                if (cell.left)   ctx.fillRect(cx - WALL,             cy,                    WALL * 2,  CELL_SIZE);
+                if (cell.right)  ctx.fillRect(cx + CELL_SIZE - WALL, cy,                    WALL * 2,  CELL_SIZE);
+
+                // corner squares where two perpendicular walls meet
+                if (cell.top    && cell.left)  ctx.fillRect(cx - WALL,             cy - WALL,             WALL * 2, WALL * 2);
+                if (cell.top    && cell.right) ctx.fillRect(cx + CELL_SIZE - WALL, cy - WALL,             WALL * 2, WALL * 2);
+                if (cell.bottom && cell.left)  ctx.fillRect(cx - WALL,             cy + CELL_SIZE - WALL, WALL * 2, WALL * 2);
+                if (cell.bottom && cell.right) ctx.fillRect(cx + CELL_SIZE - WALL, cy + CELL_SIZE - WALL, WALL * 2, WALL * 2);
+            }
+        }
+    })();
+
     const { ac, sig } = initAbort(() => { if (timerInterval) clearInterval(timerInterval); });
 
     // { once: true } not sig: before-cache fires after before-visit aborts sig.

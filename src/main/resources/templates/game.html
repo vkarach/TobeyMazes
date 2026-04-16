@@ -61,6 +61,7 @@
 
       <div class="maze-panel">
         <div class="maze-grid" id="maze-grid">
+          <canvas id="maze-canvas"></canvas>
           <div class="maze-row" th:each="row, rStat : ${cells}">
             <div th:each="cell, cStat : ${row}"
                  class="cell"

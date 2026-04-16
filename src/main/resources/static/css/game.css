@@ -48,6 +48,16 @@
   position: relative;
   display: inline-block;
   line-height: 0;
+  background: #1C0F05;
+}
+
+#maze-canvas {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  pointer-events: none;
+  z-index: 1;
+  image-rendering: pixelated;
 }
 
 .maze-row {
@@ -65,24 +75,6 @@
   border: 0;
   box-sizing: border-box;
 }
-
-.wall-left   { border-left:  4px solid var(--wall); }
-.wall-right  { border-right: 4px solid var(--wall); }
-
-/* Horizontal walls overflow 4px past the cell sides so they cover the gap
-   where a neighbor cell's vertical wall meets this one at a corner. */
-.wall-top::before,
-.wall-bottom::after {
-  content: '';
-  position: absolute;
-  left: -4px;
-  right: -4px;
-  height: 4px;
-  background: var(--wall);
-  z-index: 1;
-}
-.wall-top::before   { top: 0; }
-.wall-bottom::after { bottom: 0; }
 
 /* ---- Target flowers ---- */
 .target-gem {
@@ -108,9 +100,6 @@
   100% { transform: scale(0);   opacity: 0; }
 }
 
-/* Player sprite. Both sheets share an 80x80 frame with the horse centered
-   identically, so switching between run/salto never shifts the anchor.
-   Frames are scaled to 48x48: salto strip 13*48=624, run strip 6*48=288. */
 #player {
   position: absolute;
   width: 48px;
