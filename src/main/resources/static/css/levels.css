@@ -161,6 +161,7 @@ body.modal-open .level-card.hover {
   object-fit: contain;
   border-radius: 2px;
   flex-shrink: 0;
+  filter: saturate(1.15) brightness(1.08);
 }
 
 .level-modal-right {

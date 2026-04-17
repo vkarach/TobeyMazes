@@ -14,7 +14,9 @@ public enum Level {
     LEVEL_8(8,"Level 8", Difficulty.MEDIUM,   "levels/level_8.txt"),
     LEVEL_9(9,"Level 9", Difficulty.NORMAL,   "levels/level_9.txt"),
     LEVEL_10(10,"Level 10", Difficulty.MEDIUM,   "levels/level_10.txt"),
-    LEVEL_11(11,"Level 11", Difficulty.HARD,   "levels/level_11.txt");
+    LEVEL_11(11,"Level 11", Difficulty.HARD,   "levels/level_11.txt"),
+    LEVEL_12(12,"Level 12", Difficulty.MEDIUM,  "levels/level_12.txt");
+//    LEVEL_13(13,"Level 13", Difficulty.HARD,    "levels/level_13.txt");
 
     public enum Difficulty {
         EASY, NORMAL, MEDIUM, HARD

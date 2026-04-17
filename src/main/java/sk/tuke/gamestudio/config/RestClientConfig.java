@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 @Configuration
 public class RestClientConfig {
     private static final String BASE_URL = "http://localhost:8080";
+//    private static final String BASE_URL = "https://tobeymazes.xyz/";
 
     @Bean
     public RestTemplate restTemplate() {

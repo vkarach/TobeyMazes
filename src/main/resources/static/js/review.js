@@ -22,10 +22,18 @@
         });
     }
 
+    function showSubmitBtn() {
+        if (!submitted) return;
+        submitted = false;
+        if (thanksEl) thanksEl.style.display = '';
+        if (submitBtn) { submitBtn.style.display = ''; submitBtn.textContent = 'UPDATE'; }
+    }
+
     function applyRating(n) {
         currentRating = n;
         if (ratingInput) ratingInput.value = n;
         fillStars(n, 'filled');
+        showSubmitBtn();
     }
 
     const starsWrap = document.getElementById('rv-stars');
@@ -49,6 +57,10 @@
             const target = e.target.closest('.rv-star');
             if (target) applyRating(parseInt(target.dataset.value));
         }, sig);
+    }
+
+    if (commentEl) {
+        commentEl.addEventListener('input', showSubmitBtn, sig);
     }
 
     function doSubmit() {
@@ -110,24 +122,13 @@
             if (key === 'ArrowLeft' && currentRating > 1) { applyRating(currentRating - 1); changed = true; }
             if (key === 'ArrowRight' && currentRating < 5) { applyRating(currentRating + 1); changed = true; }
             if (changed && sel !== 0) {
-                if (submitted) {
-                    submitted = false;
-                    if (thanksEl) thanksEl.style.display = '';
-                    if (submitBtn) { submitBtn.style.display = ''; submitBtn.textContent = 'UPDATE'; }
-                }
+                showSubmitBtn();
                 nav.setSelected(0);
             }
             return changed;
         },
         onSelect: (sel) => {
-            if (submitted && sel === 0) {
-                submitted = false;
-                if (thanksEl) thanksEl.style.display = '';
-                if (submitBtn) {
-                    submitBtn.style.display = '';
-                    submitBtn.textContent = 'UPDATE';
-                }
-            }
+            if (submitted && sel === 0) showSubmitBtn();
         }
     });
 
