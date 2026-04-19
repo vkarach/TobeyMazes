@@ -44,7 +44,7 @@ public class Game {
         this.currentUser = authService.getUserBySessionToken();
         backgroundLoop.loop();
 
-        SoundUtil.setVolumeCoef(0);
+//        SoundUtil.setVolumeCoef(0);
     }
 
     public void launch() {

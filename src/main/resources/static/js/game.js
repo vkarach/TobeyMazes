@@ -122,6 +122,7 @@
             b.classList.remove('active');
             if (b instanceof HTMLElement) b.blur();
         });
+        document.querySelectorAll('.swipe-hint-overlay').forEach(el => el.remove());
     }, { once: true });
 
     let saltoId = 0;
@@ -487,4 +488,88 @@
             Turbo.visit('/menu');
         }
     }, sig);
+
+    const SWIPE_MIN = 30;
+    const INTERACTIVE_SEL = '.ctrl-btn, .win-nav, .action-link, a, button';
+    let swipeStartX = 0;
+    let swipeStartY = 0;
+    let swipeActive = false;
+    let swipeFired  = false;
+
+    function tryFireSwipe(endX, endY) {
+        if (!swipeActive || swipeFired) return;
+        if (winOverlay.classList.contains('visible')) return;
+        const dx = endX - swipeStartX;
+        const dy = endY - swipeStartY;
+        const ax = Math.abs(dx);
+        const ay = Math.abs(dy);
+        if (Math.max(ax, ay) < SWIPE_MIN) return;
+        let dir;
+        if (ax > ay) {
+            dir = dx > 0 ? 'RIGHT' : 'LEFT';
+        }
+        else {
+            dir = dy > 0 ? 'DOWN' : 'UP';
+        }
+        swipeFired = true;
+        window.sendMove(dir);
+    }
+
+    document.addEventListener('touchstart', e => {
+        const t = e.changedTouches[0];
+        if (!t) return;
+        if (e.target.closest && e.target.closest(INTERACTIVE_SEL)) {
+            swipeActive = false;
+            return;
+        }
+        swipeStartX = t.clientX;
+        swipeStartY = t.clientY;
+        swipeActive = true;
+        swipeFired  = false;
+    }, sig);
+
+    document.addEventListener('touchmove', e => {
+        if (!swipeActive || swipeFired) return;
+        const t = e.changedTouches[0];
+        if (!t) return;
+        tryFireSwipe(t.clientX, t.clientY);
+    }, sig);
+
+    document.addEventListener('touchend', e => {
+        const t = e.changedTouches[0];
+        if (t) tryFireSwipe(t.clientX, t.clientY);
+        swipeActive = false;
+    }, sig);
+
+    document.addEventListener('touchcancel', () => {
+        swipeActive = false;
+    }, sig);
+
+    if (_isTouch && !localStorage.getItem('swipe-hint-seen')) {
+        const hint = document.createElement('div');
+        hint.className = 'swipe-hint-overlay';
+        hint.innerHTML =
+            '<div class="swipe-hint-anim">' +
+                '<div class="swipe-hint-horse"></div>' +
+                '<div class="swipe-hint-circle"></div>' +
+                '<div class="swipe-hint-stroke"></div>' +
+            '</div>' +
+            '<div class="swipe-hint-text">SWIPE TO MOVE</div>';
+        document.body.appendChild(hint);
+
+        let hintDismissed = false;
+        function dismissHint() {
+            if (hintDismissed) return;
+            hintDismissed = true;
+            localStorage.setItem('swipe-hint-seen', '1');
+            hint.classList.add('hide');
+            setTimeout(() => hint.remove(), 300);
+        }
+        hint.addEventListener('touchstart', e => {
+            e.stopPropagation();
+            dismissHint();
+        }, { passive: true });
+        hint.addEventListener('click', dismissHint);
+        setTimeout(dismissHint, 3000);
+    }
 })();

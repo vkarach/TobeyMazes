@@ -448,7 +448,7 @@ body.mobile-land .modal-overlay {
     position: fixed;
     top: 8px;   /* overridden by repositionFsOverlay() after scale */
     right: 8px; /* overridden by repositionFsOverlay() after scale */
-    z-index: 99999;
+    z-index: 100001;
     width: 32px;
     height: 32px;
     background: none;
@@ -461,6 +461,7 @@ body.mobile-land .modal-overlay {
     display: flex;
     align-items: center;
     justify-content: center;
+    touch-action: manipulation;
 }
 
 .fs-toggle.fs-on {
@@ -498,7 +499,7 @@ body.mobile-land .modal-overlay {
     color: #fff;
     text-shadow: 1px 1px 0 #000;
     background: var(--panel);
-    border: 2px solid rgba(245, 197, 24, 0.5);
+    border: 2px solid #F5C518;
     border-radius: 4px;
     padding: 6px 10px;
     white-space: nowrap;
@@ -519,6 +520,8 @@ body.mobile-land .modal-overlay {
     display: inline-block;
     position: relative;
     top: -1px;
+    paint-order: stroke fill;
+    -webkit-text-stroke: 2px #140A05;
     animation: fs-chevron-combo 1s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
 }
 
@@ -549,6 +552,215 @@ body.mobile-land .modal-overlay {
 @keyframes fs-hint-out {
     from { opacity: 1; transform: translateX(0); }
     to   { opacity: 0; transform: translateX(6px); }
+}
+
+/* Landscape-rotate recommendation (first-touch-visit hint) */
+.landscape-hint-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    padding: 24px;
+    opacity: 0;
+    animation: landscape-hint-in 0.3s ease forwards;
+    touch-action: manipulation;
+}
+
+body.mobile .landscape-hint-overlay {
+    display: flex;
+}
+
+.landscape-hint-overlay.hide {
+    animation: landscape-hint-out 0.3s ease forwards;
+}
+
+@keyframes landscape-hint-in  { to { opacity: 1; } }
+@keyframes landscape-hint-out { to { opacity: 0; } }
+
+.landscape-hint-anim {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.landscape-hint-phone {
+    position: relative;
+    width: 56px;
+    height: 96px;
+    border: 4px solid #F5C518;
+    border-radius: 10px;
+    box-shadow: 0 0 16px rgba(245, 197, 24, 0.45);
+    animation: landscape-hint-rotate 2s ease-in-out infinite;
+}
+
+.landscape-hint-phone::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 20px;
+    height: 3px;
+    margin-left: -10px;
+    background: #F5C518;
+    border-radius: 2px;
+}
+
+.landscape-hint-phone::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    width: 26px;
+    height: 3px;
+    margin-left: -13px;
+    background: rgba(245, 197, 24, 0.55);
+    border-radius: 2px;
+}
+
+@keyframes landscape-hint-rotate {
+    0%,  20%  { transform: rotate(0deg); }
+    50%, 75%  { transform: rotate(-90deg); }
+    100%      { transform: rotate(0deg); }
+}
+
+.landscape-hint-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: #F5C518;
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 1px;
+    text-align: center;
+    line-height: 1.6;
+}
+
+.landscape-hint-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    color: #F5C518;
+    background: rgba(245, 197, 24, 0.12);
+    border: 2px solid rgba(245, 197, 24, 0.55);
+    padding: 14px 28px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 0 #000;
+    touch-action: manipulation;
+    transition: background 80ms, border-color 80ms;
+}
+
+.landscape-hint-btn:active {
+    background: rgba(245, 197, 24, 0.28);
+    border-color: #F5C518;
+}
+
+/* iOS Safari: add-to-home-screen guide shown when tapping the fs-toggle
+   button on a platform without the Fullscreen API */
+.ios-install-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100002;
+    background: rgba(0, 0, 0, 0.88);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    padding: 28px;
+    opacity: 0;
+    animation: ios-install-in 0.3s ease forwards;
+    touch-action: manipulation;
+}
+
+.ios-install-overlay.hide {
+    animation: ios-install-out 0.3s ease forwards;
+}
+
+@keyframes ios-install-in  { to { opacity: 1; } }
+@keyframes ios-install-out { to { opacity: 0; } }
+
+.ios-install-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    color: #F5C518;
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 2px;
+}
+
+.ios-install-subtitle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+    text-align: center;
+    line-height: 1.7;
+    max-width: 300px;
+}
+
+.ios-install-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.ios-install-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+    line-height: 1.6;
+}
+
+.ios-install-step .ios-share-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 3px;
+    color: #F5C518;
+    position: relative;
+    top: -2px;
+}
+
+.ios-install-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: #F5C518;
+    color: #1C0F05;
+    border-radius: 4px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.ios-install-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    color: #F5C518;
+    background: rgba(245, 197, 24, 0.12);
+    border: 2px solid rgba(245, 197, 24, 0.55);
+    padding: 14px 28px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 0 #000;
+    touch-action: manipulation;
+    transition: background 80ms, border-color 80ms;
+    margin-top: 8px;
+}
+
+.ios-install-btn:active {
+    background: rgba(245, 197, 24, 0.28);
+    border-color: #F5C518;
 }
 
 body.mobile .error-sep {

@@ -451,6 +451,154 @@ body.kb-mode .win-btn:hover:not(.active) {
 /* ============================
    MOBILE PORTRAIT - GAME
    ============================ */
+body.on-game.touch .page {
+  touch-action: none;
+}
+
+body.on-game.touch .ctrl-btn,
+body.on-game.touch .win-nav,
+body.on-game.touch .action-link {
+  touch-action: manipulation;
+}
+
+.swipe-hint-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99997;
+  background: rgba(0, 0, 0, 0.78);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  opacity: 0;
+  animation: swipe-hint-in 0.25s ease forwards;
+  touch-action: manipulation;
+}
+
+.swipe-hint-overlay.hide {
+  animation: swipe-hint-out 0.3s ease forwards;
+}
+
+@keyframes swipe-hint-in  { to { opacity: 1; } }
+@keyframes swipe-hint-out { to { opacity: 0; } }
+
+.swipe-hint-anim {
+  position: relative;
+  width: 232px;
+  height: 96px;
+}
+
+.swipe-hint-horse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 48px;
+  height: 48px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  animation:
+    swipe-hint-horse-slide  1.8s ease-in-out infinite,
+    swipe-hint-horse-sprite 1.8s step-end   infinite;
+}
+
+.swipe-hint-circle {
+  position: absolute;
+  top: 54px;
+  left: 10px;
+  width: 28px;
+  height: 28px;
+  border: 3px solid #F5C518;
+  border-radius: 50%;
+  background: rgba(245, 197, 24, 0.22);
+  box-shadow: 0 0 10px rgba(245, 197, 24, 0.55);
+  animation:
+    swipe-hint-circle-slide 1.8s ease-in-out infinite,
+    swipe-hint-circle-pulse 0.7s ease-in-out infinite;
+}
+
+.swipe-hint-stroke {
+  position: absolute;
+  top: 89px;
+  left: 24px;
+  width: 176px;
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(to right, rgba(245, 197, 24, 0), #F5C518);
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: swipe-hint-stroke 1.8s ease-in-out infinite;
+}
+
+/* 0-22%: idle (static KonekTobey, circle pulsing under him)
+   22-72%: swipe, circle + horse slide right, horse runs (2x 6-frame cycles)
+   72-86%: fade out at end
+   86-100%: invisible gap before next loop */
+
+@keyframes swipe-hint-horse-slide {
+  0%,  22%  { translate: 0 0;      opacity: 1; }
+  72%       { translate: 176px 0;  opacity: 1; }
+  86%       { translate: 176px 0;  opacity: 0; }
+  100%      { translate: 0 0;      opacity: 0; }
+}
+
+@keyframes swipe-hint-horse-sprite {
+  0%, 22% {
+    background-image:    url('/img/KonekTobey.png');
+    background-size:     48px 48px;
+    background-position: 0 0;
+  }
+  23% {
+    background-image:    url('/img/konekTobeyRun80x80.png');
+    background-size:     288px 48px;
+    background-position: 0 0;
+  }
+  27% { background-position:  -48px 0; }
+  31% { background-position:  -96px 0; }
+  35% { background-position: -144px 0; }
+  39% { background-position: -192px 0; }
+  43% { background-position: -240px 0; }
+  47% { background-position:    0 0; }
+  51% { background-position:  -48px 0; }
+  55% { background-position:  -96px 0; }
+  59% { background-position: -144px 0; }
+  63% { background-position: -192px 0; }
+  67% { background-position: -240px 0; }
+  72%, 100% {
+    background-image:    url('/img/KonekTobey.png');
+    background-size:     48px 48px;
+    background-position: 0 0;
+  }
+}
+
+@keyframes swipe-hint-circle-slide {
+  0%,  22%  { translate: 0 0;      opacity: 1; }
+  72%       { translate: 176px 0;  opacity: 1; }
+  86%       { translate: 176px 0;  opacity: 0; }
+  100%      { translate: 0 0;      opacity: 0; }
+}
+
+@keyframes swipe-hint-circle-pulse {
+  0%, 100% { scale: 1; }
+  50%      { scale: 1.18; }
+}
+
+@keyframes swipe-hint-stroke {
+  0%,  22%  { transform: scaleX(0); opacity: 0; }
+  26%       { transform: scaleX(0); opacity: 1; }
+  72%       { transform: scaleX(1); opacity: 1; }
+  86%       { transform: scaleX(1); opacity: 0; }
+  100%      { transform: scaleX(0); opacity: 0; }
+}
+
+.swipe-hint-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
+  color: #F5C518;
+  text-shadow: 2px 2px 0 #000;
+  letter-spacing: 1px;
+}
+
 body.mobile .page {
   gap: 10px;
   padding: 14px 0;
@@ -543,6 +691,41 @@ body.mobile .action-link {
 
 body.mobile .action-link .key {
   display: none;
+}
+
+body.on-game.mobile-land .page {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  column-gap: 28px;
+  row-gap: 10px;
+  justify-content: center;
+  align-content: center;
+}
+
+body.on-game.mobile-land .game-area {
+  display: contents;
+}
+
+body.on-game.mobile-land .maze-wrap {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: center;
+  align-self: end;
+}
+
+body.on-game.mobile-land .sidebar {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  justify-self: start;
+}
+
+body.on-game.mobile-land .bottom-bar {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: center;
+  align-self: start;
 }
 
 body.mobile-land .action-link {

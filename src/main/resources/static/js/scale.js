@@ -92,12 +92,49 @@ window.addEventListener('orientationchange', () => {
 });
 document.addEventListener('turbo:load', () => scaleGameRoot());
 
+var _fsRootEl    = null;
+var _fsDismissHint = function() {};
+
+function maybeShowFsHint() {
+    if (!_isTouch) return;
+    if (!_fsRootEl) return;
+    if (localStorage.getItem('fs-hint-seen')) return;
+    if (document.querySelector('.fs-hint')) return;
+    // While landscape-hint overlay is actually visible, don't show fs-hint yet.
+    var landscapeHintActive =
+        !localStorage.getItem('landscape-hint-dismissed') &&
+        window.innerHeight > window.innerWidth * 1.2;
+    if (landscapeHintActive) return;
+
+    var hint = document.createElement('div');
+    hint.className = 'fs-hint';
+    hint.innerHTML = '<span class="fs-hint-bubble">fullscreen</span><span class="fs-hint-arrow"><span>&#8250;</span><span>&#8250;</span></span>';
+    _fsRootEl.appendChild(hint);
+    repositionFsOverlay();
+
+    _fsDismissHint = function() {
+        if (hint.parentNode) {
+            localStorage.setItem('fs-hint-seen', '1');
+            hint.classList.add('fs-hint-hide');
+            setTimeout(function() { hint.remove(); }, 300);
+        }
+    };
+    setTimeout(_fsDismissHint, 4000);
+}
+
 // Appended to <html> so Turbo body-swaps don't remove it.
 (function initFullscreenToggle() {
     if (!_isTouch) return;
     var el = document.documentElement;
     var fsMethod = el.requestFullscreen || el.webkitRequestFullscreen;
-    if (!fsMethod) return;
+    var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+                       navigator.standalone === true;
+    // Already running as a standalone PWA: the full-screen button has nothing to do.
+    if (isStandalone) return;
+    // Neither fullscreen API nor iOS Safari: nothing we can offer.
+    if (!fsMethod && navigator.standalone === undefined) return;
+
+    _fsRootEl = el;
 
     var btn = document.createElement('button');
     btn.className = 'fs-toggle';
@@ -125,7 +162,11 @@ document.addEventListener('turbo:load', () => scaleGameRoot());
     btn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        dismissHint();
+        _fsDismissHint();
+        if (!fsMethod) {
+            showIosInstallGuide();
+            return;
+        }
         if (isFS()) {
             (document.exitFullscreen || document.webkitExitFullscreen).call(document)
                 .catch(function() {});
@@ -137,30 +178,100 @@ document.addEventListener('turbo:load', () => scaleGameRoot());
         }
     });
 
-    document.addEventListener('fullscreenchange', function() {
-        updateIcon(); setTimeout(scaleGameRoot, 100);
-    });
-    document.addEventListener('webkitfullscreenchange', function() {
-        updateIcon(); setTimeout(scaleGameRoot, 100);
-    });
-
-    var dismissHint = function() {};
-    if (!localStorage.getItem('fs-hint-seen')) {
-        var hint = document.createElement('div');
-        hint.className = 'fs-hint';
-        hint.innerHTML = '<span class="fs-hint-bubble">fullscreen</span><span class="fs-hint-arrow"><span>&#8250;</span><span>&#8250;</span></span>';
-        el.appendChild(hint);
-
-        dismissHint = function() {
-            if (hint.parentNode) {
-                localStorage.setItem('fs-hint-seen', '1');
-                hint.classList.add('fs-hint-hide');
-                setTimeout(function() { hint.remove(); }, 300);
-            }
-        };
-        setTimeout(dismissHint, 4000);
+    if (fsMethod) {
+        document.addEventListener('fullscreenchange', function() {
+            updateIcon(); setTimeout(scaleGameRoot, 100);
+        });
+        document.addEventListener('webkitfullscreenchange', function() {
+            updateIcon(); setTimeout(scaleGameRoot, 100);
+        });
     }
+
+    maybeShowFsHint();
 })();
+
+function showIosInstallGuide() {
+    if (document.querySelector('.ios-install-overlay')) return;
+    if (!document.body) return;
+    var shareSvg = '<svg class="ios-share-icon" viewBox="0 0 20 24" width="14" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M10 2 L10 15"/>' +
+        '<path d="M6 6 L10 2 L14 6"/>' +
+        '<path d="M4 10 L4 22 L16 22 L16 10"/>' +
+        '</svg>';
+    var overlay = document.createElement('div');
+    overlay.className = 'ios-install-overlay';
+    overlay.innerHTML =
+        '<div class="ios-install-title">FULLSCREEN MODE</div>' +
+        '<div class="ios-install-subtitle">iOS Safari can\'t go fullscreen.<br>Add this site to your home screen instead.</div>' +
+        '<div class="ios-install-steps">' +
+            '<div class="ios-install-step">' +
+                '<span class="ios-install-num">1</span>' +
+                '<span>Tap ' + shareSvg + ' in Safari</span>' +
+            '</div>' +
+            '<div class="ios-install-step">' +
+                '<span class="ios-install-num">2</span>' +
+                '<span>Pick &quot;Add to Home Screen&quot;</span>' +
+            '</div>' +
+            '<div class="ios-install-step">' +
+                '<span class="ios-install-num">3</span>' +
+                '<span>Launch from the icon</span>' +
+            '</div>' +
+        '</div>' +
+        '<button class="ios-install-btn" type="button">GOT IT</button>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('.ios-install-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        overlay.classList.add('hide');
+        setTimeout(function() { overlay.remove(); }, 300);
+    });
+    overlay.addEventListener('touchstart', function(e) { e.stopPropagation(); }, { passive: true });
+}
+
+// Landscape recommendation: shown on any touch page on first visit. Only the
+// GOT IT button permanently dismisses it; rotating to landscape just hides it
+// via CSS (body.mobile only), so it returns if the user rotates back.
+function createLandscapeHintIfNeeded() {
+    if (!_isTouch) return;
+    if (localStorage.getItem('landscape-hint-dismissed')) return;
+    if (document.querySelector('.landscape-hint-overlay')) return;
+    if (!document.body) {
+        document.addEventListener('DOMContentLoaded', createLandscapeHintIfNeeded, { once: true });
+        return;
+    }
+    var overlay = document.createElement('div');
+    overlay.className = 'landscape-hint-overlay';
+    overlay.innerHTML =
+        '<div class="landscape-hint-anim">' +
+            '<div class="landscape-hint-phone"></div>' +
+        '</div>' +
+        '<div class="landscape-hint-text">ROTATE TO LANDSCAPE<br>FOR BEST EXPERIENCE</div>' +
+        '<button class="landscape-hint-btn" type="button">GOT IT</button>';
+    document.body.appendChild(overlay);
+
+    var dismissed = false;
+    overlay.querySelector('.landscape-hint-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (dismissed) return;
+        dismissed = true;
+        localStorage.setItem('landscape-hint-dismissed', '1');
+        overlay.classList.add('hide');
+        setTimeout(function() {
+            overlay.remove();
+            maybeShowFsHint();
+        }, 300);
+    });
+    overlay.addEventListener('touchstart', function(e) { e.stopPropagation(); }, { passive: true });
+}
+
+createLandscapeHintIfNeeded();
+document.addEventListener('turbo:load', createLandscapeHintIfNeeded);
+document.addEventListener('turbo:before-cache', function() {
+    document.querySelectorAll('.landscape-hint-overlay, .ios-install-overlay').forEach(function(el) { el.remove(); });
+});
+
+// When rotating to landscape while landscape-hint is still pending, show fs-hint too.
+window.addEventListener('resize', maybeShowFsHint);
+window.addEventListener('orientationchange', function() { setTimeout(maybeShowFsHint, 150); });
 
 // Must match the selector each page's own initNav() uses so we read the
 // same sessionStorage key nav-shared.js writes.
