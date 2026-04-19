@@ -8,18 +8,25 @@
     const horse = document.getElementById('horse-sprite');
     if (!horse) return;
 
+    ['/img/KonekTobeySalto80x80.png', '/img/konekTobeyRun80x80.png'].forEach(function (src) {
+        var i = new Image();
+        i.src = src;
+    });
+
     const W = 120, H = 120;
     const GRAVITY = 2000, BOUNCE = 0.38, FRICTION = 0.8, STOP_V = 60;
     const THROW_K = 0.45, FLOOR = 600;
     const FLEE_RX = 200, FLEE_RY = 90, SAFE_RX = 340, SAFE_RY = 150;
     const FLEE_SPD = 380, LERP_A = 5, LERP_D = 3;
     const SALTO_N = 13, RUN_N = 6, RUN_MS = 80;
+    const WALL_BOUNCE = 0.5, WALL_STOP_V = 40;
+    const JUMP_VY = 850, JUMP_VX = 480;
 
     let sheet = 'salto';
     let saltoT0 = 0, saltoDur = 0, saltoDone = false;
     let runFrame = 0, runTimer = 0, facingL = false;
 
-    let px = 200, py = FLOOR, vx = 0, vy = 0;
+    let px = 0, py = FLOOR, vx = 0, vy = 0;
     let thrown = false, dragging = false;
     let dragOx = 0, dragOy = 0, lastT = null;
     let ptrHist = [];
@@ -89,6 +96,13 @@
         px = Math.max(W / 2, Math.min(w - W / 2, px));
     }
 
+    function hitWallX() {
+        var w = gSize().w;
+        if (px < W / 2) { px = W / 2; return -1; }
+        if (px > w - W / 2) { px = w - W / 2; return 1; }
+        return 0;
+    }
+
     function flip(left) {
         if (facingL === left) return;
         facingL = left;
@@ -100,6 +114,7 @@
         return Math.abs(d) < 1 ? tgt : cur + d * Math.min(1, spd * dt);
     }
 
+    px = gSize().w / 2;
     apply(); idle();
 
     window.addEventListener('pointermove', function (e) {
@@ -139,7 +154,7 @@
                 var gv = velToGame((b.x - a.x) / dt, (b.y - a.y) / dt);
                 vx = gv.x * THROW_K;
                 vy = gv.y * THROW_K;
-                if (vy < -100 || Math.abs(vx) > 150) {
+                if (vy < -350 || Math.abs(vx) > 450) {
                     thrown = true; saltoDone = false;
                     saltoT0 = performance.now();
                     saltoDur = Math.max(250, Math.min(1500, 2 * Math.abs(vy) / GRAVITY * 1000));
@@ -168,11 +183,27 @@
                 if (fleeing) {
                     var w = gSize().w;
                     var atL = px <= W / 2 + 2, atR = px >= w - W / 2 - 2;
-                    if ((atL && fleeDir < 0) || (atR && fleeDir > 0)) fleeDir = -fleeDir;
-                    vx = lerp(vx, fleeDir * FLEE_SPD, LERP_A, dtS);
-                    flip(fleeDir < 0);
-                    tickRun(dtMs);
-                    if (far) fleeing = false;
+                    var cornered = (atL && fleeDir < 0) || (atR && fleeDir > 0);
+                    if (cornered)
+                    {
+                        var jumpDir = -fleeDir;
+                        vx = jumpDir * JUMP_VX;
+                        vy = -JUMP_VY;
+                        thrown = true;
+                        saltoDone = false;
+                        saltoT0 = ts;
+                        saltoDur = Math.max(250, Math.min(1500, 2 * JUMP_VY / GRAVITY * 1000));
+                        sheet = '';
+                        flip(jumpDir < 0);
+                        fleeing = false;
+                    }
+                    else
+                    {
+                        vx = lerp(vx, fleeDir * FLEE_SPD, LERP_A, dtS);
+                        flip(fleeDir < 0);
+                        tickRun(dtMs);
+                        if (far) fleeing = false;
+                    }
                 }
                 else if (Math.abs(vx) > 15) {
                     vx = lerp(vx, 0, LERP_D, dtS);
@@ -192,7 +223,21 @@
             vy += GRAVITY * dtS;
             px += vx * dtS;
             py += vy * dtS;
-            clampX();
+
+            var wall = hitWallX();
+            if (wall !== 0)
+            {
+                if (thrown || !onGround)
+                {
+                    vx = -vx * WALL_BOUNCE;
+                    if (Math.abs(vx) < WALL_STOP_V) vx = 0;
+                    if (vx !== 0) flip(vx < 0);
+                }
+                else if (!fleeing)
+                {
+                    vx = 0;
+                }
+            }
 
             if (py >= FLOOR) {
                 py = FLOOR;
