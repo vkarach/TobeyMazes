@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.service.impl.JPA;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import sk.tuke.gamestudio.entity.LevelEntity;
@@ -14,6 +15,11 @@ public class LevelServiceJPA implements LevelService {
 
     public LevelServiceJPA(LevelRepository levelRepository) {
         this.levelRepository = levelRepository;
+    }
+
+    @PostConstruct
+    public void initLevels() {
+        syncLevelsFromEnum(Level.class);
     }
 
     @Override
