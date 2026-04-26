@@ -1,57 +1,43 @@
-# GameStudio Readme (SK)
+# Tobey Mazes
 
-Toto je šablóna projektu GameStudio. Naklonujte si tento projekt a otvorte ho v IntelliJ Idea podľa nižšie uvedeného návodu.
-Všetky súbory ukladajte do toho projektu podľa pokynov.
+Play it: **https://tobeymazes.xyz** — it's on my own server, with a domain I bought, and Google already indexes it (just search *Tobey Mazes*).
 
-## Klonovanie
+### The game
 
-Naklonujte si svoj projekt pomocou príkazu:
+You control Konek Tobey, a little pixel horse. He doesn't stop when you release the key — he slides in the direction you pressed until he bumps into a wall. Each level has a few flowers scattered around, and you need to pick the right sequence of slides to sweep them all up.
 
-```git clone git@git.kpi.fei.tuke.sk:...```
+Move with arrows or WASD, or swipes on a phone. Fewer moves and faster time give you a better score.
 
-V príkaze zameňte URL za SSH URL vášho projektu. Získate ho v GitLab-e.
+### What's inside
 
+Three clients share the same game core:
 
-## Otvorenie projektu v IntelliJ Idea
+- **Web** — Spring Boot + Thymeleaf, mobile-friendly (touch, swipes, landscape hint, iPhone fullscreen guide). This is what's live at tobeymazes.xyz.
+- **Desktop** — FXGL app with parallax backgrounds, sound and animations.
+- **Console** — ANSI terminal version.
 
-V menu Idey vyberte **File -> Open...**.
-V dialógu pre výber projektov nájdite **pom.xml** v hlavnom adresári vášho naklonovaného projektu a potvrďte.
-Potom vyberte **Open as Project**.
+Plus accounts, a global leaderboard, player reviews, and a hidden room somewhere.
 
+Levels are plain `.txt` files under `resources/levels/`. `S` is the horse's start tile, `!` is a flower, and two bit-matrices describe walls between cells. That's just how I write the maps — the player sees the horse and flowers, not the characters.
 
-## Nastavenie projektu
+### Stack
 
-V adresári `src/main/java/sk.tuke.gamestudio.game` si vytvorte nový balík pomenovaný podľa názvu vašej hry.
-Všetky súbory a adresáre vašej hry umiestnite do tohto balíka (napr. `Main.java`, `core`, `consoleui`, atď.).
-Keď budete vytvárať Unit testy, umiestnite ich do balíka `src/test/java/sk.tuke.gamestudio.game.[yourGame]`.
+Java · Spring Boot · Thymeleaf · FXGL · Maven
 
-Používajte [štandardnú štruktúru Maven projektov](https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html) a odporúčanú adresárovú štruktúru projektu GameStudio.
+### Running it
 
+```bash
+mvn spring-boot:run
+# console
+```
+```bash
+mvn exec:java -Dexec.args=--ui=fxgl -Dspring.profiles.active=fxgl
+# FXGL desktop
+```
 
-# GameStudio Readme (EN)
+The web version is the same codebase running as a normal Spring Boot web app.
 
-Template for your GameStudio project. Clone the project and open in IntelliJ Idea. Place all your files into this project.
+### Demos
 
-## Cloning
-
-Clone your project using:
-
-```git clone git@git.kpi.fei.tuke.sk:...```
-
-Replace the url with your project's SSH url. You can get it in GitLab.
-
-
-## Opening in IntelliJ Idea
-
-In Idea, select **File -> Open...** from the menu.
-In the file selection dialog, find and open your project's **pom.xml**.
-Then select **Open as Project**.
-
-
-## Project Setup
-
-Create a new package inside `src/main/java/sk.tuke.gamestudio.game`. Name it after your game.
-Place all files and packages related to your game (e.g. `Main.java`, `core`, `consoleui`, etc.) into this package.
-When creating new unit tests, place them into the `src/test/java/sk.tuke.gamestudio.game.[yourGame]` package.
-
-Use the [standard Maven directory layout](https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html) and GameStudio recommended directory structure when adding more classes.
+- Console: https://drive.google.com/file/d/1SJuuN40cgBDqtTGFDCi1R8A1gdFIeCln/view?usp=sharing
+- Web: [play it live](https://tobeymazes.xyz)

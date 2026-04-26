@@ -22,13 +22,17 @@ Levels are plain `.txt` files under `resources/levels/`. `S` is the horse's star
 
 ### Stack
 
-Java · Spring Boot · Thymeleaf · FXGL · Maven.
+Java · Spring Boot · Thymeleaf · FXGL · Maven
 
 ### Running it
 
 ```bash
-mvn spring-boot:run                                         # console
-mvn spring-boot:run -Dspring-boot.run.arguments=--ui=fxgl   # FXGL desktop
+mvn spring-boot:run
+# console
+```
+```bash
+mvn exec:java -Dexec.args=--ui=fxgl -Dspring.profiles.active=fxgl
+# FXGL desktop
 ```
 
 The web version is the same codebase running as a normal Spring Boot web app.
@@ -36,4 +40,4 @@ The web version is the same codebase running as a normal Spring Boot web app.
 ### Demos
 
 - Console: https://drive.google.com/file/d/1SJuuN40cgBDqtTGFDCi1R8A1gdFIeCln/view?usp=sharing
-- Web: https://tobeymazes.xyz
+- Web: [play it live](https://tobeymazes.xyz)

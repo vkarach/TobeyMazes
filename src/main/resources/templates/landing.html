@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tobey Mazes — a sliding maze puzzle game</title>
+    <meta name="description" content="A maze puzzle game. Your horse, Konek Tobey, slides until he bumps a wall — collect all the flowers and beat your own record.">
+    <meta name="keywords" content="tobey mazes, maze, puzzle, browser game, sliding puzzle, student project">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Valentyn Karachevtsev">
+    <link rel="canonical" href="https://tobeymazes.xyz/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Tobey Mazes">
+    <meta property="og:title" content="Tobey Mazes — a sliding maze puzzle game">
+    <meta property="og:description" content="A maze puzzle game. Your horse, Konek Tobey, slides until he bumps a wall — collect all the flowers and beat your own record.">
+    <meta property="og:image" content="https://tobeymazes.xyz/img/logos/logo_source.png">
+    <meta property="og:url" content="https://tobeymazes.xyz/">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Tobey Mazes — a sliding maze puzzle game">
+    <meta name="twitter:description" content="A maze puzzle game. Your horse, Konek Tobey, slides until he bumps a wall — collect all the flowers and beat your own record.">
+    <meta name="twitter:image" content="https://tobeymazes.xyz/img/logos/logo_source.png">
+
+    <script type="application/ld+json" th:unless="${reviewCount > 0}">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "Tobey Mazes",
+      "url": "https://tobeymazes.xyz/",
+      "image": "https://tobeymazes.xyz/img/logos/logo_source.png",
+      "description": "A maze puzzle game. Your horse, Konek Tobey, slides until he bumps a wall — collect all the flowers and beat your own record.",
+      "genre": ["Puzzle", "Maze"],
+      "gamePlatform": ["Web Browser"],
+      "applicationCategory": "Game",
+      "operatingSystem": "Any",
+      "author": { "@type": "Person", "name": "Valentyn Karachevtsev" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR", "availability": "https://schema.org/InStock" }
+    }
+    </script>
+    <script type="application/ld+json" th:if="${reviewCount > 0}" th:utext="|
+    {
+      &quot;@context&quot;: &quot;https://schema.org&quot;,
+      &quot;@type&quot;: &quot;VideoGame&quot;,
+      &quot;name&quot;: &quot;Tobey Mazes&quot;,
+      &quot;url&quot;: &quot;https://tobeymazes.xyz/&quot;,
+      &quot;image&quot;: &quot;https://tobeymazes.xyz/img/logos/logo_source.png&quot;,
+      &quot;description&quot;: &quot;A maze puzzle game. Your horse, Konek Tobey, slides until he bumps a wall — collect all the flowers and beat your own record.&quot;,
+      &quot;genre&quot;: [&quot;Puzzle&quot;, &quot;Maze&quot;],
+      &quot;gamePlatform&quot;: [&quot;Web Browser&quot;],
+      &quot;applicationCategory&quot;: &quot;Game&quot;,
+      &quot;operatingSystem&quot;: &quot;Any&quot;,
+      &quot;author&quot;: { &quot;@type&quot;: &quot;Person&quot;, &quot;name&quot;: &quot;Valentyn Karachevtsev&quot; },
+      &quot;offers&quot;: { &quot;@type&quot;: &quot;Offer&quot;, &quot;price&quot;: &quot;0&quot;, &quot;priceCurrency&quot;: &quot;EUR&quot;, &quot;availability&quot;: &quot;https://schema.org/InStock&quot; },
+      &quot;aggregateRating&quot;: { &quot;@type&quot;: &quot;AggregateRating&quot;, &quot;ratingValue&quot;: &quot;${#numbers.formatDecimal(overallRating, 1, 2, 'POINT')}&quot;, &quot;bestRating&quot;: &quot;5&quot;, &quot;worstRating&quot;: &quot;1&quot;, &quot;ratingCount&quot;: &quot;${reviewCount}&quot; }
+    }|"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" th:href="@{/ui/shared/fonts/PressStart2P-Regular.ttf}" as="font" type="font/ttf" crossorigin>
+
+    <th:block th:replace="~{fragments/head :: favicon}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/landing.css}">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="landing-nav">
+    <a th:href="@{/}" class="nav-logo">
+        <img th:src="@{/img/logos/logo32x32.png}" alt="Tobey Mazes">
+        <span>TOBEY MAZES</span>
+    </a>
+    <a th:href="@{/menu}" class="nav-play">&#9654; PLAY</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+        <div class="hero-sprite" aria-label="Konek Tobey"></div>
+        <h1 class="hero-title">TOBEY<br>MAZES</h1>
+        <p class="hero-tagline">slide &middot; think &middot; collect</p>
+        <a th:href="@{/menu}" class="hero-cta">PLAY NOW</a>
+    </div>
+    <div class="hero-scroll">
+        <div class="hero-scroll-inner">
+            <div class="scroll-chevron"></div>
+            <span class="scroll-label">SCROLL</span>
+        </div>
+    </div>
+</section>
+
+<div class="landing-divider"></div>
+
+<!-- ABOUT -->
+<div class="l-section">
+    <div class="about-grid">
+        <div class="about-text">
+            <div class="section-label">// ABOUT</div>
+            <h2 class="section-title">A puzzle game about a sliding horse</h2>
+            <div class="section-sep"></div>
+            <p>Your horse Konek Tobey slides in one direction until he hits a wall — no stopping halfway. Every move is a commitment. Plan ahead, collect all the flowers, and clear the maze.</p>
+            <p>12 handcrafted levels ranging from casual warm-ups to hard puzzles. Compete on the global leaderboard and chase your personal best time and score.</p>
+        </div>
+        <div class="about-features">
+            <div class="feature-card">
+                <div class="feature-icon">&#128052;</div>
+                <div>
+                    <h3>Sliding mechanic</h3>
+                    <p>Tobey slides until he hits a wall. Think ahead — every move counts.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#127800;</div>
+                <div>
+                    <h3>Collect flowers</h3>
+                    <p>Pick up all flowers before reaching the goal to clear the level.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#127942;</div>
+                <div>
+                    <h3>Score for speed</h3>
+                    <p>Fewer steps and faster time means a higher score. Beat the leaderboard.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="landing-divider"></div>
+
+<!-- SCREENSHOTS -->
+<div class="screenshots-section">
+    <div class="section-label">// LEVELS</div>
+    <h2 class="section-title">12 handcrafted mazes</h2>
+    <div class="section-sep"></div>
+    <p class="screenshots-intro">Some of them. Play to see the rest.</p>
+    <div class="screenshot-grid">
+        <form th:action="@{/game/start}" method="post" class="screenshot-item">
+            <input type="hidden" name="levelId" value="1">
+            <button type="submit" class="screenshot-btn">
+                <div class="screenshot-img-wrap">
+                    <img th:src="@{/img/levels/level_1.png}" alt="Level 1">
+                    <div class="screenshot-overlay">&#9654;</div>
+                </div>
+                <div class="screenshot-label">LEVEL 01 &middot; <span class="diff-easy">EASY</span></div>
+            </button>
+        </form>
+        <form th:action="@{/game/start}" method="post" class="screenshot-item">
+            <input type="hidden" name="levelId" value="3">
+            <button type="submit" class="screenshot-btn">
+                <div class="screenshot-img-wrap">
+                    <img th:src="@{/img/levels/level_3.png}" alt="Level 3">
+                    <div class="screenshot-overlay">&#9654;</div>
+                </div>
+                <div class="screenshot-label">LEVEL 03 &middot; <span class="diff-normal">NORMAL</span></div>
+            </button>
+        </form>
+        <form th:action="@{/game/start}" method="post" class="screenshot-item">
+            <input type="hidden" name="levelId" value="5">
+            <button type="submit" class="screenshot-btn">
+                <div class="screenshot-img-wrap">
+                    <img th:src="@{/img/levels/level_5.png}" alt="Level 5">
+                    <div class="screenshot-overlay">&#9654;</div>
+                </div>
+                <div class="screenshot-label">LEVEL 05 &middot; <span class="diff-medium">MEDIUM</span></div>
+            </button>
+        </form>
+        <form th:action="@{/game/start}" method="post" class="screenshot-item">
+            <input type="hidden" name="levelId" value="11">
+            <button type="submit" class="screenshot-btn">
+                <div class="screenshot-img-wrap">
+                    <img th:src="@{/img/levels/level_11.png}" alt="Level 11">
+                    <div class="screenshot-overlay">&#9654;</div>
+                </div>
+                <div class="screenshot-label">LEVEL 11 &middot; <span class="diff-hard">HARD</span></div>
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="landing-divider"></div>
+
+<!-- TECH STACK -->
+<div class="l-section">
+    <div class="section-label">// TECH STACK</div>
+    <h2 class="section-title">Built with</h2>
+    <div class="section-sep"></div>
+    <div class="tech-grid">
+        <div class="tech-badge">Java 21</div>
+        <div class="tech-badge">Spring Boot</div>
+        <div class="tech-badge">Thymeleaf</div>
+        <div class="tech-badge">PostgreSQL</div>
+<!--        <div class="tech-badge">FXGL</div>-->
+        <div class="tech-badge">Turbo</div>
+    </div>
+</div>
+
+<div class="landing-divider"></div>
+
+<!-- LINKS -->
+<div class="l-section">
+    <div class="section-label">// LINKS</div>
+    <h2 class="section-title">Find the project</h2>
+    <div class="section-sep"></div>
+    <div class="links-grid">
+        <a href="https://github.com/TODO" class="link-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+            GITHUB
+        </a>
+        <a th:href="@{/menu}" class="link-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="5,3 19,12 5,21"/>
+            </svg>
+            PLAY THE GAME
+        </a>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="landing-footer">
+    <div class="footer-copy">&copy; 2025-2026 Valentyn Karachevtsev</div>
+    <a th:href="@{/menu}" class="footer-back">&#9654; PLAY NOW</a>
+</footer>
+
+<script>
+    const cta = document.querySelector('.hero-cta');
+    const navPlay = document.querySelector('.nav-play');
+    new IntersectionObserver(([e]) => {
+        navPlay.style.opacity = e.isIntersecting ? '0' : '1';
+        navPlay.style.pointerEvents = e.isIntersecting ? 'none' : 'auto';
+    }).observe(cta);
+
+    const heroScroll = document.querySelector('.hero-scroll');
+    const updateScrollFade = () => {
+        const fade = Math.max(0, 1 - window.scrollY / 220);
+        heroScroll.style.opacity = fade;
+        heroScroll.style.pointerEvents = fade < 0.05 ? 'none' : 'auto';
+    };
+    window.addEventListener('scroll', updateScrollFade, { passive: true });
+    updateScrollFade();
+</script>
+</body>
+</html>

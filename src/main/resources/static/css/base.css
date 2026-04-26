@@ -181,6 +181,23 @@ body.kb-mode .menu-btn:hover:not(.active)::before {
     }
 }
 
+/* Exit variant — muted red, slightly demoted vs the regular blue items */
+.menu-btn-exit {
+    color: #c47373;
+}
+.menu-btn-exit:hover,
+.menu-btn-exit.active {
+    color: #ff8a8a;
+}
+body.kb-mode .menu-btn-exit:hover:not(.active) {
+    color: #c47373;
+}
+@media (hover: none) {
+    .menu-btn-exit:hover:not(.active) {
+        color: #c47373;
+    }
+}
+
 /* Shared nav-button: small caret-style button used across pages */
 .nav-btn {
     font-family: 'Press Start 2P', monospace;

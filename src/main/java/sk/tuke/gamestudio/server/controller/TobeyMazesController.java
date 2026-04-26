@@ -30,6 +30,7 @@ public class TobeyMazesController {
     @RequestMapping("/menu")
     public String menu(Model model) {
         model.addAttribute("version", Game.version);
+        model.addAttribute("versionLabel", Game.versionLabel);
         Float overall = reviewService.getOverallRating();
         List<sk.tuke.gamestudio.entity.Review> all = reviewService.getAllReviews();
         int reviewCount = all != null ? all.size() : 0;
