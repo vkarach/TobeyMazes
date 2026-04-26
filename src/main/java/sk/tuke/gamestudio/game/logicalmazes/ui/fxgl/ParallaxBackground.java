@@ -52,7 +52,7 @@ public class ParallaxBackground {
 
         for (int i = 0; i < layers.length; i++) {
             Image img = new Image(FileReader.getInputStream(layers[i]));
-            double scaleY = FXGL.getAppHeight() / img.getHeight();
+            double scaleY = (double) FXGL.getAppHeight() / img.getHeight();
             double scaledW = img.getWidth() * scaleY;
 
             ImageView a = makeView(img, scaledW, 0);
@@ -66,7 +66,7 @@ public class ParallaxBackground {
             @Override
             public void handle(long now) {
                 if (timerLast == 0) { timerLast = now; return; }
-                double dt = Math.min((now - timerLast) / 1_000_000_000.0, 1.0 / 60.0);
+                double dt = Math.min((now - timerLast) / 1_000_000_000.0, 1.0 / 30.0);
                 timerLast = now;
                 for (int i = 0; i < layerPairs.size(); i++) {
                     ImageView[] pair = layerPairs.get(i);
@@ -88,10 +88,13 @@ public class ParallaxBackground {
 
     private ImageView makeView(Image img, double scaledW, double x) {
         ImageView v = new ImageView(img);
+        v.setSmooth(false);
+        v.setPreserveRatio(false);
         v.setFitWidth(scaledW);
         v.setFitHeight(FXGL.getAppHeight());
         v.setTranslateX(x);
         v.setTranslateY(0);
+        v.setMouseTransparent(true);
         return v;
     }
 }

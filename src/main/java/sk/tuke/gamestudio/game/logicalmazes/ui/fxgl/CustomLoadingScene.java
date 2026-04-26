@@ -23,6 +23,7 @@ public class CustomLoadingScene extends LoadingScene {
 
     public CustomLoadingScene() {
         ImageView bg = new ImageView(new Image(FileReader.getInputStream("ui/shared/backgrounds/main/origbig.png")));
+        bg.setSmooth(false);
         bg.setFitWidth(FXGL.getAppWidth());
         bg.setFitHeight(FXGL.getAppHeight());
 
@@ -86,6 +87,7 @@ public class CustomLoadingScene extends LoadingScene {
     private ImageView createSpriteAnimation(String path, int totalFrames) {
         int[] frame = {0};
         ImageView view = new ImageView(new Image(FileReader.getInputStream(path)));
+        view.setSmooth(false);
         view.setViewport(new Rectangle2D(0, 0, FRAME_W, FRAME_H));
 
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), e -> {

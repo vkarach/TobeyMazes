@@ -50,6 +50,7 @@ public class FxglApp extends GameApplication {
     @Override
     protected void initGame() {
         springContext = new SpringApplicationBuilder(TobeyMazes.class)
+                .properties("spring.profiles.active=fxgl")
                 .web(WebApplicationType.NONE)
                 .run(appArgs);
 

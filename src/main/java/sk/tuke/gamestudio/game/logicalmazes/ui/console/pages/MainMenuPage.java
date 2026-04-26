@@ -25,7 +25,7 @@ public class MainMenuPage {
     public MenuOption show() {
         console.clear();
 
-        String versionText = String.format("Beta v%s", Game.version);
+        String versionText = Game.versionLabel + Game.version;
         console.print(versionText, console.getWidth() - versionText.length(), console.getHeight() - 1);
 
         consoleRenderer.renderFromFile("ui/console/uiTexts/game_title.txt");

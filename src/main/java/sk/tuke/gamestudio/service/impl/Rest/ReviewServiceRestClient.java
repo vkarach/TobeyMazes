@@ -1,6 +1,9 @@
 package sk.tuke.gamestudio.service.impl.Rest;
 
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import sk.tuke.gamestudio.config.RestClientConfig;
@@ -37,12 +40,13 @@ public class ReviewServiceRestClient implements ReviewService {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<Review> getAllReviews() {
-        String url = String.format(
-          "%s/reviews", baseUrl
+        String url = String.format("%s/reviews", baseUrl);
+        ResponseEntity<List<Review>> response = restTemplate.exchange(
+                url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<>() {}
         );
-        return restTemplate.getForObject(url, List.class);
+        return response.getBody();
     }
 
     @Override
