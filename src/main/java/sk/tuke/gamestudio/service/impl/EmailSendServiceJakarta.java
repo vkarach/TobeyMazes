@@ -1,5 +1,6 @@
 package sk.tuke.gamestudio.service.impl;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import sk.tuke.gamestudio.service.EmailSendService;
 import jakarta.mail.*;
@@ -11,8 +12,11 @@ import java.util.Properties;
 
 @Component
 public class EmailSendServiceJakarta implements EmailSendService {
-    final String fromEmail = "noreplay.tobeymazes@gmail.com";
-    final String appPassword = "REDACTED";
+    @Value("${mail.from}")
+    private String fromEmail;
+
+    @Value("${mail.app-password}")
+    private String appPassword;
 
     public void sendCode(String toEmail, int code) {
         Properties props = getProperties();

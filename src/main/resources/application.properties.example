@@ -1,0 +1,31 @@
+#https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# Copy this file to `application.properties` and fill in your local values.
+
+spring.datasource.url=jdbc:postgresql://localhost/gamestudio
+spring.datasource.username=postgres
+spring.datasource.password=CHANGE_ME
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.hikari.maximumPoolSize=2
+server.port=8080
+server.forward-headers-strategy=framework
+spring.profiles.active=console
+#spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.hibernate.ddl-auto=update
+#spring.jpa.show-sql=true
+spring.web.resources.cache.period=0
+spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
+spring.profiles.default=console
+spring.jpa.show-sql=false
+spring.jpa.open-in-view=false
+spring.thymeleaf.cache=false
+spring.main.banner-mode=off
+logging.level.root=INFO
+logging.level.org.hibernate.SQL=OFF
+logging.level.org.springframework=INFO
+logging.level.org.hibernate.orm.jdbc.bind=OFF
+logging.level.com.zaxxer.hikari=OFF
+
+# Gmail SMTP — sender for email-verification codes.
+# Generate at https://myaccount.google.com/apppasswords (2-Step Verification required).
+mail.from=YOUR_GMAIL_ADDRESS@gmail.com
+mail.app-password=CHANGE_ME
