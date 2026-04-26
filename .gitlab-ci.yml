@@ -18,7 +18,7 @@ deploy:
       ssh -i ~/.ssh/gitlab_deploy -o IdentitiesOnly=yes $SERVER_USER@$SERVER_HOST 'bash -lc "
         set -e
         cd /home/valik/TobeyMazes
-        git pull origin master
+        git fetch origin && git reset --hard origin/master
         fuser -k 8080/tcp || true
         sleep 2
         nohup /usr/bin/mvn spring-boot:run -Dspring-boot.run.profiles=server > app.log 2>&1 < /dev/null &
