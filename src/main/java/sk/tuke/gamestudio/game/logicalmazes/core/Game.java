@@ -13,7 +13,7 @@ import sk.tuke.gamestudio.service.*;
 @Profile({"console", "fxgl"})
 @Component
 public class Game {
-    public static String version = "1.15.83";
+    public static String version = "1.15.89";
     public static String versionLabel = "v";
     public static final String author = "Valentyn";
 
